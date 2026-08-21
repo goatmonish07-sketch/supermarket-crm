@@ -25,6 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   if (b.taxRate !== undefined) set("taxRate", Number(b.taxRate));
   if (b.unit !== undefined) set("unit", b.unit);
   if (b.lowStockThreshold !== undefined) set("lowStockThreshold", Number(b.lowStockThreshold));
+  if (b.image !== undefined) set("image", b.image?.trim() || null);
   if (b.active !== undefined) set("active", b.active ? 1 : 0);
   set("updatedAt", nowSql());
 

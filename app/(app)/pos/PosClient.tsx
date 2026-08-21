@@ -9,10 +9,11 @@ import {
 import clsx from "clsx";
 import { formatINR } from "@/lib/format";
 import { computeTotals, loyaltyPointsFor, type CartLine } from "@/lib/billing";
+import ProductThumb from "@/components/ui/ProductThumb";
 
 type Product = {
   id: string; name: string; sku: string; sellPrice: number;
-  taxRate: number; stock: number; unit: string; categoryId: string | null;
+  taxRate: number; stock: number; unit: string; categoryId: string | null; image: string | null;
 };
 type Category = { id: string; name: string; color: string };
 type Customer = { id: string; name: string; phone: string };
@@ -159,9 +160,7 @@ export default function PosClient({
                   out ? "opacity-50" : "hover:-translate-y-0.5 hover:shadow-card-hover",
                 )}
               >
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-violet-100 text-violet-500">
-                  <Package className="h-5 w-5" />
-                </div>
+                <ProductThumb src={p.image} name={p.name} className="h-24 w-full" iconClass="h-7 w-7" />
                 <p className="mt-3 line-clamp-2 min-h-[2.5rem] text-sm font-semibold text-ink">{p.name}</p>
                 <div className="mt-1 flex items-center justify-between">
                   <p className="text-base font-extrabold text-violet-600 tnum">{formatINR(p.sellPrice)}</p>

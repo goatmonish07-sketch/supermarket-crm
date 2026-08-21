@@ -3,7 +3,7 @@ import { query } from "./d1";
 export type ProductRow = {
   id: string; name: string; sku: string; categoryId: string | null;
   costPrice: number; sellPrice: number; taxRate: number;
-  stock: number; unit: string; lowStockThreshold: number;
+  stock: number; unit: string; lowStockThreshold: number; image: string | null;
   categoryName: string | null; categoryColor: string | null;
 };
 

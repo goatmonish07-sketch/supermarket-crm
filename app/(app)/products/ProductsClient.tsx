@@ -11,12 +11,13 @@ import PageHeader from "@/components/ui/PageHeader";
 import Modal from "@/components/ui/Modal";
 import EmptyState from "@/components/ui/EmptyState";
 import { StockBadge } from "@/components/ui/Badges";
+import ProductThumb from "@/components/ui/ProductThumb";
 
 type Product = {
   id: string; name: string; sku: string; categoryId: string | null;
   categoryName: string | null; categoryColor: string;
   costPrice: number; sellPrice: number; taxRate: number;
-  stock: number; unit: string; lowStockThreshold: number;
+  stock: number; unit: string; lowStockThreshold: number; image: string | null;
 };
 type Category = { id: string; name: string; color: string };
 
@@ -104,9 +105,7 @@ export default function ProductsClient({
                   <tr key={p.id} className="hover:bg-violet-50/40">
                     <td className="td">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg" style={{ background: p.categoryColor + "22", color: p.categoryColor }}>
-                          <Package className="h-4 w-4" />
-                        </span>
+                        <ProductThumb src={p.image} name={p.name} className="h-10 w-10 shrink-0" iconClass="h-4 w-4" />
                         <div>
                           <p className="font-semibold text-ink">{p.name}</p>
                           <p className="text-xs text-ink-muted">{p.sku}</p>
@@ -152,6 +151,7 @@ function ProductForm({ product, categories, onClose, onSaved }: { product: Produ
     categoryId: product?.categoryId ?? "", costPrice: product?.costPrice ?? 0,
     sellPrice: product?.sellPrice ?? 0, taxRate: product?.taxRate ?? 0,
     stock: product?.stock ?? 0, unit: product?.unit ?? "pcs", lowStockThreshold: product?.lowStockThreshold ?? 10,
+    image: product?.image ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -194,7 +194,16 @@ function ProductForm({ product, categories, onClose, onSaved }: { product: Produ
           {!product && (
             <Field label="Opening stock"><input type="number" min={0} className="input tnum" value={f.stock} onChange={(e) => setF({ ...f, stock: Number(e.target.value) })} /></Field>
           )}
+          <div className="sm:col-span-2">
+            <Field label="Image URL (optional)"><input className="input" placeholder="https://…" value={f.image} onChange={(e) => setF({ ...f, image: e.target.value })} /></Field>
+          </div>
         </div>
+        {f.image ? (
+          <div className="flex items-center gap-3 rounded-xl bg-surface-sunken p-2">
+            <ProductThumb src={f.image} name={f.name} className="h-14 w-14" iconClass="h-5 w-5" />
+            <span className="text-xs text-ink-muted">Image preview</span>
+          </div>
+        ) : null}
         {error && <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="btn-outline">Cancel</button>

@@ -48,6 +48,7 @@ model Product {
   stock              Float           @default(0)
   unit               String          @default("pcs")
   lowStockThreshold  Float           @default(10)
+  image              String?
   active             Boolean         @default(true)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt

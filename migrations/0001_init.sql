@@ -29,6 +29,7 @@ CREATE TABLE "Product" (
     "stock" REAL NOT NULL DEFAULT 0,
     "unit" TEXT NOT NULL DEFAULT 'pcs',
     "lowStockThreshold" REAL NOT NULL DEFAULT 10,
+    "image" TEXT,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,

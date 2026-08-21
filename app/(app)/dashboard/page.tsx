@@ -10,6 +10,7 @@ import StatCard from "@/components/ui/StatCard";
 import RevenueTrendChart from "@/components/charts/RevenueTrendChart";
 import PaymentDonut from "@/components/charts/PaymentDonut";
 import { StatusBadge } from "@/components/ui/Badges";
+import ProductThumb from "@/components/ui/ProductThumb";
 export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
@@ -119,9 +120,7 @@ export default async function DashboardPage() {
             {lowStock.length === 0 && <p className="px-5 py-6 text-sm text-ink-muted">All items well stocked. 🎉</p>}
             {lowStock.map((p) => (
               <div key={p.id} className="flex items-center gap-3 px-5 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-rose-50 text-rose-500">
-                  <Package className="h-4 w-4" />
-                </span>
+                <ProductThumb src={p.image} name={p.name} className="h-9 w-9 shrink-0" iconClass="h-4 w-4" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
                   <p className="text-xs text-ink-muted">Min: {formatNumber(p.lowStockThreshold)} {p.unit}</p>

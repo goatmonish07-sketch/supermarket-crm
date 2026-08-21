@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
   const stock = Number(b.stock) || 0;
   try {
     await execute(
-      `INSERT INTO Product (id, name, sku, categoryId, costPrice, sellPrice, taxRate, stock, unit, lowStockThreshold, active, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      `INSERT INTO Product (id, name, sku, categoryId, costPrice, sellPrice, taxRate, stock, unit, lowStockThreshold, image, active, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
       [id, String(b.name).trim(), sku, b.categoryId || null, Number(b.costPrice) || 0, Number(b.sellPrice) || 0,
-       Number(b.taxRate) || 0, stock, b.unit || "pcs", Number(b.lowStockThreshold) || 10, now, now],
+       Number(b.taxRate) || 0, stock, b.unit || "pcs", Number(b.lowStockThreshold) || 10, b.image?.trim() || null, now, now],
     );
     if (stock > 0) {
       await execute(`INSERT INTO StockMovement (id, productId, qtyChange, type, note, createdAt) VALUES (?, ?, ?, 'PURCHASE', 'Initial stock', ?)`,
