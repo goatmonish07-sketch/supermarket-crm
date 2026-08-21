@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { execute, newId, nowSql } from "@/lib/d1";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -12,17 +12,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (!qty || qty === 0) return NextResponse.json({ error: "Enter a valid quantity." }, { status: 400 });
 
   try {
-    // D1 has no interactive transactions; run sequentially.
-    const product = await prisma.product.update({ where: { id: params.id }, data: { stock: { increment: qty } } });
-    await prisma.stockMovement.create({
-      data: {
-        productId: params.id,
-        qtyChange: qty,
-        type: qty > 0 ? "PURCHASE" : "ADJUSTMENT",
-        note: b.note || (qty > 0 ? "Restock" : "Stock adjustment"),
-      },
-    });
-    return NextResponse.json({ ok: true, product });
+    await execute(`UPDATE Product SET stock = stock + ?, updatedAt = ? WHERE id = ?`, [qty, nowSql(), params.id]);
+    await execute(
+      `INSERT INTO StockMovement (id, productId, qtyChange, type, note, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
+      [newId("mov"), params.id, qty, qty > 0 ? "PURCHASE" : "ADJUSTMENT", b.note || (qty > 0 ? "Restock" : "Stock adjustment"), nowSql()],
+    );
+    return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Failed to update stock." }, { status: 500 });
   }

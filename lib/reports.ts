@@ -1,4 +1,5 @@
-import { prisma } from "./db";
+import { query, queryFirst } from "./d1";
+import { toSql } from "./queries";
 
 export type ReportRange = { from: Date; to: Date };
 
@@ -11,74 +12,74 @@ export function parseRange(fromStr?: string, toStr?: string): ReportRange {
 }
 
 export async function getReport({ from, to }: ReportRange) {
-  const where = { createdAt: { gte: from, lte: to } };
+  const f = toSql(from);
+  const t = toSql(to);
 
-  const [agg, invoices, itemRows, paymentRows] = await Promise.all([
-    prisma.invoice.aggregate({
-      _sum: { grandTotal: true, taxTotal: true, discount: true, subtotal: true },
-      _count: true,
-      where,
-    }),
-    prisma.invoice.findMany({ where, select: { createdAt: true, grandTotal: true } }),
-    prisma.invoiceItem.findMany({
-      where: { invoice: where },
-      select: { name: true, qty: true, lineTotal: true, product: { select: { category: { select: { name: true, color: true } } } } },
-    }),
-    prisma.invoice.groupBy({ by: ["paymentMode"], _sum: { grandTotal: true }, where }),
+  const [agg, dailyRows, catRows, prodRows, paymentRows] = await Promise.all([
+    queryFirst<{ revenue: number; tax: number; discount: number; subtotal: number; cnt: number }>(
+      `SELECT COALESCE(SUM(grandTotal),0) AS revenue, COALESCE(SUM(taxTotal),0) AS tax,
+              COALESCE(SUM(discount),0) AS discount, COALESCE(SUM(subtotal),0) AS subtotal, COUNT(*) AS cnt
+       FROM Invoice WHERE createdAt >= ? AND createdAt <= ?`,
+      [f, t],
+    ),
+    query<{ d: string; total: number }>(
+      `SELECT date(createdAt) AS d, SUM(grandTotal) AS total FROM Invoice WHERE createdAt >= ? AND createdAt <= ? GROUP BY date(createdAt)`,
+      [f, t],
+    ),
+    query<{ name: string; color: string | null; revenue: number; qty: number }>(
+      `SELECT COALESCE(c.name,'Uncategorized') AS name, c.color AS color, SUM(ii.lineTotal) AS revenue, SUM(ii.qty) AS qty
+       FROM InvoiceItem ii JOIN Invoice i ON i.id = ii.invoiceId
+       LEFT JOIN Product p ON p.id = ii.productId
+       LEFT JOIN Category c ON c.id = p.categoryId
+       WHERE i.createdAt >= ? AND i.createdAt <= ?
+       GROUP BY c.name, c.color ORDER BY revenue DESC`,
+      [f, t],
+    ),
+    query<{ name: string; qty: number; revenue: number }>(
+      `SELECT ii.name AS name, SUM(ii.qty) AS qty, SUM(ii.lineTotal) AS revenue
+       FROM InvoiceItem ii JOIN Invoice i ON i.id = ii.invoiceId
+       WHERE i.createdAt >= ? AND i.createdAt <= ?
+       GROUP BY ii.name ORDER BY revenue DESC LIMIT 10`,
+      [f, t],
+    ),
+    query<{ mode: string; total: number }>(
+      `SELECT paymentMode AS mode, SUM(grandTotal) AS total FROM Invoice WHERE createdAt >= ? AND createdAt <= ? GROUP BY paymentMode`,
+      [f, t],
+    ),
   ]);
 
-  // Daily sales
+  // Fill daily buckets
   const dailyMap = new Map<string, number>();
   const cursor = new Date(from);
   while (cursor <= to) {
     dailyMap.set(cursor.toISOString().slice(0, 10), 0);
     cursor.setDate(cursor.getDate() + 1);
   }
-  for (const inv of invoices) {
-    const key = inv.createdAt.toISOString().slice(0, 10);
-    if (dailyMap.has(key)) dailyMap.set(key, (dailyMap.get(key) ?? 0) + inv.grandTotal);
-  }
+  for (const r of dailyRows) if (dailyMap.has(r.d)) dailyMap.set(r.d, r.total);
   const daily = Array.from(dailyMap.entries()).map(([date, total]) => ({
     date,
     label: new Date(date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
     total: Math.round(total),
   }));
 
-  // Category breakdown
-  const catMap = new Map<string, { name: string; color: string; revenue: number; qty: number }>();
-  for (const it of itemRows) {
-    const name = it.product?.category?.name ?? "Uncategorized";
-    const color = it.product?.category?.color ?? "#a78bfa";
-    const cur = catMap.get(name) ?? { name, color, revenue: 0, qty: 0 };
-    cur.revenue += it.lineTotal;
-    cur.qty += it.qty;
-    catMap.set(name, cur);
-  }
-  const categories = Array.from(catMap.values()).map((c) => ({ ...c, revenue: Math.round(c.revenue) })).sort((a, b) => b.revenue - a.revenue);
+  const categories = catRows.map((c) => ({
+    name: c.name,
+    color: c.color ?? "#a78bfa",
+    revenue: Math.round(c.revenue),
+    qty: Math.round(c.qty),
+  }));
 
-  // Top products
-  const prodMap = new Map<string, { name: string; qty: number; revenue: number }>();
-  for (const it of itemRows) {
-    const cur = prodMap.get(it.name) ?? { name: it.name, qty: 0, revenue: 0 };
-    cur.qty += it.qty;
-    cur.revenue += it.lineTotal;
-    prodMap.set(it.name, cur);
-  }
-  const topProducts = Array.from(prodMap.values())
-    .map((p) => ({ ...p, revenue: Math.round(p.revenue), qty: Math.round(p.qty) }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10);
+  const topProducts = prodRows.map((p) => ({ name: p.name, qty: Math.round(p.qty), revenue: Math.round(p.revenue) }));
+  const payments = paymentRows.map((r) => ({ mode: r.mode, total: Math.round(r.total) })).sort((a, b) => b.total - a.total);
 
-  const payments = paymentRows.map((r) => ({ mode: r.paymentMode, total: Math.round(r._sum.grandTotal ?? 0) })).sort((a, b) => b.total - a.total);
-
-  const revenue = agg._sum.grandTotal ?? 0;
-  const count = agg._count;
+  const revenue = agg?.revenue ?? 0;
+  const count = agg?.cnt ?? 0;
 
   return {
     summary: {
       revenue,
-      tax: agg._sum.taxTotal ?? 0,
-      discount: agg._sum.discount ?? 0,
+      tax: agg?.tax ?? 0,
+      discount: agg?.discount ?? 0,
       invoices: count,
       avgBill: count > 0 ? revenue / count : 0,
     },
@@ -87,4 +88,19 @@ export async function getReport({ from, to }: ReportRange) {
     topProducts,
     payments,
   };
+}
+
+/** Rows for CSV export. */
+export async function getInvoiceRowsForExport({ from, to }: ReportRange) {
+  return query<{
+    invoiceNo: string; createdAt: string; customerName: string | null; userName: string;
+    paymentMode: string; status: string; subtotal: number; taxTotal: number;
+    discount: number; grandTotal: number; paidAmount: number; dueAmount: number;
+  }>(
+    `SELECT i.invoiceNo, i.createdAt, c.name AS customerName, u.name AS userName,
+            i.paymentMode, i.status, i.subtotal, i.taxTotal, i.discount, i.grandTotal, i.paidAmount, i.dueAmount
+     FROM Invoice i LEFT JOIN Customer c ON c.id = i.customerId JOIN User u ON u.id = i.userId
+     WHERE i.createdAt >= ? AND i.createdAt <= ? ORDER BY i.createdAt ASC`,
+    [toSql(from), toSql(to)],
+  );
 }

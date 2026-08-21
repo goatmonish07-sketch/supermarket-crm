@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { execute, newId, nowSql } from "@/lib/d1";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
@@ -8,10 +8,13 @@ export async function POST(req: NextRequest) {
   if (!user || user.role !== "ADMIN") return NextResponse.json({ error: "Admin access required." }, { status: 403 });
 
   const b = (await req.json().catch(() => ({}))) as any;
-  if (!b.name?.trim()) return NextResponse.json({ error: "Supplier name is required." }, { status: 400 });
+  const name = b.name?.trim();
+  if (!name) return NextResponse.json({ error: "Supplier name is required." }, { status: 400 });
 
-  const supplier = await prisma.supplier.create({
-    data: { name: b.name.trim(), phone: b.phone?.trim() || null, email: b.email?.trim() || null, address: b.address?.trim() || null },
-  });
-  return NextResponse.json({ ok: true, supplier });
+  const id = newId("sup");
+  await execute(
+    `INSERT INTO Supplier (id, name, phone, email, address, createdAt) VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, name, b.phone?.trim() || null, b.email?.trim() || null, b.address?.trim() || null, nowSql()],
+  );
+  return NextResponse.json({ ok: true, supplier: { id } });
 }

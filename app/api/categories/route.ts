@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { execute, newId, nowSql, queryFirst } from "@/lib/d1";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
@@ -8,15 +8,17 @@ export async function POST(req: NextRequest) {
   if (!user || user.role !== "ADMIN") return NextResponse.json({ error: "Admin access required." }, { status: 403 });
 
   const b = (await req.json().catch(() => ({}))) as any;
-  if (!b.name?.trim()) return NextResponse.json({ error: "Category name is required." }, { status: 400 });
+  const name = b.name?.trim();
+  if (!name) return NextResponse.json({ error: "Category name is required." }, { status: 400 });
 
+  const dup = await queryFirst<{ id: string }>(`SELECT id FROM Category WHERE name = ? LIMIT 1`, [name]);
+  if (dup) return NextResponse.json({ error: "Category already exists." }, { status: 400 });
+
+  const id = newId("cat");
   try {
-    const category = await prisma.category.create({
-      data: { name: b.name.trim(), color: b.color || "#7c5cfc" },
-    });
-    return NextResponse.json({ ok: true, category });
-  } catch (e: any) {
-    if (e.code === "P2002") return NextResponse.json({ error: "Category already exists." }, { status: 400 });
+    await execute(`INSERT INTO Category (id, name, color, createdAt) VALUES (?, ?, ?, ?)`, [id, name, b.color || "#7c5cfc", nowSql()]);
+    return NextResponse.json({ ok: true, category: { id } });
+  } catch {
     return NextResponse.json({ error: "Failed to create category." }, { status: 500 });
   }
 }

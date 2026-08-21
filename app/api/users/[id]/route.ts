@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, hashPassword } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { execute } from "@/lib/d1";
 export const runtime = "edge";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
@@ -14,20 +14,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: "You cannot demote or deactivate your own account." }, { status: 400 });
   }
 
-  const data: any = {};
-  if (b.name !== undefined) data.name = b.name.trim();
-  if (b.role !== undefined) data.role = b.role === "ADMIN" ? "ADMIN" : "CASHIER";
-  if (b.active !== undefined) data.active = Boolean(b.active);
+  const sets: string[] = [];
+  const vals: any[] = [];
+  const set = (c: string, v: any) => { sets.push(`${c} = ?`); vals.push(v); };
+  if (b.name !== undefined) set("name", b.name.trim());
+  if (b.role !== undefined) set("role", b.role === "ADMIN" ? "ADMIN" : "CASHIER");
+  if (b.active !== undefined) set("active", b.active ? 1 : 0);
   if (b.password) {
     if (String(b.password).length < 6) return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
-    data.passwordHash = await hashPassword(b.password);
+    set("passwordHash", await hashPassword(b.password));
   }
+  if (sets.length === 0) return NextResponse.json({ ok: true });
 
-  try {
-    await prisma.user.update({ where: { id: params.id }, data });
-    return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e.code === "P2002") return NextResponse.json({ error: "Email already in use." }, { status: 400 });
-    return NextResponse.json({ error: "Failed to update staff." }, { status: 500 });
-  }
+  await execute(`UPDATE User SET ${sets.join(", ")} WHERE id = ?`, [...vals, params.id]);
+  return NextResponse.json({ ok: true });
 }

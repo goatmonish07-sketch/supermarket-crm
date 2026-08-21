@@ -1,4 +1,4 @@
-import { getDb } from "./db";
+import { query, queryFirst, execute, newId, nowSql } from "./d1";
 import { getSettings } from "./settings";
 import { computeTotals, loyaltyPointsFor, type CartLine } from "./billing";
 import { round2 } from "./format";
@@ -8,7 +8,7 @@ export type CreateInvoiceInput = {
   customerId?: string | null;
   discount?: number;
   paymentMode?: "CASH" | "CARD" | "UPI" | "CREDIT";
-  paidAmount?: number; // if omitted, assumed fully paid
+  paidAmount?: number;
   note?: string;
 };
 
@@ -23,12 +23,14 @@ function pad(n: number, w: number) {
 export async function createInvoice(userId: string, input: CreateInvoiceInput): Promise<CreateInvoiceResult> {
   if (!input.items?.length) return { ok: false, error: "Cart is empty." };
 
-  const prisma = getDb();
   const settings = await getSettings();
 
-  // Load products fresh — never trust client-side prices/stock.
   const ids = input.items.map((i) => i.productId);
-  const products = await prisma.product.findMany({ where: { id: { in: ids } } });
+  const placeholders = ids.map(() => "?").join(",");
+  const products = await query<{ id: string; name: string; sellPrice: number; taxRate: number; stock: number; unit: string }>(
+    `SELECT id, name, sellPrice, taxRate, stock, unit FROM Product WHERE id IN (${placeholders})`,
+    ids,
+  );
   const byId = new Map(products.map((p) => [p.id, p]));
 
   const lines: CartLine[] = [];
@@ -57,65 +59,43 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
   const loyaltyEarned = loyaltyPointsFor(totals.grandTotal, settings.loyaltyRate);
 
   try {
-    // NOTE: Cloudflare D1 does not support interactive transactions, so these
-    // writes run sequentially. Values were validated above, so partial failure
-    // is unlikely; acceptable for this workload.
     const now = new Date();
     const dateKey = `${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)}`;
     const start = new Date(now); start.setHours(0, 0, 0, 0);
-    const todayCount = await prisma.invoice.count({ where: { createdAt: { gte: start } } });
-    const invoiceNo = `INV-${dateKey}-${pad(todayCount + 1, 4)}`;
+    const cntRow = await queryFirst<{ n: number }>(
+      `SELECT COUNT(*) AS n FROM Invoice WHERE createdAt >= ?`,
+      [start.toISOString().replace("T", " ").slice(0, 19)],
+    );
+    const invoiceNo = `INV-${dateKey}-${pad((cntRow?.n ?? 0) + 1, 4)}`;
+    const invoiceId = newId("inv");
+    const createdAt = nowSql();
 
-    const invoice = await prisma.invoice.create({
-      data: {
-        invoiceNo,
-        customerId: input.customerId || null,
-        userId,
-        subtotal: totals.subtotal,
-        taxTotal: totals.taxTotal,
-        discount: totals.discount,
-        grandTotal: totals.grandTotal,
-        paymentMode,
-        paidAmount,
-        dueAmount,
-        status,
-        note: input.note || null,
-        items: {
-          create: lines.map((l) => ({
-            productId: l.productId,
-            name: l.name,
-            qty: l.qty,
-            unitPrice: l.unitPrice,
-            taxRate: l.taxRate,
-            lineTotal: round2(l.qty * l.unitPrice),
-          })),
-        },
-      },
-    });
+    await execute(
+      `INSERT INTO Invoice (id, invoiceNo, customerId, userId, subtotal, taxTotal, discount, grandTotal, paymentMode, paidAmount, dueAmount, status, note, createdAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [invoiceId, invoiceNo, input.customerId || null, userId, totals.subtotal, totals.taxTotal, totals.discount, totals.grandTotal, paymentMode, paidAmount, dueAmount, status, input.note || null, createdAt],
+    );
 
-    // Decrement stock + audit trail
     for (const l of lines) {
-      await prisma.product.update({
-        where: { id: l.productId },
-        data: { stock: { decrement: l.qty } },
-      });
-      await prisma.stockMovement.create({
-        data: { productId: l.productId, qtyChange: -l.qty, type: "SALE", note: invoiceNo },
-      });
+      await execute(
+        `INSERT INTO InvoiceItem (id, invoiceId, productId, name, qty, unitPrice, taxRate, lineTotal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [newId("item"), invoiceId, l.productId, l.name, l.qty, l.unitPrice, l.taxRate, round2(l.qty * l.unitPrice)],
+      );
+      await execute(`UPDATE Product SET stock = stock - ? WHERE id = ?`, [l.qty, l.productId]);
+      await execute(
+        `INSERT INTO StockMovement (id, productId, qtyChange, type, note, createdAt) VALUES (?, ?, ?, 'SALE', ?, ?)`,
+        [newId("mov"), l.productId, -l.qty, invoiceNo, createdAt],
+      );
     }
 
-    // Customer loyalty + dues
     if (input.customerId) {
-      await prisma.customer.update({
-        where: { id: input.customerId },
-        data: {
-          loyaltyPoints: { increment: loyaltyEarned },
-          dueBalance: { increment: dueAmount },
-        },
-      });
+      await execute(
+        `UPDATE Customer SET loyaltyPoints = loyaltyPoints + ?, dueBalance = dueBalance + ? WHERE id = ?`,
+        [loyaltyEarned, dueAmount, input.customerId],
+      );
     }
 
-    return { ok: true, invoiceId: invoice.id, invoiceNo: invoice.invoiceNo, grandTotal: totals.grandTotal, loyaltyEarned };
+    return { ok: true, invoiceId, invoiceNo, grandTotal: totals.grandTotal, loyaltyEarned };
   } catch (e) {
     console.error("createInvoice failed", e);
     return { ok: false, error: "Failed to create invoice. Please try again." };

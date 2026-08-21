@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { query, queryFirst } from "@/lib/d1";
 import { getSettings } from "@/lib/settings";
 import { formatINR, formatDate, formatTime, formatNumber } from "@/lib/format";
 import { StatusBadge, PaymentBadge } from "@/components/ui/Badges";
@@ -11,14 +11,25 @@ export const dynamic = "force-dynamic";
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
   const [invoice, settings] = await Promise.all([
-    prisma.invoice.findUnique({
-      where: { id: params.id },
-      include: { items: true, customer: true, user: { select: { name: true } } },
-    }),
+    queryFirst<{
+      id: string; invoiceNo: string; createdAt: string; subtotal: number; taxTotal: number;
+      discount: number; grandTotal: number; paymentMode: string; paidAmount: number; dueAmount: number;
+      status: string; customerName: string | null; customerPhone: string | null; customerAddress: string | null; userName: string;
+    }>(
+      `SELECT i.*, c.name AS customerName, c.phone AS customerPhone, c.address AS customerAddress, u.name AS userName
+       FROM Invoice i LEFT JOIN Customer c ON c.id = i.customerId JOIN User u ON u.id = i.userId
+       WHERE i.id = ? LIMIT 1`,
+      [params.id],
+    ),
     getSettings(),
   ]);
 
   if (!invoice) notFound();
+
+  const items = await query<{ id: string; name: string; qty: number; unitPrice: number; taxRate: number; lineTotal: number }>(
+    `SELECT id, name, qty, unitPrice, taxRate, lineTotal FROM InvoiceItem WHERE invoiceId = ?`,
+    [params.id],
+  );
 
   const cgst = invoice.taxTotal / 2;
   const sgst = invoice.taxTotal / 2;
@@ -28,13 +39,10 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
       <PrintControls />
 
       <div className="print-area card overflow-hidden">
-        {/* Header */}
         <div className="bg-brand-gradient px-8 py-7 text-white">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/15">
-                <ShoppingCart className="h-6 w-6" />
-              </div>
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/15"><ShoppingCart className="h-6 w-6" /></div>
               <div>
                 <p className="text-xl font-extrabold leading-none">{settings.shopName}</p>
                 <p className="mt-1 text-xs text-violet-100">{settings.tagline}</p>
@@ -51,18 +59,17 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {/* Meta */}
         <div className="grid grid-cols-2 gap-4 border-b border-violet-100 px-8 py-5 sm:grid-cols-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">Billed To</p>
-            <p className="mt-1 text-sm font-semibold text-ink">{invoice.customer?.name ?? "Walk-in Customer"}</p>
-            {invoice.customer?.phone && <p className="text-xs text-ink-muted">{invoice.customer.phone}</p>}
-            {invoice.customer?.address && <p className="text-xs text-ink-muted">{invoice.customer.address}</p>}
+            <p className="mt-1 text-sm font-semibold text-ink">{invoice.customerName ?? "Walk-in Customer"}</p>
+            {invoice.customerPhone && <p className="text-xs text-ink-muted">{invoice.customerPhone}</p>}
+            {invoice.customerAddress && <p className="text-xs text-ink-muted">{invoice.customerAddress}</p>}
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">Date & Time</p>
             <p className="mt-1 text-sm font-semibold text-ink">{formatDate(invoice.createdAt)}</p>
-            <p className="text-xs text-ink-muted">{formatTime(invoice.createdAt)} · by {invoice.user.name}</p>
+            <p className="text-xs text-ink-muted">{formatTime(invoice.createdAt)} · by {invoice.userName}</p>
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">Status</p>
@@ -73,20 +80,16 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {/* Items */}
         <div className="overflow-x-auto px-8 py-2">
           <table className="w-full min-w-[500px]">
             <thead>
               <tr className="border-b border-violet-100">
-                <th className="th pl-0">Item</th>
-                <th className="th text-center">GST</th>
-                <th className="th text-right">Price</th>
-                <th className="th text-center">Qty</th>
-                <th className="th pr-0 text-right">Amount</th>
+                <th className="th pl-0">Item</th><th className="th text-center">GST</th>
+                <th className="th text-right">Price</th><th className="th text-center">Qty</th><th className="th pr-0 text-right">Amount</th>
               </tr>
             </thead>
             <tbody>
-              {invoice.items.map((it) => (
+              {items.map((it) => (
                 <tr key={it.id}>
                   <td className="td border-violet-100/70 pl-0 font-medium text-ink">{it.name}</td>
                   <td className="td border-violet-100/70 text-center text-ink-muted">{it.taxRate}%</td>
@@ -99,7 +102,6 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           </table>
         </div>
 
-        {/* Totals */}
         <div className="flex justify-end px-8 pb-6 pt-2">
           <div className="w-full max-w-xs space-y-2 text-sm">
             <Row label="Subtotal" value={formatINR(invoice.subtotal)} />
@@ -115,7 +117,6 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           </div>
         </div>
 
-        {/* Footer */}
         <div className="border-t border-violet-100 bg-surface-sunken px-8 py-5 text-center">
           <p className="text-sm font-semibold text-ink">Thank you for shopping with us! 🛍️</p>
           <p className="mt-1 text-xs text-ink-muted">This is a computer-generated invoice.</p>

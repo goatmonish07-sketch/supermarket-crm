@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Star, NotebookPen, ReceiptText, Phone, Mail, MapPin, ShoppingBag } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { query, queryFirst } from "@/lib/d1";
 import { formatINR, formatDate, formatNumber } from "@/lib/format";
 import { StatusBadge, PaymentBadge } from "@/components/ui/Badges";
 import EmptyState from "@/components/ui/EmptyState";
@@ -11,21 +11,23 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
-  const customer = await prisma.customer.findUnique({
-    where: { id: params.id },
-    include: {
-      invoices: { orderBy: { createdAt: "desc" }, take: 50 },
-    },
-  });
+  const customer = await queryFirst<{
+    id: string; name: string; phone: string; email: string | null; address: string | null;
+    loyaltyPoints: number; dueBalance: number;
+  }>(`SELECT id, name, phone, email, address, loyaltyPoints, dueBalance FROM Customer WHERE id = ? LIMIT 1`, [params.id]);
   if (!customer) notFound();
 
-  const totalSpent = customer.invoices.reduce((s, i) => s + i.grandTotal, 0);
+  const invoices = await query<{ id: string; invoiceNo: string; createdAt: string; paymentMode: string; grandTotal: number; status: string }>(
+    `SELECT id, invoiceNo, createdAt, paymentMode, grandTotal, status FROM Invoice WHERE customerId = ? ORDER BY createdAt DESC LIMIT 50`,
+    [params.id],
+  );
+
+  const totalSpent = invoices.reduce((s, i) => s + i.grandTotal, 0);
 
   return (
     <div className="space-y-5">
       <Link href="/customers" className="btn-ghost btn-sm -ml-2"><ArrowLeft className="h-4 w-4" /> All customers</Link>
 
-      {/* Profile header */}
       <div className="card card-pad">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
@@ -45,33 +47,28 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MiniStat icon={ShoppingBag} label="Total Spent" value={formatINR(totalSpent, { compact: true })} tone="violet" />
-        <MiniStat icon={ReceiptText} label="Total Bills" value={formatNumber(customer.invoices.length)} tone="blue" />
+        <MiniStat icon={ReceiptText} label="Total Bills" value={formatNumber(invoices.length)} tone="blue" />
         <MiniStat icon={Star} label="Loyalty Points" value={formatNumber(customer.loyaltyPoints)} tone="amber" />
         <MiniStat icon={NotebookPen} label="Dues Balance" value={formatINR(customer.dueBalance, { compact: true })} tone={customer.dueBalance > 0 ? "rose" : "emerald"} />
       </div>
 
-      {/* History */}
       <div className="card overflow-hidden">
         <h2 className="px-5 pt-5 text-base font-bold text-ink">Purchase History</h2>
-        {customer.invoices.length === 0 ? (
+        {invoices.length === 0 ? (
           <EmptyState icon={ReceiptText} title="No purchases yet" />
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="bg-surface-sunken">
-                  <th className="th">Invoice</th>
-                  <th className="th">Date</th>
-                  <th className="th">Payment</th>
-                  <th className="th text-right">Amount</th>
-                  <th className="th">Status</th>
+                  <th className="th">Invoice</th><th className="th">Date</th><th className="th">Payment</th>
+                  <th className="th text-right">Amount</th><th className="th">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {customer.invoices.map((inv) => (
+                {invoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-violet-50/40">
                     <td className="td"><Link href={`/invoices/${inv.id}`} className="font-semibold text-violet-600 hover:underline">{inv.invoiceNo}</Link></td>
                     <td className="td whitespace-nowrap">{formatDate(inv.createdAt)}</td>

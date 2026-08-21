@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { parseRange } from "@/lib/reports";
+import { parseRange, getInvoiceRowsForExport } from "@/lib/reports";
 export const runtime = "edge";
 
 function csvCell(v: string | number): string {
@@ -14,32 +13,17 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const { from, to } = parseRange(searchParams.get("from") || undefined, searchParams.get("to") || undefined);
-
-  const invoices = await prisma.invoice.findMany({
-    where: { createdAt: { gte: from, lte: to } },
-    orderBy: { createdAt: "asc" },
-    include: { customer: { select: { name: true } }, user: { select: { name: true } } },
-  });
+  const range = parseRange(searchParams.get("from") || undefined, searchParams.get("to") || undefined);
+  const rows = await getInvoiceRowsForExport(range);
 
   const header = ["Invoice No", "Date", "Customer", "Cashier", "Payment", "Status", "Subtotal", "Tax", "Discount", "Grand Total", "Paid", "Due"];
-  const rows = invoices.map((i) => [
-    i.invoiceNo,
-    i.createdAt.toISOString(),
-    i.customer?.name ?? "Walk-in",
-    i.user.name,
-    i.paymentMode,
-    i.status,
-    i.subtotal.toFixed(2),
-    i.taxTotal.toFixed(2),
-    i.discount.toFixed(2),
-    i.grandTotal.toFixed(2),
-    i.paidAmount.toFixed(2),
-    i.dueAmount.toFixed(2),
+  const body = rows.map((i) => [
+    i.invoiceNo, i.createdAt, i.customerName ?? "Walk-in", i.userName, i.paymentMode, i.status,
+    i.subtotal.toFixed(2), i.taxTotal.toFixed(2), i.discount.toFixed(2), i.grandTotal.toFixed(2), i.paidAmount.toFixed(2), i.dueAmount.toFixed(2),
   ]);
 
-  const csv = [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
-  const filename = `sales-report_${from.toISOString().slice(0, 10)}_to_${to.toISOString().slice(0, 10)}.csv`;
+  const csv = [header, ...body].map((r) => r.map(csvCell).join(",")).join("\n");
+  const filename = `sales-report_${range.from.toISOString().slice(0, 10)}_to_${range.to.toISOString().slice(0, 10)}.csv`;
 
   return new NextResponse(csv, {
     headers: {

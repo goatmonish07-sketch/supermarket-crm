@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NotebookPen, Phone } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { query } from "@/lib/d1";
 import { formatINR } from "@/lib/format";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
@@ -10,10 +10,9 @@ export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export default async function DuesPage() {
-  const customers = await prisma.customer.findMany({
-    where: { dueBalance: { gt: 0 } },
-    orderBy: { dueBalance: "desc" },
-  });
+  const customers = await query<{ id: string; name: string; phone: string; dueBalance: number }>(
+    `SELECT id, name, phone, dueBalance FROM Customer WHERE dueBalance > 0 ORDER BY dueBalance DESC`,
+  );
   const totalDues = customers.reduce((s, c) => s + c.dueBalance, 0);
 
   return (
@@ -28,10 +27,8 @@ export default async function DuesPage() {
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="bg-surface-sunken">
-                  <th className="th">Customer</th>
-                  <th className="th">Phone</th>
-                  <th className="th text-right">Outstanding</th>
-                  <th className="th text-right">Action</th>
+                  <th className="th">Customer</th><th className="th">Phone</th>
+                  <th className="th text-right">Outstanding</th><th className="th text-right">Action</th>
                 </tr>
               </thead>
               <tbody>

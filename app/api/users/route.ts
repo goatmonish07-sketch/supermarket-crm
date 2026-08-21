@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, hashPassword } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { execute, newId, nowSql, queryFirst } from "@/lib/d1";
 export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
@@ -14,20 +14,15 @@ export async function POST(req: NextRequest) {
   if (String(b.password).length < 6) {
     return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
   }
-  const role = b.role === "ADMIN" ? "ADMIN" : "CASHIER";
+  const email = b.email.toLowerCase().trim();
+  const dup = await queryFirst<{ id: string }>(`SELECT id FROM User WHERE email = ? LIMIT 1`, [email]);
+  if (dup) return NextResponse.json({ error: "Email already registered." }, { status: 400 });
 
-  try {
-    const created = await prisma.user.create({
-      data: {
-        name: b.name.trim(),
-        email: b.email.toLowerCase().trim(),
-        passwordHash: await hashPassword(b.password),
-        role,
-      },
-    });
-    return NextResponse.json({ ok: true, user: { id: created.id } });
-  } catch (e: any) {
-    if (e.code === "P2002") return NextResponse.json({ error: "Email already registered." }, { status: 400 });
-    return NextResponse.json({ error: "Failed to create staff." }, { status: 500 });
-  }
+  const role = b.role === "ADMIN" ? "ADMIN" : "CASHIER";
+  const id = newId("usr");
+  await execute(
+    `INSERT INTO User (id, name, email, passwordHash, role, active, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`,
+    [id, b.name.trim(), email, await hashPassword(b.password), role, nowSql()],
+  );
+  return NextResponse.json({ ok: true, user: { id } });
 }
