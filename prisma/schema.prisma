@@ -1,0 +1,132 @@
+// SuperMart CRM — data model
+// SQLite for zero-config local dev; schema stays Postgres-compatible.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite has no native enums. These fields use strings validated in app code:
+//   Role: ADMIN | CASHIER
+//   PaymentMode: CASH | CARD | UPI | CREDIT
+//   InvoiceStatus: PAID | PARTIAL | DUE
+//   StockMovementType: SALE | PURCHASE | ADJUSTMENT
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("CASHIER")
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  invoices     Invoice[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  color     String    @default("#7c5cfc")
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Product {
+  id                 String          @id @default(cuid())
+  name               String
+  sku                String          @unique
+  categoryId         String?
+  category           Category?       @relation(fields: [categoryId], references: [id])
+  costPrice          Float           @default(0)
+  sellPrice          Float           @default(0)
+  taxRate            Float           @default(0) // GST %
+  stock              Float           @default(0)
+  unit               String          @default("pcs")
+  lowStockThreshold  Float           @default(10)
+  active             Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  invoiceItems       InvoiceItem[]
+  stockMovements     StockMovement[]
+}
+
+model Customer {
+  id            String    @id @default(cuid())
+  name          String
+  phone         String    @unique
+  email         String?
+  address       String?
+  loyaltyPoints Int       @default(0)
+  dueBalance    Float     @default(0)
+  createdAt     DateTime  @default(now())
+  invoices      Invoice[]
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  invoiceNo   String        @unique
+  customerId  String?
+  customer    Customer?     @relation(fields: [customerId], references: [id])
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  subtotal    Float         @default(0) // pre-tax, post line-discounts
+  taxTotal    Float         @default(0)
+  discount    Float         @default(0) // invoice-level discount amount
+  grandTotal  Float         @default(0)
+  paymentMode String        @default("CASH")
+  paidAmount  Float         @default(0)
+  dueAmount   Float         @default(0)
+  status      String        @default("PAID")
+  note        String?
+  createdAt   DateTime      @default(now())
+  items       InvoiceItem[]
+
+  @@index([createdAt])
+}
+
+model InvoiceItem {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  name      String
+  qty       Float
+  unitPrice Float
+  taxRate   Float    @default(0)
+  lineTotal Float // qty * unitPrice (pre-tax)
+}
+
+model StockMovement {
+  id        String            @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  qtyChange Float // + inbound, - outbound
+  type      String // SALE | PURCHASE | ADJUSTMENT
+  note      String?
+  createdAt DateTime          @default(now())
+}
+
+model Setting {
+  id          Int     @id @default(1)
+  shopName    String  @default("SuperMart")
+  tagline     String  @default("Fresh Groceries & Daily Essentials")
+  address     String  @default("Gandhipuram, Coimbatore, TN 641012")
+  phone       String  @default("+91 98765 43210")
+  gstin       String  @default("33ABCDE1234F1Z5")
+  currency    String  @default("INR")
+  loyaltyRate Int     @default(100) // 1 loyalty point per this many currency units spent
+}
