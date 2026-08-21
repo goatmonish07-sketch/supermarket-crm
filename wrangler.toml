@@ -1,21 +1,20 @@
-# Wrangler config — LOCAL DEVELOPMENT ONLY.
-#
-# Cloudflare Pages deployment is configured entirely in the PAGES DASHBOARD:
-#   • Build command:        npm run pages:build
-#   • Build output dir:     .vercel/output/static
-#   • D1 binding:           Variable name "DB" -> your supermart-crm database
-#   • Compatibility flags:  nodejs_compat   (Production AND Preview)
-#
-# This file deliberately OMITS `pages_build_output_dir` so the Pages Git build
-# ignores it and uses the dashboard settings above. (If it were present, Pages
-# would try to bind the placeholder D1 id below and the deploy would fail.)
+# Cloudflare Pages + D1 configuration (source of truth for the deployment).
+# Because `pages_build_output_dir` is set, Cloudflare Pages reads bindings, vars
+# and compatibility flags from THIS file — no dashboard configuration needed.
 
 name = "supermarket-crm"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
 
-# Local D1 binding for `wrangler pages dev` / `wrangler d1 execute --local`.
+# Cloudflare D1 database binding (created & seeded for this project).
 [[d1_databases]]
 binding = "DB"
 database_name = "supermart-crm"
-database_id = "local"
+database_id = "ee560976-9b43-4cf4-9593-a887e9bb8704"
+
+# Runtime variables. AUTH_SECRET signs session cookies — change it to your own
+# long random string for real production use. SEED_TOKEN guards /api/seed.
+[vars]
+AUTH_SECRET = "supermart-crm-prod-secret-4c2f9a7e1b6d0837f5a2e9c4b1d6087a"
+SEED_TOKEN = "seed-supermart-2026"
