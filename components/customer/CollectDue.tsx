@@ -19,7 +19,7 @@ export default function CollectDue({ customerId, dueBalance }: { customerId: str
     const res = await fetch(`/api/customers/${customerId}/collect`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount }),
     });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     setOpen(false); setSaving(false); router.refresh();
   }

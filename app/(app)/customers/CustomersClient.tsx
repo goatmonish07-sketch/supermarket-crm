@@ -99,7 +99,7 @@ function CustomerForm({ customer, onClose, onSaved }: { customer: Customer | nul
     setError(""); setSaving(true);
     const url = customer ? `/api/customers/${customer.id}` : "/api/customers";
     const res = await fetch(url, { method: customer ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }

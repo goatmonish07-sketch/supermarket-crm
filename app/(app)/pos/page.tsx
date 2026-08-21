@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import PosClient from "./PosClient";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

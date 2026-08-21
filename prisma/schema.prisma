@@ -2,7 +2,8 @@
 // SQLite for zero-config local dev; schema stays Postgres-compatible.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {

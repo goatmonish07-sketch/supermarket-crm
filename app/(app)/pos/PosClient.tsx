@@ -103,7 +103,7 @@ export default function PosClient({
           paidAmount: mode === "CREDIT" ? paidAmount : undefined,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (!res.ok) {
         setError(data.error || "Checkout failed.");
         setSubmitting(false);

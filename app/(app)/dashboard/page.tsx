@@ -10,6 +10,7 @@ import StatCard from "@/components/ui/StatCard";
 import RevenueTrendChart from "@/components/charts/RevenueTrendChart";
 import PaymentDonut from "@/components/charts/PaymentDonut";
 import { StatusBadge } from "@/components/ui/Badges";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

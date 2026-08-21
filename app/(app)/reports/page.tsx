@@ -5,6 +5,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import ReportControls from "@/components/reports/ReportControls";
 import RevenueTrendChart from "@/components/charts/RevenueTrendChart";
 import PaymentDonut from "@/components/charts/PaymentDonut";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

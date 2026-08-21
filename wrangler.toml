@@ -1,0 +1,13 @@
+name = "supermarket-crm"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# Cloudflare D1 database binding.
+# After `wrangler d1 create supermart-crm`, paste the returned database_id below
+# (and set the same binding in the Pages dashboard: Settings → Functions → D1
+# bindings → Variable name "DB").
+[[d1_databases]]
+binding = "DB"
+database_name = "supermart-crm"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"

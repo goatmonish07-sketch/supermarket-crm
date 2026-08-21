@@ -20,7 +20,7 @@ export default function SettingsClient({ settings }: { settings: AppSettings }) 
     e.preventDefault();
     setError(""); setSaved(false); setSaving(true);
     const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     setSaving(false); setSaved(true);
     router.refresh();

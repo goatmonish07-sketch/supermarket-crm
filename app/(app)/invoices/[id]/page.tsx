@@ -5,6 +5,7 @@ import { getSettings } from "@/lib/settings";
 import { formatINR, formatDate, formatTime, formatNumber } from "@/lib/format";
 import { StatusBadge, PaymentBadge } from "@/components/ui/Badges";
 import PrintControls from "@/components/invoice/PrintControls";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

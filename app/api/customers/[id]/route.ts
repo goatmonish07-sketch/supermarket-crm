@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const runtime = "edge";
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const user = await getSession();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => ({}))) as any;
   try {
     const customer = await prisma.customer.update({
       where: { id: params.id },

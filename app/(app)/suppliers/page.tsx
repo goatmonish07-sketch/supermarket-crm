@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import SuppliersClient from "./SuppliersClient";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

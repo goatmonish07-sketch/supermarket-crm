@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { getSettings } from "@/lib/settings";
 import { getLowStockCount } from "@/lib/queries";
 import AppShell from "@/components/layout/AppShell";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

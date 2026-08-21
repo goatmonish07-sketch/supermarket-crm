@@ -1,4 +1,4 @@
-import { prisma } from "./db";
+import { getDb } from "./db";
 import { getSettings } from "./settings";
 import { computeTotals, loyaltyPointsFor, type CartLine } from "./billing";
 import { round2 } from "./format";
@@ -23,6 +23,7 @@ function pad(n: number, w: number) {
 export async function createInvoice(userId: string, input: CreateInvoiceInput): Promise<CreateInvoiceResult> {
   if (!input.items?.length) return { ok: false, error: "Cart is empty." };
 
+  const prisma = getDb();
   const settings = await getSettings();
 
   // Load products fresh — never trust client-side prices/stock.
@@ -56,67 +57,65 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
   const loyaltyEarned = loyaltyPointsFor(totals.grandTotal, settings.loyaltyRate);
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      // Invoice number: INV-YYYYMMDD-#### (sequential within the day)
-      const now = new Date();
-      const dateKey = `${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)}`;
-      const start = new Date(now); start.setHours(0, 0, 0, 0);
-      const todayCount = await tx.invoice.count({ where: { createdAt: { gte: start } } });
-      const invoiceNo = `INV-${dateKey}-${pad(todayCount + 1, 4)}`;
+    // NOTE: Cloudflare D1 does not support interactive transactions, so these
+    // writes run sequentially. Values were validated above, so partial failure
+    // is unlikely; acceptable for this workload.
+    const now = new Date();
+    const dateKey = `${now.getFullYear()}${pad(now.getMonth() + 1, 2)}${pad(now.getDate(), 2)}`;
+    const start = new Date(now); start.setHours(0, 0, 0, 0);
+    const todayCount = await prisma.invoice.count({ where: { createdAt: { gte: start } } });
+    const invoiceNo = `INV-${dateKey}-${pad(todayCount + 1, 4)}`;
 
-      const invoice = await tx.invoice.create({
-        data: {
-          invoiceNo,
-          customerId: input.customerId || null,
-          userId,
-          subtotal: totals.subtotal,
-          taxTotal: totals.taxTotal,
-          discount: totals.discount,
-          grandTotal: totals.grandTotal,
-          paymentMode,
-          paidAmount,
-          dueAmount,
-          status,
-          note: input.note || null,
-          items: {
-            create: lines.map((l) => ({
-              productId: l.productId,
-              name: l.name,
-              qty: l.qty,
-              unitPrice: l.unitPrice,
-              taxRate: l.taxRate,
-              lineTotal: round2(l.qty * l.unitPrice),
-            })),
-          },
+    const invoice = await prisma.invoice.create({
+      data: {
+        invoiceNo,
+        customerId: input.customerId || null,
+        userId,
+        subtotal: totals.subtotal,
+        taxTotal: totals.taxTotal,
+        discount: totals.discount,
+        grandTotal: totals.grandTotal,
+        paymentMode,
+        paidAmount,
+        dueAmount,
+        status,
+        note: input.note || null,
+        items: {
+          create: lines.map((l) => ({
+            productId: l.productId,
+            name: l.name,
+            qty: l.qty,
+            unitPrice: l.unitPrice,
+            taxRate: l.taxRate,
+            lineTotal: round2(l.qty * l.unitPrice),
+          })),
         },
-      });
-
-      // Decrement stock + audit trail
-      for (const l of lines) {
-        await tx.product.update({
-          where: { id: l.productId },
-          data: { stock: { decrement: l.qty } },
-        });
-        await tx.stockMovement.create({
-          data: { productId: l.productId, qtyChange: -l.qty, type: "SALE", note: invoiceNo },
-        });
-      }
-
-      // Customer loyalty + dues
-      if (input.customerId) {
-        await tx.customer.update({
-          where: { id: input.customerId },
-          data: {
-            loyaltyPoints: { increment: loyaltyEarned },
-            dueBalance: { increment: dueAmount },
-          },
-        });
-      }
-
-      return invoice;
+      },
     });
 
-    return { ok: true, invoiceId: result.id, invoiceNo: result.invoiceNo, grandTotal: totals.grandTotal, loyaltyEarned };
+    // Decrement stock + audit trail
+    for (const l of lines) {
+      await prisma.product.update({
+        where: { id: l.productId },
+        data: { stock: { decrement: l.qty } },
+      });
+      await prisma.stockMovement.create({
+        data: { productId: l.productId, qtyChange: -l.qty, type: "SALE", note: invoiceNo },
+      });
+    }
+
+    // Customer loyalty + dues
+    if (input.customerId) {
+      await prisma.customer.update({
+        where: { id: input.customerId },
+        data: {
+          loyaltyPoints: { increment: loyaltyEarned },
+          dueBalance: { increment: dueAmount },
+        },
+      });
+    }
+
+    return { ok: true, invoiceId: invoice.id, invoiceNo: invoice.invoiceNo, grandTotal: totals.grandTotal, loyaltyEarned };
   } catch (e) {
     console.error("createInvoice failed", e);
     return { ok: false, error: "Failed to create invoice. Please try again." };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseRange } from "@/lib/reports";
+export const runtime = "edge";
 
 function csvCell(v: string | number): string {
   const s = String(v ?? "");

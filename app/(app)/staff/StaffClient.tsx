@@ -18,7 +18,7 @@ export default function StaffClient({ users, currentUserId }: { users: Staff[]; 
   async function patch(id: string, body: any) {
     const res = await fetch(`/api/users/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (!res.ok) {
-      const d = await res.json();
+      const d = (await res.json()) as any;
       alert(d.error || "Failed.");
       return;
     }
@@ -92,7 +92,7 @@ function AddStaff({ onClose, onSaved }: { onClose: () => void; onSaved: () => vo
     e.preventDefault();
     setError(""); setSaving(true);
     const res = await fetch("/api/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }
@@ -128,7 +128,7 @@ function ResetPassword({ staff, onClose, onSaved }: { staff: Staff; onClose: () 
     e.preventDefault();
     setError(""); setSaving(true);
     const res = await fetch(`/api/users/${staff.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }

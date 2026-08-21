@@ -34,24 +34,34 @@ customer loyalty and live analytics.
 | --------- | ------------------------------------------------- |
 | Framework | Next.js 14 (App Router) + TypeScript              |
 | Styling   | Tailwind CSS · lucide-react icons · Recharts      |
-| Database  | Prisma ORM + SQLite (Postgres-compatible schema)  |
+| Database  | Prisma ORM + Cloudflare D1 (SQLite)               |
+| Hosting   | Cloudflare Pages (`@cloudflare/next-on-pages`, edge)|
 | Auth      | `jose` JWT (httpOnly cookie) + `bcryptjs`         |
 
-## 🚀 Getting Started
+## 🚀 Getting Started (local)
+
+The app is wired to **Cloudflare D1**, so local dev uses a local D1 database via
+Wrangler's dev platform.
 
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Set up the database (schema + demo data)
-npm run db:push
-npm run db:seed
+# 2. Local secrets — create .dev.vars
+printf 'AUTH_SECRET = "dev-secret"\nSEED_TOKEN = "seed-me"\n' > .dev.vars
 
-# 3. Run the dev server
+# 3. Create the local D1 tables
+npx wrangler d1 execute supermart-crm --local --file=./migrations/0001_init.sql
+
+# 4. Run the dev server
 npm run dev
 ```
 
-Open **http://localhost:3000**.
+Open **http://localhost:3000**, then seed demo data once by visiting
+`http://localhost:3000/api/seed?token=seed-me`.
+
+> For a production-accurate local preview on the Cloudflare runtime, use
+> `npm run preview` instead of `npm run dev`.
 
 ### Demo accounts
 
@@ -65,23 +75,66 @@ Open **http://localhost:3000**.
 
 ## 📜 Scripts
 
-| Script            | Description                                  |
-| ----------------- | -------------------------------------------- |
-| `npm run dev`     | Start the dev server                         |
-| `npm run build`   | Production build                             |
-| `npm run start`   | Run the production build                     |
-| `npm run db:push` | Sync the Prisma schema to SQLite             |
-| `npm run db:seed` | Seed demo data                               |
-| `npm run db:reset`| Reset the database and re-seed               |
+| Script                    | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `npm run dev`             | Start the local dev server (local D1)          |
+| `npm run pages:build`     | Build for Cloudflare Pages                      |
+| `npm run preview`         | Local Cloudflare-runtime preview               |
+| `npm run deploy`          | Build and deploy to Cloudflare Pages           |
+| `npm run d1:migrate:remote` | Apply the schema to the remote D1            |
 
 ## ⚙️ Configuration
 
-`.env` holds two values (a dev default is committed for convenience):
+Runtime secrets are set as Cloudflare **environment variables** (and locally in
+`.dev.vars`):
+
+- **`AUTH_SECRET`** — secret used to sign session cookies (use a long random string).
+- **`SEED_TOKEN`** — token that guards the one-time `/api/seed` endpoint.
+
+The D1 database is bound as **`DB`** (see `wrangler.toml`).
+
+## ☁️ Deploy to Cloudflare Pages (with D1)
+
+This app runs on **Cloudflare Pages** using **D1** (Cloudflare's SQLite) via the
+Prisma D1 adapter and `@cloudflare/next-on-pages`. All routes run on the edge runtime.
+
+**One-time setup (run locally with the Wrangler CLI — `npm i -g wrangler` then `wrangler login`):**
+
+```bash
+# 1. Create the D1 database
+wrangler d1 create supermart-crm
+#    → copy the printed database_id into wrangler.toml (replace REPLACE_WITH_YOUR_D1_DATABASE_ID)
+
+# 2. Create the tables in the remote D1
+wrangler d1 execute supermart-crm --remote --file=./migrations/0001_init.sql
+```
+
+**In the Cloudflare Pages dashboard** (Create application → connect this repo):
+
+| Setting                    | Value                          |
+| -------------------------- | ------------------------------ |
+| Production branch          | `claude/supermarket-crm-dashboard-ugmszi` |
+| Framework preset           | `None`                         |
+| Build command              | `npm run pages:build`          |
+| Build output directory     | `.vercel/output/static`        |
+
+Then in **Settings → Functions**:
+- **D1 bindings** → add binding **Variable name `DB`** → your `supermart-crm` database.
+- **Environment variables** → add **`AUTH_SECRET`** (a long random string) and
+  **`SEED_TOKEN`** (any secret you choose).
+- **Compatibility flags** → add **`nodejs_compat`** (Production *and* Preview).
+
+**After the first deploy, seed the demo data once** by visiting:
 
 ```
-DATABASE_URL="file:./dev.db"   # swap for a Postgres URL to scale up
-AUTH_SECRET="change-me"        # secret used to sign session cookies
+https://<your-project>.pages.dev/api/seed?token=YOUR_SEED_TOKEN
 ```
+
+Then log in at `https://<your-project>.pages.dev/login` with **admin@shop.com / admin123**.
+
+> Local Cloudflare preview: `npm run preview` (uses a local D1 — apply the migration
+> first with `wrangler d1 execute supermart-crm --local --file=./migrations/0001_init.sql`,
+> and put `AUTH_SECRET` / `SEED_TOKEN` in a `.dev.vars` file).
 
 ## 🗂️ Project Structure
 

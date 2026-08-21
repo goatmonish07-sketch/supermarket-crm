@@ -161,7 +161,7 @@ function ProductForm({ product, categories, onClose, onSaved }: { product: Produ
     setError(""); setSaving(true);
     const url = product ? `/api/products/${product.id}` : "/api/products";
     const res = await fetch(url, { method: product ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed to save."); setSaving(false); return; }
     onSaved();
   }
@@ -215,7 +215,7 @@ function RestockModal({ product, onClose, onSaved }: { product: Product; onClose
     e.preventDefault();
     setError(""); setSaving(true);
     const res = await fetch(`/api/products/${product.id}/restock`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ qty, note }) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }
@@ -251,7 +251,7 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
     e.preventDefault();
     setError(""); setSaving(true);
     const res = await fetch("/api/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, color }) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }

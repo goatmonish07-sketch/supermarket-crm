@@ -69,7 +69,7 @@ function SupplierForm({ supplier, onClose, onSaved }: { supplier: Supplier | nul
     setError(""); setSaving(true);
     const url = supplier ? `/api/suppliers/${supplier.id}` : "/api/suppliers";
     const res = await fetch(url, { method: supplier ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f) });
-    const data = await res.json();
+    const data = (await res.json()) as any;
     if (!res.ok) { setError(data.error || "Failed."); setSaving(false); return; }
     onSaved();
   }

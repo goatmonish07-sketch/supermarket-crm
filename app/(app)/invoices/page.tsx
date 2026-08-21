@@ -5,6 +5,7 @@ import { formatINR, formatDate, formatTime } from "@/lib/format";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import { StatusBadge, PaymentBadge } from "@/components/ui/Badges";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

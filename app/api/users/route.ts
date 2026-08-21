@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   const user = await getSession();
   if (!user || user.role !== "ADMIN") return NextResponse.json({ error: "Admin access required." }, { status: 403 });
 
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => ({}))) as any;
   if (!b.name?.trim() || !b.email?.trim() || !b.password) {
     return NextResponse.json({ error: "Name, email and password are required." }, { status: 400 });
   }

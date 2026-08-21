@@ -5,6 +5,7 @@ import { formatINR } from "@/lib/format";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import CollectDue from "@/components/customer/CollectDue";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

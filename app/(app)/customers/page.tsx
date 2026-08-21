@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import CustomersClient from "./CustomersClient";
+export const runtime = "edge";
 
 export const dynamic = "force-dynamic";
 

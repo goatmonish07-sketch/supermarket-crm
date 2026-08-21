@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+export const runtime = "edge";
 
 export async function POST(req: NextRequest) {
   const user = await getSession();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (user.role !== "ADMIN") return NextResponse.json({ error: "Admin access required." }, { status: 403 });
 
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => ({}))) as any;
   if (!b.name || !b.sku) return NextResponse.json({ error: "Name and SKU are required." }, { status: 400 });
 
   try {
