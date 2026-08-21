@@ -97,19 +97,14 @@ The D1 database is bound as **`DB`** (see `wrangler.toml`).
 
 This app runs on **Cloudflare Pages** using **D1** (Cloudflare's SQLite) via the
 Prisma D1 adapter and `@cloudflare/next-on-pages`. All routes run on the edge runtime.
+Everything below is configured in the **Cloudflare dashboard** — no CLI or file edits needed.
 
-**One-time setup (run locally with the Wrangler CLI — `npm i -g wrangler` then `wrangler login`):**
+**1. Create the D1 database & tables**
+- Dashboard → **Workers & Pages → D1 SQL Database → Create** → name it `supermart-crm`.
+- Open it → **Console** tab → paste the entire contents of
+  [`migrations/0001_init.sql`](./migrations/0001_init.sql) → **Execute** (creates the tables).
 
-```bash
-# 1. Create the D1 database
-wrangler d1 create supermart-crm
-#    → copy the printed database_id into wrangler.toml (replace REPLACE_WITH_YOUR_D1_DATABASE_ID)
-
-# 2. Create the tables in the remote D1
-wrangler d1 execute supermart-crm --remote --file=./migrations/0001_init.sql
-```
-
-**In the Cloudflare Pages dashboard** (Create application → connect this repo):
+**2. Pages project build settings** (Create application → connect this repo):
 
 | Setting                    | Value                          |
 | -------------------------- | ------------------------------ |
@@ -118,13 +113,15 @@ wrangler d1 execute supermart-crm --remote --file=./migrations/0001_init.sql
 | Build command              | `npm run pages:build`          |
 | Build output directory     | `.vercel/output/static`        |
 
-Then in **Settings → Functions**:
-- **D1 bindings** → add binding **Variable name `DB`** → your `supermart-crm` database.
-- **Environment variables** → add **`AUTH_SECRET`** (a long random string) and
-  **`SEED_TOKEN`** (any secret you choose).
-- **Compatibility flags** → add **`nodejs_compat`** (Production *and* Preview).
+**3. Pages → Settings → Functions:**
+- **D1 database bindings** → add binding: variable name **`DB`** → select `supermart-crm`.
+- **Compatibility flags** → add **`nodejs_compat`** to **both** Production and Preview.
 
-**After the first deploy, seed the demo data once** by visiting:
+**4. Pages → Settings → Environment variables:**
+- **`AUTH_SECRET`** = a long random string.
+- **`SEED_TOKEN`** = any secret you choose.
+
+**5. Deploy, then seed demo data once** by visiting:
 
 ```
 https://<your-project>.pages.dev/api/seed?token=YOUR_SEED_TOKEN
@@ -132,9 +129,9 @@ https://<your-project>.pages.dev/api/seed?token=YOUR_SEED_TOKEN
 
 Then log in at `https://<your-project>.pages.dev/login` with **admin@shop.com / admin123**.
 
-> Local Cloudflare preview: `npm run preview` (uses a local D1 — apply the migration
-> first with `wrangler d1 execute supermart-crm --local --file=./migrations/0001_init.sql`,
-> and put `AUTH_SECRET` / `SEED_TOKEN` in a `.dev.vars` file).
+> Prefer the CLI? `wrangler d1 create supermart-crm`,
+> `wrangler d1 execute supermart-crm --remote --file=./migrations/0001_init.sql`,
+> then `npm run deploy`.
 
 ## 🗂️ Project Structure
 
