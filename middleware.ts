@@ -9,7 +9,7 @@ const secret = new TextEncoder().encode(
 // Routes only ADMINs may open.
 const ADMIN_ONLY = ["/staff", "/settings"];
 
-const PUBLIC_PATHS = ["/login"];
+const PUBLIC_PATHS = ["/login", "/welcome"];
 
 async function readRole(req: NextRequest): Promise<"ADMIN" | "CASHIER" | null> {
   const token = req.cookies.get(COOKIE_NAME)?.value;
@@ -24,6 +24,10 @@ async function readRole(req: NextRequest): Promise<"ADMIN" | "CASHIER" | null> {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Root sends everyone to the public marketing landing page.
+  if (pathname === "/") return NextResponse.redirect(new URL("/welcome", req.url));
+
   const role = await readRole(req);
   const isAuthed = role !== null;
 
