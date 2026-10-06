@@ -33,6 +33,7 @@ export const checkoutSchema = z.object({
     .max(6),
   note: z.string().trim().max(300).optional(),
   heldBillId: z.string().optional(),
+  orderId: z.string().optional(),
   approval: approvalSchema,
 });
 
@@ -71,13 +72,25 @@ export async function checkout(user: CurrentUser, input: CheckoutInput): Promise
   const missing = input.lines.find((l) => !byId.has(l.variantId));
   if (missing) throw new CheckoutError("An item in the cart is no longer available. Remove it and try again.");
 
+  // Billing an order/job: its advance counts as paid, it must be for the same customer,
+  // and the prices agreed on the order don't need approval again.
+  const order = input.orderId
+    ? await db.order.findFirst({ where: { id: input.orderId, tenantId: user.tenantId }, include: { payments: true, items: true } })
+    : null;
+  if (input.orderId) {
+    if (!order || order.status === "CANCELLED" || order.saleId) throw new CheckoutError("This order is closed or already billed.");
+    if (input.customerId && input.customerId !== order.customerId) throw new CheckoutError("The bill must be for the order's customer.");
+    input.customerId = order.customerId;
+  }
+  const agreed = new Set((order?.items ?? []).map((i) => `${i.variantId}:${i.price}`));
+
   // Build calculation lines from database prices.
   let needsOverride = false;
   const calcInputs: CalcLineInput[] = input.lines.map((l, i) => {
     const v = byId.get(l.variantId)!;
     let unitPrice = v.price;
     if (l.priceOverride != null && l.priceOverride !== v.price) {
-      if (!(v.item.priceAtCounter && v.price === 0)) needsOverride = true;
+      if (!(v.item.priceAtCounter && v.price === 0) && !agreed.has(`${v.id}:${l.priceOverride}`)) needsOverride = true;
       unitPrice = l.priceOverride;
     }
     if (unitPrice <= 0 && v.item.priceAtCounter) throw new CheckoutError(`Enter a price for “${v.item.name}”.`);
@@ -105,13 +118,17 @@ export async function checkout(user: CurrentUser, input: CheckoutInput): Promise
     approvedById = await verifyApproval(user, input.approval, what);
   }
 
-  // Payments: card/UPI/bank can't exceed the bill; cash may (change is returned).
+  const advance = order?.advancePaid ?? 0;
+  if (advance > bill.payable) throw new CheckoutError(`The advance (${formatMoney(advance)}) is more than this bill. Reduce the discount or refund from the order.`);
+  const payableNow = bill.payable - advance;
+
+  // Payments: card/UPI/bank can't exceed what's left; cash may (change is returned).
   const paidNonCash = input.payments.filter((p) => p.method !== "CASH").reduce((s, p) => s + p.amount, 0);
   const cashTendered = input.payments.filter((p) => p.method === "CASH").reduce((s, p) => s + p.amount, 0);
-  if (paidNonCash > bill.payable) throw new CheckoutError("Card / UPI amount is more than the bill.");
-  const cashKept = Math.min(cashTendered, bill.payable - paidNonCash);
+  if (paidNonCash > payableNow) throw new CheckoutError("Card / UPI amount is more than the bill.");
+  const cashKept = Math.min(cashTendered, payableNow - paidNonCash);
   const change = cashTendered - cashKept;
-  const paidTotal = paidNonCash + cashKept;
+  const paidTotal = advance + paidNonCash + cashKept;
   const due = bill.payable - paidTotal;
   if (due > 0 && !input.customerId) {
     throw new CheckoutError(`${formatMoney(due)} is still due. Collect it, or add the customer to record it as credit.`);
@@ -134,10 +151,23 @@ export async function checkout(user: CurrentUser, input: CheckoutInput): Promise
 
   const fy = financialYear(new Date(), store.timezone);
   const sale = await db.$transaction(async (tx) => {
+    if (order) {
+      await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${order.id} FOR UPDATE`;
+      const latest = await tx.order.findUniqueOrThrow({ where: { id: order.id }, select: { saleId: true, status: true } });
+      if (latest.saleId || latest.status === "CANCELLED") throw new CheckoutError("This order was just billed or cancelled.");
+    }
     // Lock stock rows in a stable order to avoid deadlocks between counters.
     const lockIds = [...need.keys()].sort();
     if (lockIds.length) {
       await tx.$queryRaw`SELECT id FROM "Variant" WHERE id = ANY(${lockIds}::text[]) ORDER BY id FOR UPDATE`;
+    }
+    // Stock held for the order is released into this sale before checking availability.
+    if (order) {
+      const held = await tx.orderItem.findMany({ where: { orderId: order.id, reservedQty: { gt: 0 } } });
+      for (const h of held) {
+        await tx.variant.update({ where: { id: h.variantId }, data: { reserved: { decrement: h.reservedQty } } });
+        await tx.orderItem.update({ where: { id: h.id }, data: { reservedQty: 0 } });
+      }
     }
     const fresh = await tx.variant.findMany({ where: { id: { in: lockIds } } });
     if (!store.allowNegativeStock) {
@@ -163,6 +193,14 @@ export async function checkout(user: CurrentUser, input: CheckoutInput): Promise
       payments.push({ method: p.method as PaymentMethod, amount: p.amount, reference: p.reference || null });
     }
     if (cashKept > 0) payments.push({ method: "CASH", amount: cashKept });
+    if (order) {
+      // Advances were counted on the day they were taken, so mark them.
+      const byMethod = new Map<PaymentMethod, number>();
+      for (const p of order.payments) byMethod.set(p.method, (byMethod.get(p.method) ?? 0) + p.amount);
+      for (const [method, amount] of byMethod) {
+        if (amount > 0) payments.push({ method, amount, reference: `Advance ${order.number}`, fromAdvance: true });
+      }
+    }
 
     const created = await tx.sale.create({
       data: {
@@ -211,6 +249,11 @@ export async function checkout(user: CurrentUser, input: CheckoutInput): Promise
         payments: { createMany: { data: payments } },
       },
     });
+
+    if (order) {
+      await tx.order.update({ where: { id: order.id }, data: { saleId: created.id, status: "DELIVERED", completedAt: new Date() } });
+      await tx.orderEvent.create({ data: { orderId: order.id, userId: user.id, status: "DELIVERED", message: `Billed on ${created.number}` } });
+    }
 
     for (const v of fresh) {
       const qty = need.get(v.id) ?? 0;

@@ -14,7 +14,7 @@ export default async function TeamPage() {
   const roles = assignableRoles(user.role).map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_400px]">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_400px]">
       <section className="card">
         <h1 className="text-3xl font-bold tracking-tight">Team</h1>
         <p className="mt-1 text-muted">

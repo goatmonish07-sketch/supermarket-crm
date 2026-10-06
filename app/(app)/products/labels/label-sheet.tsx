@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import JsBarcode from "jsbarcode";
+import { useMemo, useState } from "react";
+import { Barcode } from "@/components/ui/barcode";
 import { Minus, Plus, Printer } from "lucide-react";
 import { cn, formatMoney } from "@/lib/utils";
 
@@ -23,28 +23,6 @@ const LAYOUTS = {
   a4: { label: "A4 sheet · 3 × 8", page: "A4", w: "64mm", h: "33.9mm", sheet: true },
 } as const;
 type LayoutId = keyof typeof LAYOUTS;
-
-function Barcode({ value }: { value: string }) {
-  const ref = useRef<SVGSVGElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    try {
-      JsBarcode(ref.current, value, {
-        format: /^\d{13}$/.test(value) ? "EAN13" : "CODE128",
-        displayValue: true,
-        fontSize: 11,
-        height: 34,
-        margin: 0,
-        width: 1.3,
-        background: "transparent",
-        font: "monospace",
-      });
-    } catch {
-      JsBarcode(ref.current, value, { format: "CODE128", height: 34, margin: 0, width: 1.2, fontSize: 11 });
-    }
-  }, [value]);
-  return <svg ref={ref} className="h-auto max-h-[60%] w-full" role="img" aria-label={`Barcode ${value}`} />;
-}
 
 export function LabelSheet({ variants, shopName }: { variants: LabelVariant[]; shopName: string }) {
   const [layout, setLayout] = useState<LayoutId>("50x25");
@@ -170,7 +148,7 @@ export function LabelSheet({ variants, shopName }: { variants: LabelVariant[]; s
                 {v.name}
                 {fields.variant && (v.size || v.colour) ? ` · ${[v.size, v.colour].filter(Boolean).join(" / ")}` : ""}
               </p>
-              <Barcode value={v.barcode} />
+              <Barcode value={v.barcode} className="max-h-[60%]" />
               {(fields.price || fields.mrp) && (
                 <p className="text-[8pt] font-bold leading-tight">
                   {fields.price && formatMoney(v.price)}

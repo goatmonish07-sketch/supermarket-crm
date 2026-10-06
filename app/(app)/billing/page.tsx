@@ -9,7 +9,8 @@ import type { CartState, PosVariant } from "./types";
 
 export const metadata = { title: "Billing" };
 
-export default async function BillingPage() {
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ order?: string }> }) {
+  const sp = await searchParams;
   const user = await requirePermission("billing.use");
   const store = user.store;
 
@@ -23,6 +24,35 @@ export default async function BillingPage() {
     db.heldBill.findMany({ where: { tenantId: user.tenantId }, orderBy: { createdAt: "desc" }, include: { user: { select: { name: true } } } }),
     db.user.findMany({ where: { tenantId: user.tenantId, active: true }, select: { id: true, name: true, role: true, pinHash: true }, orderBy: { name: "asc" } }),
   ]);
+
+  // Billing an order or job: start the cart from its lines at the agreed prices.
+  const order = sp.order
+    ? await db.order.findFirst({
+        where: { id: sp.order, tenantId: user.tenantId, saleId: null, status: { notIn: ["CANCELLED", "DELIVERED"] } },
+        include: { items: true, customer: { select: { id: true, name: true, phone: true } } },
+      })
+    : null;
+  const priceOf = new Map(variants.map((v) => [v.id, v.price]));
+  const fromOrder = order
+    ? {
+        id: order.id,
+        number: order.number,
+        advance: order.advancePaid,
+        cart: {
+          lines: order.items.map((i) => ({
+            key: `o-${i.id}`,
+            variantId: i.variantId,
+            qty: i.qty,
+            priceOverride: i.price === priceOf.get(i.variantId) ? null : i.price,
+            discount: "",
+            note: i.note ?? "",
+          })),
+          billDiscount: "",
+          customer: order.customer,
+          salespersonId: null,
+        } satisfies CartState,
+      }
+    : null;
 
   const catalogue: PosVariant[] = variants.map((v) => ({
     id: v.id,
@@ -53,7 +83,14 @@ export default async function BillingPage() {
           <History className="h-4 w-4" aria-hidden="true" /> Bills
         </Link>
       </div>
+      {sp.order && !order && (
+        <p role="alert" className="rounded-2xl border border-warning/40 bg-warning/5 px-4 py-3 text-sm text-warning">
+          That order is already billed, delivered or cancelled.
+        </p>
+      )}
       <Counter
+        key={order?.id ?? "counter"}
+        fromOrder={fromOrder}
         catalogue={catalogue}
         held={held.map((h) => ({ id: h.id, label: h.label, createdAt: h.createdAt.toISOString(), by: h.user?.name ?? null, payload: h.payload as unknown as CartState }))}
         staff={staff.map((s) => ({ id: s.id, name: s.name }))}

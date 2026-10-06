@@ -64,6 +64,9 @@ model Tenant {
   sales          Sale[]
   heldBills      HeldBill[]
   saleReturns    SaleReturn[]
+  orders         Order[]
+  measurements   Measurement[]
+  docCounters    DocCounter[]
 }
 
 enum ReceiptPaper {
@@ -74,21 +77,21 @@ enum ReceiptPaper {
 }
 
 model Store {
-  id        String   @id @default(cuid())
-  tenantId  String
-  name      String
-  phone     String?
-  email     String?
-  address   String?
-  city      String?
-  state     String?
-  pincode   String?
-  gstin     String?
-  upiId     String?
-  currency  String   @default("INR")
-  timezone  String   @default("Asia/Kolkata")
-  invoicePrefix String @default("INV")
-  logoUrl   String?
+  id                   String       @id @default(cuid())
+  tenantId             String
+  name                 String
+  phone                String?
+  email                String?
+  address              String?
+  city                 String?
+  state                String?
+  pincode              String?
+  gstin                String?
+  upiId                String?
+  currency             String       @default("INR")
+  timezone             String       @default("Asia/Kolkata")
+  invoicePrefix        String       @default("INV")
+  logoUrl              String?
   // Billing & receipts
   receiptPaper         ReceiptPaper @default(THERMAL_80)
   receiptFooter        String?      @default("Thank you for shopping with us!")
@@ -97,13 +100,14 @@ model Store {
   allowNegativeStock   Boolean      @default(false)
   cashierMaxDiscountBp Int          @default(1000) // 10% without manager approval
   monthlyTarget        Int? // paise, for the dashboard gauge
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   users           User[]
   sales           Sale[]
   invoiceCounters InvoiceCounter[]
+  orders          Order[]
 
   @@index([tenantId])
 }
@@ -133,6 +137,11 @@ model User {
   salesSold      Sale[]          @relation("salesperson")
   heldBills      HeldBill[]
   saleReturns    SaleReturn[]
+  ordersCreated  Order[]         @relation("orderCreator")
+  ordersAssigned Order[]         @relation("orderAssignee")
+  orderEvents    OrderEvent[]
+  orderPayments  OrderPayment[]
+  measurements   Measurement[]
 
   // Email is unique per business, not globally, so one person can own two shops.
   @@unique([tenantId, email])
@@ -217,7 +226,7 @@ model Item {
 
 /// A sellable unit. Every item has at least one variant (size/colour may be empty).
 model Variant {
-  id           String  @id @default(cuid())
+  id           String   @id @default(cuid())
   tenantId     String
   itemId       String
   size         String?
@@ -227,23 +236,24 @@ model Variant {
   mrp          Int // paise
   price        Int // paise, selling price
   cost         Int? // paise, hidden from cashiers
-  reorderLevel Int     @default(2)
+  reorderLevel Int      @default(2)
   // Stock buckets. available = onHand - reserved - inAlteration - damaged
-  onHand       Int     @default(0)
-  reserved     Int     @default(0)
-  inAlteration Int     @default(0)
-  damaged      Int     @default(0)
-  onRent       Int     @default(0)
-  onOrder      Int     @default(0)
-  sortOrder    Int     @default(0)
-  active       Boolean @default(true)
+  onHand       Int      @default(0)
+  reserved     Int      @default(0)
+  inAlteration Int      @default(0)
+  damaged      Int      @default(0)
+  onRent       Int      @default(0)
+  onOrder      Int      @default(0)
+  sortOrder    Int      @default(0)
+  active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  item      Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  movements StockMovement[]
-  saleItems SaleItem[]
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  item       Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  movements  StockMovement[]
+  saleItems  SaleItem[]
+  orderItems OrderItem[]
 
   @@unique([tenantId, sku])
   @@unique([tenantId, barcode])
@@ -304,8 +314,10 @@ model Customer {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sales  Sale[]
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sales        Sale[]
+  orders       Order[]
+  measurements Measurement[]
 
   @@unique([tenantId, phone])
   @@index([tenantId, name])
@@ -359,6 +371,7 @@ model Sale {
   items       SaleItem[]
   payments    Payment[]
   returns     SaleReturn[]
+  order       Order?
 
   @@unique([storeId, fy, seq])
   @@index([tenantId, createdAt])
@@ -366,7 +379,7 @@ model Sale {
 }
 
 model SaleItem {
-  id           String  @id @default(cuid())
+  id           String   @id @default(cuid())
   saleId       String
   variantId    String?
   // Snapshot at time of sale
@@ -383,7 +396,7 @@ model SaleItem {
   taxable      Int
   tax          Int
   total        Int // taxable + tax
-  returnedQty  Int     @default(0)
+  returnedQty  Int      @default(0)
   note         String?
 
   sale    Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
@@ -393,12 +406,13 @@ model SaleItem {
 }
 
 model Payment {
-  id        String        @id @default(cuid())
-  saleId    String
-  method    PaymentMethod
-  amount    Int // paise; negative for refunds
-  reference String?
-  createdAt DateTime      @default(now())
+  id          String        @id @default(cuid())
+  saleId      String
+  method      PaymentMethod
+  amount      Int // paise; negative for refunds
+  reference   String?
+  fromAdvance Boolean       @default(false) // settled from an order advance (collected earlier)
+  createdAt   DateTime      @default(now())
 
   sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
 
@@ -436,4 +450,151 @@ model HeldBill {
   user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, createdAt])
+}
+
+// ─── Orders & jobs (Phase 4) ─────────────────────────────────────────────────
+
+enum OrderKind {
+  ORDER // special order / booking / delivery
+  JOB // alteration or stitching
+}
+
+enum OrderStatus {
+  // jobs
+  RECEIVED
+  MEASURED
+  CUTTING
+  STITCHING
+  TRIAL
+  // orders
+  CONFIRMED
+  AWAITING_STOCK
+  IN_ALTERATION
+  OUT_FOR_DELIVERY
+  // shared
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryMode {
+  PICKUP
+  DELIVERY
+}
+
+/// Per-tenant running numbers for documents (ORD-0001, JOB-0001…).
+model DocCounter {
+  tenantId String
+  kind     String
+  last     Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([tenantId, kind])
+}
+
+model Measurement {
+  id         String   @id @default(cuid())
+  tenantId   String
+  customerId String
+  label      String // e.g. "Blouse", "Kurti"
+  values     Json // { "Bust": 34, "Waist": 30 } in inches
+  notes      String?
+  takenById  String?
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  takenBy  User?    @relation(fields: [takenById], references: [id], onDelete: SetNull)
+  orders   Order[]
+
+  @@index([customerId, createdAt])
+}
+
+model Order {
+  id                  String       @id @default(cuid())
+  tenantId            String
+  storeId             String
+  number              String
+  kind                OrderKind
+  status              OrderStatus
+  onHold              Boolean      @default(false)
+  customerId          String
+  assigneeId          String?
+  createdById         String?
+  dueDate             DateTime?
+  trialDate           DateTime?
+  deliveryMode        DeliveryMode @default(PICKUP)
+  deliveryAddress     String?
+  notes               String?
+  designNotes         String?
+  measurementId       String?
+  measurementSnapshot Json? // copy at order time, so later edits don't change the job card
+  estimate            Int // paise, sum of lines
+  advancePaid         Int          @default(0)
+  saleId              String?      @unique
+  completedAt         DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  tenant      Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  store       Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customer    Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  assignee    User?          @relation("orderAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy   User?          @relation("orderCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  measurement Measurement?   @relation(fields: [measurementId], references: [id], onDelete: SetNull)
+  sale        Sale?          @relation(fields: [saleId], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  payments    OrderPayment[]
+  events      OrderEvent[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId, kind, status])
+  @@index([tenantId, dueDate])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  variantId   String
+  description String // name + size/colour snapshot
+  qty         Int
+  price       Int // paise per unit agreed with the customer
+  reservedQty Int     @default(0) // units held from stock for this order
+  note        String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model OrderPayment {
+  id        String        @id @default(cuid())
+  orderId   String
+  userId    String?
+  method    PaymentMethod
+  amount    Int // paise
+  reference String?
+  createdAt DateTime      @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+model OrderEvent {
+  id        String       @id @default(cuid())
+  orderId   String
+  userId    String?
+  status    OrderStatus?
+  message   String
+  createdAt DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
 }

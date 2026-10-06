@@ -17,14 +17,16 @@ export default async function DayEndPage({ searchParams }: { searchParams: Promi
   const inDay = { gte: start, lt: end };
   const live = { tenantId: user.tenantId, createdAt: inDay, status: { not: "CANCELLED" as const } };
 
-  const [sales, cancelled, payments, returns, top] = await Promise.all([
+  const [sales, cancelled, salePayments, advances, returns, top] = await Promise.all([
     db.sale.aggregate({
       where: live,
       _count: true,
       _sum: { grossTotal: true, discountTotal: true, taxableTotal: true, taxTotal: true, total: true, paidTotal: true, roundOff: true },
     }),
     db.sale.aggregate({ where: { tenantId: user.tenantId, createdAt: inDay, status: "CANCELLED" }, _count: true, _sum: { total: true } }),
-    db.payment.groupBy({ by: ["method"], where: { sale: { tenantId: user.tenantId }, createdAt: inDay }, _sum: { amount: true } }),
+    // Bill payments settled from an advance were already counted when the advance was taken.
+    db.payment.groupBy({ by: ["method"], where: { sale: { tenantId: user.tenantId }, createdAt: inDay, fromAdvance: false }, _sum: { amount: true } }),
+    db.orderPayment.groupBy({ by: ["method"], where: { order: { tenantId: user.tenantId }, createdAt: inDay }, _sum: { amount: true } }),
     db.saleReturn.aggregate({ where: { tenantId: user.tenantId, createdAt: inDay }, _count: true, _sum: { amount: true } }),
     db.saleItem.groupBy({
       by: ["name"],
@@ -35,9 +37,13 @@ export default async function DayEndPage({ searchParams }: { searchParams: Promi
     }),
   ]);
   const s = sales._sum;
+  const advanceTotal = advances.reduce((sum, a) => sum + (a._sum.amount ?? 0), 0);
+  const merged = new Map<keyof typeof PAYMENT_LABEL, number>();
+  for (const p of [...salePayments, ...advances]) merged.set(p.method, (merged.get(p.method) ?? 0) + (p._sum.amount ?? 0));
+  const payments = [...merged].map(([method, amount]) => ({ method, amount }));
   const due = (s.total ?? 0) - (s.paidTotal ?? 0);
-  const net = payments.reduce((sum, p) => sum + (p._sum.amount ?? 0), 0);
-  const cash = payments.find((p) => p.method === "CASH")?._sum.amount ?? 0;
+  const net = payments.reduce((sum, p) => sum + p.amount, 0);
+  const cash = merged.get("CASH") ?? 0;
   const pretty = new Date(start.getTime() + 12 * 3600_000).toLocaleDateString("en-IN", { timeZone: tz, weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const Row = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
@@ -93,8 +99,9 @@ export default async function DayEndPage({ searchParams }: { searchParams: Promi
         <dl className="mt-2 space-y-1.5 text-sm print:text-[11px]">
           {payments.length === 0 && <p className="text-muted">No payments.</p>}
           {payments.map((p) => (
-            <Row key={p.method} label={PAYMENT_LABEL[p.method]} value={formatMoney(p._sum.amount ?? 0)} />
+            <Row key={p.method} label={PAYMENT_LABEL[p.method]} value={formatMoney(p.amount)} />
           ))}
+          {advanceTotal !== 0 && <Row label="…of which order advances" value={formatMoney(advanceTotal)} />}
           <Row label="Net collected" value={formatMoney(net)} strong />
         </dl>
         <p className="mt-3 rounded-2xl bg-primary-soft px-4 py-3 text-sm print:rounded-none print:border print:border-black print:bg-transparent print:text-[11px]">

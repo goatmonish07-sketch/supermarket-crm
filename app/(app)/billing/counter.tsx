@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronUp, Loader2, Minus, PauseCircle, Plus, ReceiptText, ScanLine, Search, ShoppingBag, Trash2, UserRound, X } from "lucide-react";
+import { ChevronUp, ClipboardList, Loader2, Minus, PauseCircle, Plus, ReceiptText, ScanLine, Search, ShoppingBag, Trash2, UserRound, X } from "lucide-react";
 import { calculateBill, resolveDiscount, type CalcLineInput } from "@/lib/billing";
 import { colourSwatch, stockStatus } from "@/lib/catalogue";
 import { cn, formatMoney } from "@/lib/utils";
@@ -25,16 +25,20 @@ export function Counter({
   staff,
   approvers,
   settings,
+  fromOrder = null,
 }: {
   catalogue: PosVariant[];
   held: Held[];
   staff: StaffOption[];
   approvers: StaffOption[];
   settings: PosSettings;
+  /** When billing an order/job: its lines, customer and advance. */
+  fromOrder?: { id: string; number: string; advance: number; cart: CartState } | null;
 }) {
   const router = useRouter();
   const searchRef = useRef<HTMLInputElement>(null);
-  const [cart, setCart] = useState<CartState>(EMPTY);
+  const [orderMode, setOrderMode] = useState(fromOrder);
+  const [cart, setCart] = useState<CartState>(fromOrder?.cart ?? EMPTY);
   const [query, setQuery] = useState("");
   const [picker, setPicker] = useState<PosVariant[] | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
@@ -83,6 +87,10 @@ export function Counter({
   const updateLine = (key: string, patch: Partial<CartLine>) => setCart((c) => ({ ...c, lines: c.lines.map((l) => (l.key === key ? { ...l, ...patch } : l)) }));
   const removeLine = (key: string) => setCart((c) => ({ ...c, lines: c.lines.filter((l) => l.key !== key) }));
   const clear = () => {
+    if (orderMode) {
+      setOrderMode(null);
+      router.replace("/billing");
+    }
     setCart(EMPTY);
     setPayError("");
     focusSearch();
@@ -150,6 +158,9 @@ export function Counter({
     return calculateBill(inputs, resolveDiscount(cart.billDiscount, net), settings.roundOff);
   }, [cart, byId, settings.roundOff]);
 
+  const advance = orderMode?.advance ?? 0;
+  const toPay = Math.max(0, bill.payable - advance);
+
   const missingPrice = cart.lines.some((l) => {
     const v = byId.get(l.variantId);
     return v?.priceAtCounter && (l.priceOverride ?? v.price) <= 0;
@@ -166,6 +177,7 @@ export function Counter({
         salespersonId: cart.salespersonId,
         payments,
         heldBillId: cart.heldBillId,
+        orderId: orderMode?.id,
         approval: approvalPin,
       });
       if (res.ok) {
@@ -183,7 +195,7 @@ export function Counter({
 
   const hold = () =>
     startBusy(async () => {
-      if (!cart.lines.length) return;
+      if (!cart.lines.length || orderMode) return;
       const label = cart.customer?.name ?? `Bill ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
       const r = await holdBillAction({ label, payload: cart });
       if (r.ok) {
@@ -225,10 +237,25 @@ export function Counter({
   // ── Cart panel (shared by desktop pane and mobile sheet) ──
   const cartPanel = (
     <div className="flex h-full min-h-0 flex-col">
+      {orderMode && (
+        <p className="mb-3 flex items-center gap-2 rounded-2xl bg-primary-soft px-3 py-2.5 text-sm" role="status">
+          <ClipboardList className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+          <span>
+            Billing <strong className="font-mono">{orderMode.number}</strong>
+            {advance > 0 && (
+              <>
+                {" "}
+                · advance <span className="tabular">{money(advance)}</span>
+              </>
+            )}
+          </span>
+        </p>
+      )}
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => setCustomerOpen(true)}
+          onClick={() => !orderMode && setCustomerOpen(true)}
+          disabled={Boolean(orderMode)}
           className="flex h-12 min-w-0 flex-1 items-center gap-2 rounded-2xl border border-dashed border-border px-3 text-left text-sm hover:bg-surface-2"
         >
           <UserRound className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
@@ -240,7 +267,7 @@ export function Counter({
             <span className="text-muted">Add customer</span>
           )}
         </button>
-        {cart.customer && (
+        {cart.customer && !orderMode && (
           <button type="button" className="btn-ghost h-12 w-12 p-0" onClick={() => setCart((c) => ({ ...c, customer: null }))} aria-label="Remove customer">
             <X className="h-4 w-4" />
           </button>
@@ -360,14 +387,26 @@ export function Counter({
               <dd className="tabular">{money(bill.roundOff)}</dd>
             </div>
           )}
+          {advance > 0 && (
+            <>
+              <div className="flex justify-between text-muted">
+                <dt>Bill total</dt>
+                <dd className="tabular">{money(bill.payable)}</dd>
+              </div>
+              <div className="flex justify-between text-success">
+                <dt>Advance paid</dt>
+                <dd className="tabular">− {money(Math.min(advance, bill.payable))}</dd>
+              </div>
+            </>
+          )}
           <div className="flex items-end justify-between pt-1">
             <dt className="text-base font-semibold">To pay</dt>
-            <dd className="tabular text-3xl font-bold tracking-tight">{money(bill.payable)}</dd>
+            <dd className="tabular text-3xl font-bold tracking-tight">{money(toPay)}</dd>
           </div>
         </dl>
 
         <div className="grid grid-cols-[auto_auto_1fr] gap-2">
-          <button type="button" className="btn-outline h-14 px-4" onClick={hold} disabled={!cart.lines.length || busy} title="Hold bill (F4)">
+          <button type="button" className="btn-outline h-14 px-4" onClick={hold} disabled={!cart.lines.length || busy || Boolean(orderMode)} title="Hold bill (F4)">
             <PauseCircle className="h-5 w-5" aria-hidden="true" />
             <span className="sr-only sm:not-sr-only">Hold</span>
           </button>
@@ -384,7 +423,7 @@ export function Counter({
             }}
             title="Pay (F8)"
           >
-            {missingPrice ? "Enter missing price" : `Pay ${money(bill.payable)}`}
+            {missingPrice ? "Enter missing price" : `Pay ${money(toPay)}`}
           </button>
         </div>
       </div>
@@ -488,7 +527,7 @@ export function Counter({
             <span className="tabular">{bill.itemCount} item{bill.itemCount === 1 ? "" : "s"}</span>
           </span>
           <span className="tabular flex items-center gap-2 font-bold">
-            {money(bill.payable)} <ChevronUp className="h-5 w-5" aria-hidden="true" />
+            {money(toPay)} <ChevronUp className="h-5 w-5" aria-hidden="true" />
           </span>
         </button>
       </div>
@@ -539,7 +578,7 @@ export function Counter({
       />
       <PayDialog
         open={payOpen}
-        payable={bill.payable}
+        payable={toPay}
         shopName={settings.shopName}
         upiId={settings.upiId}
         hasCustomer={Boolean(cart.customer)}

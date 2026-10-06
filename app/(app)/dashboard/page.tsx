@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, Circle, PackagePlus, PartyPopper, Plus, ReceiptText, UserPlus } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Circle, PackagePlus, PartyPopper, Plus, ReceiptText, Scissors, Shirt, UserPlus } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { can, ROLE_LABELS } from "@/lib/permissions";
@@ -10,6 +10,7 @@ import { Gauge } from "@/components/ui/gauge";
 import { LiveClock } from "@/components/ui/live-clock";
 import { StatCard } from "@/components/ui/stat-card";
 import { StatusPill } from "@/components/ui/status-pill";
+import { STATUS_LABEL, STATUS_TONE } from "@/lib/orders";
 
 export const metadata = { title: "Dashboard" };
 
@@ -63,6 +64,23 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   ];
   const doneCount = checklist.filter((c) => c.done).length;
 
+  // Orders and jobs due today or overdue (tailors: only their own).
+  const seesOrders = can(user.role, "orders.manage") || can(user.role, "jobs.update");
+  const dueOrders = seesOrders
+    ? await db.order.findMany({
+        where: {
+          tenantId: user.tenantId,
+          status: { notIn: ["DELIVERED", "CANCELLED"] },
+          dueDate: { lt: today.end },
+          ...(can(user.role, "orders.manage") ? {} : { assigneeId: user.id }),
+        },
+        orderBy: { dueDate: "asc" },
+        take: 6,
+        include: { customer: { select: { name: true } } },
+      })
+    : [];
+  const showChecklist = doneCount < checklist.length && can(user.role, "settings.manage");
+
   return (
     <div className="space-y-4">
       {denied && (
@@ -114,27 +132,72 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       </section>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <section className="card">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold">Get started</h2>
-              <p className="mt-1 text-sm text-muted">
-                {doneCount} of {checklist.length} done
-              </p>
+        {showChecklist ? (
+          <section className="card">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold">Get started</h2>
+                <p className="mt-1 text-sm text-muted">
+                  {doneCount} of {checklist.length} done
+                </p>
+              </div>
+              <span className="font-mono text-sm text-muted">{Math.round((doneCount / checklist.length) * 100)}%</span>
             </div>
-            <span className="font-mono text-sm text-muted">{Math.round((doneCount / checklist.length) * 100)}%</span>
-          </div>
-          <ul className="mt-5 space-y-1">
-            {checklist.map((item) => (
-              <li key={item.label}>
-                <Link href={item.href} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition hover:bg-surface-2">
-                  {item.done ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5 text-muted/60" />}
-                  <span className={item.done ? "text-muted line-through" : "font-medium"}>{item.label}</span>
+            <ul className="mt-5 space-y-1">
+              {checklist.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition hover:bg-surface-2">
+                    {item.done ? <CheckCircle2 className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5 text-muted/60" />}
+                    <span className={item.done ? "text-muted line-through" : "font-medium"}>{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : (
+          <section className="card">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold">Due today</h2>
+                <p className="mt-1 text-sm text-muted">Orders and jobs due now or overdue</p>
+              </div>
+              {seesOrders && (
+                <Link href="/orders/calendar" className="btn-ghost h-10 px-3 text-sm">
+                  Calendar
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+              )}
+            </div>
+            {dueOrders.length === 0 ? (
+              <p className="mt-6 flex items-center gap-2 text-muted">
+                <CheckCircle2 className="h-5 w-5 text-success" aria-hidden="true" /> Nothing due. All caught up.
+              </p>
+            ) : (
+              <ul className="mt-5 space-y-1">
+                {dueOrders.map((o) => {
+                  const late = o.dueDate! < today.start;
+                  return (
+                    <li key={o.id}>
+                      <Link href={`/orders/${o.id}`} className="flex items-center gap-3 rounded-2xl px-2 py-2.5 transition hover:bg-surface-2">
+                        {o.kind === "JOB" ? <Scissors className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" /> : <Shirt className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />}
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-medium">
+                            <span className="font-mono text-sm">{o.number}</span> · {o.customer.name}
+                          </span>
+                          {late && (
+                            <span className="flex items-center gap-1 text-xs font-semibold text-danger">
+                              <AlertTriangle className="h-3 w-3" aria-hidden="true" /> Overdue
+                            </span>
+                          )}
+                        </span>
+                        <StatusPill tone={STATUS_TONE[o.status]}>{STATUS_LABEL[o.status]}</StatusPill>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        )}
 
         <section className="card">
           <div className="flex items-start justify-between gap-4">
