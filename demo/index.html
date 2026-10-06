@@ -22,6 +22,7 @@
   --warning: #a0620f;
   --danger: #c4443c;
   --info: #3b6cc4;
+  --violet: #7a4fc9;
   --glow-a: rgba(38, 98, 68, 0.18);
   --glow-b: rgba(201, 151, 63, 0.16);
   --shadow: 0 1px 2px rgba(20, 30, 24, 0.05), 0 10px 30px -14px rgba(20, 30, 24, 0.18);
@@ -35,7 +36,7 @@
   :root:not([data-theme="light"]) {
     --bg: #0c110e; --surface: #141b17; --surface-2: #1a231e; --border: #26322b; --fg: #e8eee9; --muted: #98a59c;
     --primary: #5cb080; --primary-strong: #348058; --primary-soft: #1d3327; --on-primary: #0a140e; --accent: #e2b870;
-    --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec;
+    --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec; --violet: #b49af0;
     --glow-a: rgba(92, 176, 128, 0.16); --glow-b: rgba(226, 184, 112, 0.10);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
@@ -44,7 +45,7 @@
 :root[data-theme="dark"] {
   --bg: #0c110e; --surface: #141b17; --surface-2: #1a231e; --border: #26322b; --fg: #e8eee9; --muted: #98a59c;
   --primary: #5cb080; --primary-strong: #348058; --primary-soft: #1d3327; --on-primary: #0a140e; --accent: #e2b870;
-  --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec;
+  --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec; --violet: #b49af0;
   --glow-a: rgba(92, 176, 128, 0.16); --glow-b: rgba(226, 184, 112, 0.10);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
@@ -237,6 +238,59 @@ hr.div { border: 0; border-top: 1px dashed var(--border); margin: 12px 0; }
 .label { width: 189px; height: 95px; background: #fff; color: #111; border: 1px dashed #c8c8c8; border-radius: 6px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center; font-size: 9px; overflow: hidden; }
 .label svg { width: 100%; height: 44px; }
 
+
+/* ── Calendar, appointments, notifications ── */
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-head { margin-bottom: 6px; }
+.cal-head span { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.cal-cell { position: relative; min-height: 76px; border-radius: 16px; border: 1px solid transparent; background: var(--surface-2); padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; text-align: left; transition: background 0.15s, border-color 0.15s, transform 0.15s; }
+button.cal-cell:hover { border-color: color-mix(in srgb, var(--primary) 45%, transparent); transform: translateY(-1px); }
+.cal-cell.out { background: transparent; color: color-mix(in srgb, var(--muted) 55%, transparent); }
+.cal-cell.today .cal-num { background: var(--primary-soft); color: var(--primary); }
+.cal-cell.sel { background: var(--fg); color: var(--bg); }
+.cal-cell.sel .cal-num { background: transparent; color: var(--bg); }
+.cal-num { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+.cal-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+.cal-dots i { width: 8px; height: 8px; border-radius: 9px; }
+.cal-count { position: absolute; top: 8px; right: 8px; font-size: 11px; font-weight: 700; opacity: 0.7; }
+.ev { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; border: 1px solid var(--border); border-left: 4px solid var(--c); border-radius: 14px; background: var(--surface); padding: 10px 12px; transition: background 0.15s; }
+.ev:hover { background: var(--surface-2); }
+.ev b { display: block; }
+.ev-time { width: 64px; flex: none; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.ev-cat { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
+.date-chip { flex: none; width: 50px; height: 54px; border-radius: 14px; background: var(--primary-soft); color: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.date-chip span { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
+.date-chip b { font-size: 20px; }
+.appt-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 4px; }
+.appt-row + .appt-row { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.switch { position: relative; flex: none; width: 50px; height: 30px; border-radius: 999px; border: 0; background: color-mix(in srgb, var(--muted) 35%, transparent); transition: background 0.2s; }
+.switch i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.2s; }
+.switch.on { background: var(--primary); }
+.switch.on i { transform: translateX(20px); }
+.perm { width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--border); background: transparent; display: inline-flex; align-items: center; justify-content: center; color: var(--on-primary); }
+.perm.on { background: var(--primary); border-color: var(--primary); }
+.perm:disabled { opacity: 0.6; cursor: default; }
+.notif { border-radius: 14px; background: transparent; }
+.notif:hover { background: var(--surface-2); }
+.notif.unread { background: color-mix(in srgb, var(--primary-soft) 60%, transparent); }
+.notif.unread b::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 9px; background: var(--primary); margin-right: 6px; vertical-align: middle; }
+.notif-ic { flex: none; width: 38px; height: 38px; border-radius: 12px; background: var(--surface-2); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; }
+.pref-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 14px 4px; }
+.pref-row + .pref-row { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.bell { position: relative; }
+.bell-count { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.drop { border: 2px dashed var(--border); border-radius: 20px; padding: 22px; text-align: center; }
+[hidden] { display: none !important; }
+@media (max-width: 560px) {
+  .cal-grid { gap: 3px; }
+  .cal-cell { min-height: 52px; padding: 5px; border-radius: 12px; }
+  .cal-num { min-width: 22px; height: 22px; font-size: 12px; }
+  .cal-dots i { width: 6px; height: 6px; }
+  .cal-count { display: none; }
+  .cal-head span { font-size: 10px; letter-spacing: 0; }
+}
+
 /* ── Dialog & toast ── */
 dialog.modal { width: min(640px, calc(100vw - 24px)); max-height: 90dvh; border: 0; padding: 0; border-radius: 28px; background: var(--surface); color: var(--fg); box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5); }
 dialog.modal.wide { width: min(940px, calc(100vw - 24px)); }
@@ -292,6 +346,7 @@ dialog.modal::backdrop { background: rgba(8, 12, 10, 0.5); backdrop-filter: blur
           <option value="TAILOR">Tailor</option>
         </select>
       </div>
+      <button class="btn btn-ghost icon-btn bell" data-act="bell" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="bell-count num" id="bell-count" hidden></span></button>
       <span class="avatar" id="me-avatar" aria-hidden="true">AS</span>
     </header>
     <div id="view"></div>
@@ -353,6 +408,9 @@ const I = {
   store: '<path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/>',
   up: '<path d="m6 15 6-6 6 6"/>',
   down: '<path d="m6 9 6 6 6-6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>',
   sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
 };
 const ic = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name] || ""}</svg>`;
@@ -516,20 +574,29 @@ DATA.orders = [
 DATA.orders.forEach((o) => (o.estimate = o.items.reduce((s, i) => s + i.price * i.qty, 0)));
 
 /* ── Rentals, purchases, money, appointments ── */
+const atDay = (off, hour = 11) => today0.getTime() + off * DAY + hour * 3600000;
+DATA.rentalItems = [
+  { id: "ri1", name: "Bridal Lehenga — Royal Red", fee: 4500, deposit: 10000 },
+  { id: "ri2", name: "Bridal Lehenga — Rose Pink", fee: 4500, deposit: 10000 },
+  { id: "ri3", name: "Sherwani — Ivory Gold", fee: 3000, deposit: 6000 },
+  { id: "ri4", name: "Temple Jewellery Set", fee: 1500, deposit: 5000 },
+  { id: "ri5", name: "Kanjivaram Saree — Wedding", fee: 2000, deposit: 4000 },
+];
 DATA.rentals = [
-  { item: "Bridal Lehenga — Royal Red", customer: "Nandini Rao", from: -2, to: 1, deposit: 10000, fee: 4500, status: "Out on rent" },
-  { item: "Sherwani — Ivory Gold", customer: "Harpreet Kaur", from: -6, to: -1, deposit: 6000, fee: 3000, status: "Overdue" },
-  { item: "Temple Jewellery Set", customer: "Lavanya Krishnan", from: 3, to: 5, deposit: 5000, fee: 1500, status: "Booked" },
-  { item: "Bridal Lehenga — Rose Pink", customer: "Swathi Pillai", from: 9, to: 11, deposit: 10000, fee: 4500, status: "Booked" },
-  { item: "Kanjivaram Saree — Wedding", customer: "Pooja Reddy", from: -10, to: -8, deposit: 4000, fee: 2000, status: "Returned" },
+  { id: "r1", item: "ri1", customer: "Nandini Rao", phone: "9876501097", from: atDay(-2), to: atDay(1, 19), status: "Out on rent" },
+  { id: "r2", item: "ri3", customer: "Harpreet Kaur", phone: "9876501234", from: atDay(-6), to: atDay(-1, 19), status: "Out on rent" },
+  { id: "r3", item: "ri4", customer: "Lavanya Krishnan", phone: "9876500960", from: atDay(3), to: atDay(5, 19), status: "Booked" },
+  { id: "r4", item: "ri2", customer: "Swathi Pillai", phone: "9876501645", from: atDay(9), to: atDay(11, 19), status: "Booked" },
+  { id: "r5", item: "ri5", customer: "Pooja Reddy", phone: "9876500549", from: atDay(-10), to: atDay(-8, 19), status: "Returned" },
 ];
 DATA.pos = [
-  { no: "PO-0018", supplier: "su1", items: "Banarasi Silk Saree × 6", value: 31200, status: "Sent", eta: 4 },
-  { no: "PO-0017", supplier: "su2", items: "Cotton Straight Kurti × 24", value: 9840, status: "Partly received", eta: 1 },
-  { no: "PO-0016", supplier: "su3", items: "Kanjivaram Silk Saree × 4", value: 39200, status: "Received", eta: -5 },
-  { no: "PO-0015", supplier: "su4", items: "Palazzo Pants × 30", value: 8400, status: "Billed", eta: -9 },
-  { no: "PO-0019", supplier: "su2", items: "Dupatta – Bandhani × 40", value: 9600, status: "Draft", eta: 10 },
+  { no: "PO-0018", supplier: "su1", pid: "", items: "Banarasi Silk Saree × 6", qty: 6, value: 31200, status: "Sent", eta: atDay(4) },
+  { no: "PO-0017", supplier: "su2", pid: "", items: "Cotton Straight Kurti × 24", qty: 24, value: 9840, status: "Partly received", eta: atDay(1) },
+  { no: "PO-0016", supplier: "su3", pid: "", items: "Kanjivaram Silk Saree × 4", qty: 4, value: 39200, status: "Received", eta: atDay(-5) },
+  { no: "PO-0015", supplier: "su4", pid: "", items: "Palazzo Pants × 30", qty: 30, value: 8400, status: "Billed", eta: atDay(-9) },
+  { no: "PO-0019", supplier: "su2", pid: "", items: "Dupatta – Bandhani × 40", qty: 40, value: 9600, status: "Draft", eta: atDay(10) },
 ];
+DATA.pos.forEach((po) => (po.pid = DATA.products.find((p) => po.items.startsWith(p.name))?.id ?? ""));
 DATA.expenses = [
   { at: Date.now() - 1 * 3600000, cat: "Tea & snacks", amount: 180, by: "Kavya Nair", method: "CASH" },
   { at: Date.now() - 26 * 3600000, cat: "Courier", amount: 420, by: "Imran Khan", method: "UPI" },
@@ -538,13 +605,28 @@ DATA.expenses = [
   { at: Date.now() - 8 * DAY, cat: "Shop rent", amount: 45000, by: "Anita Sharma", method: "BANK" },
   { at: Date.now() - 9 * DAY, cat: "Packaging", amount: 1600, by: "Imran Khan", method: "CASH" },
 ];
-DATA.appts = [
-  { time: "11:00", customer: "Swathi Pillai", type: "Bridal consultation", staff: "Anita Sharma", status: "Done" },
-  { time: "12:30", customer: "Divya Iyer", type: "Trial fitting · JOB-0002", staff: "Lakshmi Devi", status: "Checked in" },
-  { time: "15:00", customer: "Ishita Banerjee", type: "Measurement", staff: "Lakshmi Devi", status: "Confirmed" },
-  { time: "16:30", customer: "Aisha Siddiqui", type: "Saree draping", staff: "Rahul Verma", status: "Confirmed" },
-  { time: "18:00", customer: "Gayathri Subramanian", type: "Styling session", staff: "Anita Sharma", status: "Booked" },
-];
+DATA.shifts = [];
+/* Appointments across the month, so the calendar has real content. */
+const APPT_TYPES = { "Fitting": 30, "Measurement": 30, "Trial fitting": 30, "Bridal consultation": 60, "Saree draping": 45, "Styling session": 60 };
+const SLOTS = []; for (let h = 10; h <= 19.5; h += 0.5) SLOTS.push(h);
+const slotLabel = (h) => `${String(Math.floor(h)).padStart(2, "0")}:${h % 1 ? "30" : "00"}`;
+DATA.appts = [];
+(function seedAppointments() {
+  let seq = 0;
+  const nowH = new Date().getHours() + new Date().getMinutes() / 60;
+  for (let d = -12; d <= 24; d++) {
+    const n = Math.floor(R() * 3) + (d === 0 ? 3 : d === 1 ? 1 : 0);
+    const used = new Set();
+    for (let i = 0; i < n; i++) {
+      let h; do { h = pick([10.5, 11, 12, 12.5, 14, 15, 15.5, 16.5, 17, 18]); } while (used.has(h)); used.add(h);
+      const type = pick(Object.keys(APPT_TYPES));
+      const staff = type === "Measurement" || type === "Trial fitting" ? "s5" : pick(["s1", "s2", "s5"]);
+      const status = d < 0 ? (R() < 0.88 ? "Done" : "No-show") : d === 0 ? (h + 0.5 < nowH ? "Done" : i === 0 ? "Checked in" : "Confirmed") : R() < 0.55 ? "Confirmed" : "Booked";
+      DATA.appts.push({ id: "a" + ++seq, at: atDay(d, h), dur: APPT_TYPES[type], customer: pick(DATA.customers).id, type, staff, status, notes: "" });
+    }
+  }
+  DATA.appts.sort((a, b) => a.at - b.at);
+})();
 
 /* ───────────── State, nav, theming ───────────── */
 const state = {
@@ -553,27 +635,32 @@ const state = {
   billsRange: "today", orderKind: "JOB", reportRange: 30, settingsTab: "appearance",
   template: { paper: "t80", font: "mono", gstin: true, hsn: true, saved: true, qr: true, policy: true, footer: "Thank you for shopping with us!" },
   invFilter: "", prodQuery: "", labelSel: new Set(),
+  calMonth: new Date(today0.getFullYear(), today0.getMonth(), 1), calDay: dayKey(today0), apptRange: "today",
+  notifPrefs: { job: { on: true, channel: "app" }, due: { on: true, channel: "app" }, appt: { on: true, channel: "whatsapp" }, stock: { on: true, channel: "app" }, sales: { on: true, channel: "email" }, birthday: { on: false, channel: "app" }, dues: { on: true, channel: "app" } },
+  readNotifs: [], profile: null,
 };
+DATA.extraNotifs = [];
 const NAV = [
   ["Sell", [
     ["dashboard", "Dashboard", "dash", ["OWNER", "CASHIER", "TAILOR"]],
     ["billing", "Billing", "bill", ["OWNER", "CASHIER"]],
     ["bills", "Bills & returns", "history", ["OWNER", "CASHIER"]],
     ["orders", "Orders & Jobs", "scissors", ["OWNER", "CASHIER", "TAILOR"], "orders"],
-    ["rentals", "Rentals", "rental", ["OWNER", "CASHIER"], null, "Preview"],
-    ["appts", "Appointments", "cal", ["OWNER", "CASHIER", "TAILOR"], null, "Preview"],
+    ["calendar", "Calendar", "cal", ["OWNER", "CASHIER", "TAILOR"]],
+    ["appts", "Appointments", "clock", ["OWNER", "CASHIER", "TAILOR"], "appts"],
+    ["rentals", "Rentals", "rental", ["OWNER", "CASHIER"]],
     ["customers", "Customers", "users", ["OWNER", "CASHIER"]],
   ]],
   ["Stock", [
     ["products", "Products & Services", "box", ["OWNER"]],
     ["inventory", "Inventory", "boxes", ["OWNER"]],
     ["labels", "Barcode labels", "tag", ["OWNER"]],
-    ["purchases", "Purchases", "truck", ["OWNER"], null, "Preview"],
+    ["purchases", "Purchases", "truck", ["OWNER"]],
   ]],
   ["Money", [
     ["reports", "Reports", "chart", ["OWNER"], null, "Preview"],
-    ["accounts", "Cash & accounts", "wallet", ["OWNER"], null, "Preview"],
-    ["offers", "Offers & loyalty", "gift", ["OWNER"], null, "Preview"],
+    ["accounts", "Cash & accounts", "wallet", ["OWNER"]],
+    ["offers", "Offers & loyalty", "gift", ["OWNER"]],
   ]],
   ["Admin", [
     ["team", "Team & roles", "team", ["OWNER"]],
@@ -602,13 +689,14 @@ const can = (route) => NAV.some(([, items]) => items.some((i) => i[0] === route 
 
 function renderSidebar() {
   const openJobs = DATA.orders.filter((o) => o.stage !== "Delivered" && o.stage !== "Cancelled" && (state.role !== "TAILOR" || o.tailor === "s5")).length;
+  const todayAppts = DATA.appts.filter((a) => startOfDay(a.at) === today0.getTime() && ["Booked", "Confirmed", "Checked in"].includes(a.status) && (state.role !== "TAILOR" || a.staff === "s5")).length;
   $("#sidebar").innerHTML = `
     <div class="brand"><svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--primary)"/><stop offset="1" stop-color="var(--primary-strong)"/></linearGradient></defs><rect width="40" height="40" rx="12" fill="url(#lg)"/><circle cx="20" cy="21" r="11.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/><path d="M13.5 28 19 13.5a1.1 1.1 0 0 1 2 0L26.5 28M16 22.5h8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="var(--accent)"/></svg><span>Aura<b>POS</b></span></div>
     <div class="store-switch"><label class="sr" for="store">Store</label><select class="input" id="store" data-input="store">${DATA.stores.map((s) => `<option ${s === state.store ? "selected" : ""}>${esc(DATA.shop.name)} · ${esc(s)}</option>`).join("")}</select></div>
     <nav class="nav">${NAV.map(([group, items]) => {
       const vis = items.filter((i) => i[3].includes(state.role));
       if (!vis.length) return "";
-      return `<p class="nav-group">${group}</p>` + vis.map(([id, label, icon, , badge, tag]) => `<a href="#${id}" data-route="${id}" class="${state.route === id ? "on" : ""}" ${state.route === id ? 'aria-current="page"' : ""}>${ic(icon)}<span>${state.role === "TAILOR" && id === "orders" ? "My jobs" : label}</span>${badge === "orders" && openJobs ? `<span class="badge-count num">${openJobs}</span>` : tag ? `<span class="tag">${tag}</span>` : ""}</a>`).join("");
+      return `<p class="nav-group">${group}</p>` + vis.map(([id, label, icon, , badge, tag]) => `<a href="#${id}" data-route="${id}" class="${state.route === id ? "on" : ""}" ${state.route === id ? 'aria-current="page"' : ""}>${ic(icon)}<span>${state.role === "TAILOR" && id === "orders" ? "My jobs" : label}</span>${badge === "orders" && openJobs ? `<span class="badge-count num">${openJobs}</span>` : badge === "appts" && todayAppts ? `<span class="badge-count num">${todayAppts}</span>` : tag ? `<span class="tag">${tag}</span>` : ""}</a>`).join("");
     }).join("")}</nav>
     <div class="side-promo"><span class="xs" style="opacity:.8">AuraPOS · works on phone & tablet</span><strong>Billing, stock, stitching jobs and reports in one place.</strong></div>`;
   const [b, f] = tone(me().name);
@@ -718,7 +806,7 @@ V.dashboard = () => {
     ${showMoney ? `<section class="card rise lift" style="animation-delay:440ms">
       <div class="card-title"><h2>Top sellers · month</h2></div>
       <div class="stack">${topList.map(([name, v], i) => `<div><div class="between small"><span style="font-weight:600">${esc(name)}</span><span class="num muted">${inr.format(v)}</span></div><div style="height:8px;border-radius:9px;background:var(--surface-2);margin-top:6px;overflow:hidden"><div class="hbar" style="height:100%;width:${(v / topMax) * 100}%;border-radius:9px;background:linear-gradient(90deg,var(--primary),var(--accent));animation-delay:${400 + i * 80}ms"></div></div></div>`).join("")}</div>
-    </section>` : `<section class="card rise"><div class="card-title"><h2>Today's appointments</h2></div>${DATA.appts.filter((a) => a.staff === "Lakshmi Devi").map((a) => `<div class="list-row"><span class="mono small" style="font-weight:600">${a.time}</span><span style="flex:1">${esc(a.customer)}<br><span class="xs muted">${esc(a.type)}</span></span>${pill(a.status === "Done" ? "neutral" : "info", a.status)}</div>`).join("")}</section>`}
+    </section>` : `<section class="card rise"><div class="card-title"><h2>Today's appointments</h2></div>${DATA.appts.filter((a) => a.staff === "s5" && startOfDay(a.at) === today0.getTime()).map((a) => `<div class="list-row"><span class="mono small" style="font-weight:600">${fmtTime(a.at)}</span><span style="flex:1">${esc(custName(a.customer))}<br><span class="xs muted">${esc(a.type)}</span></span>${apptPill(a.status)}</div>`).join("") || `<p class="empty">No appointments today.</p>`}<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-go="calendar">${ic("cal")} Open calendar</button></section>`}
   </div>
 
   <div class="grid g2">
@@ -969,7 +1057,7 @@ function drawBarcodes(root = document) {
 /* ── Customers ── */
 V.customers = () => {
   const rows = DATA.customers.map((c) => { const bills = DATA.bills.filter((b) => b.customer === c.id && live(b)); return { c, bills, spend: sumNet(bills), last: bills.length ? bills[bills.length - 1].at : null, due: bills.filter((b) => b.status === "Credit").reduce((s, b) => s + b.total, 0) }; }).sort((a, b) => b.spend - a.spend);
-  return `<div class="page-head"><div><h1>Customers</h1><p class="muted">${rows.length} customers · loyalty: 1 point per ₹100</p></div><button class="btn btn-primary" data-act="toast" data-msg="New customer form opens here — name, mobile, birthday, notes">${ic("plus")} Add customer</button></div>
+  return `<div class="page-head"><div><h1>Customers</h1><p class="muted">${rows.length} customers · loyalty: 1 point per ₹100</p></div><button class="btn btn-primary" data-act="newcust">${ic("plus")} Add customer</button></div>
     <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Customer</th><th>Mobile</th><th>Tier</th><th class="r">Visits</th><th class="r">Points</th><th>Last visit</th><th class="r">Total spent</th></tr></thead><tbody>
     ${rows.map(({ c, bills, spend, last, due }) => `<tr class="click" data-act="cust" data-id="${c.id}"><td><span class="row" style="flex-wrap:nowrap">${avatar(c.name, "sm")}<b>${esc(c.name)}</b>${due ? pill("warning", "Due " + inr.format(due)) : ""}${c.birthday ? pill("primary", "Birthday", "gift") : ""}</span></td><td class="num small">${c.phone}</td><td>${pill(c.tier === "Gold" ? "warning" : c.tier === "Silver" ? "info" : "neutral", c.tier)}</td><td class="r num">${bills.length}</td><td class="r num">${c.points}</td><td class="small muted">${last ? fmtDate(last) : "—"}</td><td class="r num" style="font-weight:700">${inr.format(spend)}</td></tr>`).join("")}
     </tbody></table></div></section>`;
@@ -990,7 +1078,7 @@ V.products = () => {
   const q = state.prodQuery.toLowerCase();
   const list = DATA.products.filter((p) => !q || (p.name + p.cat).toLowerCase().includes(q));
   return `<div class="page-head"><div><h1>Products & Services</h1><p class="muted">${DATA.products.length} items · goods, services, rentals and other charges</p></div>
-    <div class="row"><button class="btn btn-ghost" data-go="labels">${ic("tag")} Labels</button><button class="btn btn-outline" data-act="toast" data-msg="Upload Excel/CSV → preview with row errors → import">Import Excel</button><button class="btn btn-primary" data-act="newproduct">${ic("plus")} Add product</button></div></div>
+    <div class="row"><button class="btn btn-ghost" data-go="labels">${ic("tag")} Labels</button><button class="btn btn-outline" data-act="importprod">${ic("upload")} Import Excel</button><button class="btn btn-primary" data-act="newproduct">${ic("plus")} Add product</button></div></div>
     <section class="card"><input class="input" id="prod-q" placeholder="Search name or category" value="${esc(state.prodQuery)}" data-input="prodQuery" style="margin-bottom:12px" />
     <div class="scroll-x"><table class="tbl"><thead><tr><th>Product</th><th>Type</th><th>Category</th><th class="r">Variants</th><th class="r">Price</th><th>GST</th><th>Stock</th></tr></thead><tbody>
     ${list.map((p) => { const prices = p.variants.map((v) => v.price); const min = Math.min(...prices), max = Math.max(...prices); const stock = p.variants.reduce((s, v) => s + Math.max(0, available(v)), 0);
@@ -1073,63 +1161,322 @@ V.reports = () => {
     <section class="card"><div class="card-title"><h2>GST · HSN summary</h2><span class="pill t-info">GSTR-1 ready</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>HSN/SAC</th><th>Rate</th><th class="r">Qty</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th></tr></thead><tbody>${Object.values(gst).sort((a, b) => b.taxable - a.taxable).map((g) => `<tr><td class="mono small">${g.hsn}</td><td>${g.rate}%</td><td class="r num">${g.qty}</td><td class="r num">${inr.format(Math.round(g.taxable))}</td><td class="r num">${inr.format(Math.round(g.tax / 2))}</td><td class="r num">${inr.format(Math.round(g.tax / 2))}</td></tr>`).join("")}</tbody></table></div></section></div>`;
 };
 
-/* ── Purchases (Phase 6 preview) ── */
-const PO_TONE = { Draft: "neutral", Sent: "info", "Partly received": "warning", Received: "success", Billed: "primary" };
-V.purchases = () => `${preview("Phase 6 (Purchases & accounts)")}
-  <div class="page-head"><div><h1>Purchases</h1><p class="muted">Suppliers, purchase orders and what you owe</p></div><button class="btn btn-primary" data-act="toast" data-msg="New PO: pick supplier → add items from low-stock suggestions → send on WhatsApp">${ic("plus")} New purchase order</button></div>
-  <div class="grid g4">${DATA.suppliers.map((s) => `<div class="card lift"><p style="font-weight:700">${esc(s.name)}</p><p class="small muted">${esc(s.city)} · ${s.phone}</p><p class="num" style="margin-top:10px;font-size:22px;font-weight:800;color:${s.due ? "var(--warning)" : "var(--success)"}">${s.due ? inr.format(s.due) : "Settled"}</p><p class="xs muted">${s.due ? "payable" : "nothing due"}</p></div>`).join("")}</div>
-  <section class="card"><div class="card-title"><h2>Purchase orders</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>PO</th><th>Supplier</th><th>Items</th><th>Expected</th><th>Status</th><th class="r">Value</th><th></th></tr></thead><tbody>
-  ${DATA.pos.map((p) => `<tr><td class="mono small" style="font-weight:600">${p.no}</td><td>${esc(DATA.suppliers.find((s) => s.id === p.supplier).name)}</td><td class="small">${esc(p.items)}</td><td class="small muted">${fmtDate(today0.getTime() + p.eta * DAY)}</td><td>${pill(PO_TONE[p.status], p.status)}</td><td class="r num">${inr.format(p.value)}</td><td>${["Sent", "Partly received"].includes(p.status) ? `<button class="btn btn-outline btn-sm" data-act="receivepo" data-no="${p.no}">Receive</button>` : ""}</td></tr>`).join("")}
-  </tbody></table></div></section>`;
+/* ── Shared helpers for scheduling ── */
+const staffName = (id) => DATA.staff.find((s) => s.id === id)?.name ?? "—";
+const startOfDay = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const dayLabel = (t) => { const diff = Math.round((startOfDay(t) - today0.getTime()) / DAY); return diff === 0 ? "Today" : diff === 1 ? "Tomorrow" : diff === -1 ? "Yesterday" : fmtDate(t, { weekday: "short", day: "numeric", month: "short" }); };
+const rentalStatus = (r) => (r.status === "Out on rent" && Date.now() > r.to ? "Overdue" : r.status);
+const rentalItem = (id) => DATA.rentalItems.find((x) => x.id === id);
+const lateDays = (r) => Math.max(0, Math.ceil((Date.now() - r.to) / DAY));
+const CAT = {
+  appt: { label: "Appointments", color: "var(--primary)" },
+  trial: { label: "Trial fittings", color: "var(--info)" },
+  due: { label: "Due & pickups", color: "var(--warning)" },
+  rental: { label: "Rentals", color: "var(--danger)" },
+  stock: { label: "Stock arrivals", color: "var(--violet)" },
+};
+function eventsBetween(from, to) {
+  const ev = [], tailor = state.role === "TAILOR";
+  DATA.appts.forEach((a) => { if (a.at >= from && a.at < to && a.status !== "Cancelled" && (!tailor || a.staff === "s5")) ev.push({ at: a.at, end: a.at + a.dur * 60000, cat: a.type === "Trial fitting" ? "trial" : "appt", title: a.type, sub: `${custName(a.customer)} · ${staffName(a.staff)}`, act: "appt", id: a.id, status: a.status }); });
+  DATA.orders.forEach((o) => {
+    if (tailor && o.tailor !== "s5") return;
+    if (o.trial && o.trial >= from && o.trial < to && !["Delivered", "Cancelled"].includes(o.stage)) ev.push({ at: o.trial + 16 * 3600000, cat: "trial", title: `${o.no} trial`, sub: custName(o.customer), act: "order", id: o.id });
+    if (o.due >= from && o.due < to && !["Delivered", "Cancelled"].includes(o.stage)) ev.push({ at: o.due, cat: "due", title: `${o.no} ${o.kind === "JOB" ? "ready for pickup" : o.delivery ? "delivery" : "pickup"}`, sub: custName(o.customer), act: "order", id: o.id });
+  });
+  if (!tailor) {
+    DATA.rentals.forEach((r) => {
+      if (r.status === "Returned" || r.status === "Cancelled") return;
+      if (r.from >= from && r.from < to && r.status === "Booked") ev.push({ at: r.from, cat: "rental", title: `Rental pickup`, sub: `${rentalItem(r.item).name} · ${r.customer}`, act: "rental", id: r.id });
+      if (r.to >= from && r.to < to) ev.push({ at: r.to, cat: "rental", title: `Rental return`, sub: `${rentalItem(r.item).name} · ${r.customer}`, act: "rental", id: r.id });
+    });
+    DATA.pos.forEach((po) => { if (po.eta >= from && po.eta < to && ["Sent", "Partly received"].includes(po.status)) ev.push({ at: po.eta, cat: "stock", title: `${po.no} arriving`, sub: DATA.suppliers.find((s) => s.id === po.supplier).name, act: "po", id: po.no }); });
+  }
+  return ev.sort((a, b) => a.at - b.at);
+}
+const evRow = (e) => `<button class="ev" data-act="openev" data-k="${e.act}" data-id="${e.id}" style="--c:${CAT[e.cat].color}"><span class="ev-time num">${fmtTime(e.at)}${e.end ? `<br><span class="muted">${fmtTime(e.end)}</span>` : ""}</span><span style="min-width:0;flex:1"><b>${esc(e.title)}</b><span class="ev-cat" style="color:${CAT[e.cat].color}">${CAT[e.cat].label}</span><span class="small muted">${esc(e.sub)}</span></span>${e.status ? apptPill(e.status) : ""}</button>`;
 
-/* ── Accounts (Phase 6 preview) ── */
+/* ── Calendar ── */
+V.calendar = () => {
+  const m = state.calMonth, y = m.getFullYear(), mo = m.getMonth();
+  const first = new Date(y, mo, 1), days = new Date(y, mo + 1, 0).getDate();
+  const lead = (first.getDay() + 6) % 7; // Monday first
+  const monthEv = eventsBetween(first.getTime(), new Date(y, mo + 1, 1).getTime());
+  const byDay = {}; monthEv.forEach((e) => (byDay[dayKey(e.at)] = byDay[dayKey(e.at)] || []).push(e));
+  const sel = state.calDay;
+  const selStart = new Date(sel + "T00:00:00").getTime();
+  const selEv = eventsBetween(selStart, selStart + DAY);
+  const upcoming = eventsBetween(Date.now(), Date.now() + 14 * DAY).slice(0, 7);
+  const cells = [];
+  for (let i = 0; i < lead; i++) { const d = new Date(y, mo, 1 - lead + i); cells.push(`<span class="cal-cell out" aria-hidden="true"><span>${d.getDate()}</span></span>`); }
+  for (let d = 1; d <= days; d++) {
+    const key = dayKey(new Date(y, mo, d)); const evs = byDay[key] || [];
+    const cats = [...new Set(evs.map((e) => e.cat))].slice(0, 4);
+    const isToday = key === dayKey(today0), isSel = key === sel;
+    cells.push(`<button class="cal-cell ${isSel ? "sel" : ""} ${isToday ? "today" : ""}" data-act="calday" data-v="${key}" aria-pressed="${isSel}" aria-label="${fmtDate(new Date(y, mo, d), { weekday: "long", day: "numeric", month: "long" })}: ${evs.length} item${evs.length === 1 ? "" : "s"}"><span class="cal-num">${d}</span><span class="cal-dots">${cats.map((c) => `<i style="background:${CAT[c].color}"></i>`).join("")}</span>${evs.length > 2 ? `<span class="cal-count num">${evs.length}</span>` : ""}</button>`);
+  }
+  return `<div class="page-head"><div><h1>Calendar</h1><p class="muted">Appointments, trials, pickups, rentals and stock arrivals in one place.</p></div>
+    <div class="row"><button class="btn btn-outline" data-act="caltoday">${ic("cal")} Today</button>${state.role !== "TAILOR" ? `<button class="btn btn-primary" data-act="book" data-date="${sel}">${ic("plus")} Book appointment</button>` : ""}</div></div>
+    <div class="grid g21" style="align-items:start">
+      <section class="card rise">
+        <div class="between" style="margin-bottom:14px"><h2 style="font-size:24px;font-weight:800;letter-spacing:-.02em">${first.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</h2>
+        <div class="row"><button class="btn btn-ghost icon-btn" style="background:var(--surface-2)" data-act="calmove" data-v="-1" aria-label="Previous month">‹</button><button class="btn btn-ghost icon-btn" style="background:var(--surface-2)" data-act="calmove" data-v="1" aria-label="Next month">›</button></div></div>
+        <div class="cal-grid cal-head" aria-hidden="true">${["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => `<span>${d}</span>`).join("")}</div>
+        <div class="cal-grid">${cells.join("")}</div>
+        <div class="row" style="margin-top:16px;gap:14px">${Object.entries(CAT).filter(([k]) => state.role !== "TAILOR" || ["appt", "trial", "due"].includes(k)).map(([, c]) => `<span class="row small" style="gap:6px"><i style="width:11px;height:11px;border-radius:9px;background:${c.color};display:inline-block"></i>${c.label}</span>`).join("")}</div>
+      </section>
+      <div class="stack" style="gap:16px">
+        <section class="card rise" style="animation-delay:80ms">
+          <p class="eyebrow">${dayLabel(selStart)}${dayLabel(selStart).length < 10 ? " · " + fmtDate(selStart, { weekday: "long" }) : ""}</p>
+          <h2 style="font-size:30px;font-weight:800;letter-spacing:-.03em;margin:2px 0 14px">${fmtDate(selStart, { day: "numeric", month: "long" })}</h2>
+          ${selEv.length ? `<div class="stack" style="gap:8px">${selEv.map(evRow).join("")}</div>` : `<p class="empty">Nothing scheduled.${state.role !== "TAILOR" ? `<br><button class="btn btn-outline btn-sm" style="margin-top:10px" data-act="book" data-date="${sel}">Book this day</button>` : ""}</p>`}
+        </section>
+        <section class="card rise" style="animation-delay:140ms"><div class="card-title"><h2>Coming up</h2></div>
+          ${upcoming.map((e) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="openev" data-k="${e.act}" data-id="${e.id}"><span class="date-chip"><span>${fmtDate(e.at, { month: "short" }).toUpperCase()}</span><b class="num">${new Date(e.at).getDate()}</b></span><span style="flex:1;min-width:0"><b>${esc(e.title)}</b><br><span class="small muted">${dayLabel(e.at)} · ${fmtTime(e.at)} · ${esc(e.sub)}</span></span></button>`).join("") || `<p class="empty">Nothing in the next two weeks.</p>`}
+        </section>
+      </div>
+    </div>`;
+};
+
+/* ── Appointments ── */
+const APPT_TONE = { Booked: "warning", Confirmed: "info", "Checked in": "success", Done: "neutral", "No-show": "danger", Cancelled: "danger" };
+const apptPill = (st) => pill(APPT_TONE[st] || "neutral", st);
+const NEXT_APPT = { Booked: ["Confirmed", "Confirm"], Confirmed: ["Checked in", "Check in"], "Checked in": ["Done", "Mark done"] };
+V.appts = () => {
+  const r = state.apptRange;
+  const from = r === "past" ? today0.getTime() - 14 * DAY : today0.getTime();
+  const to = r === "today" ? today0.getTime() + DAY : r === "tomorrow" ? today0.getTime() + 2 * DAY : r === "week" ? today0.getTime() + 7 * DAY : r === "past" ? today0.getTime() : today0.getTime() + 60 * DAY;
+  const start = r === "tomorrow" ? today0.getTime() + DAY : from;
+  let list = DATA.appts.filter((a) => a.at >= start && a.at < to && (state.role !== "TAILOR" || a.staff === "s5"));
+  if (r === "past") list = list.reverse();
+  const groups = {}; list.forEach((a) => (groups[dayKey(a.at)] = groups[dayKey(a.at)] || []).push(a));
+  const todays = DATA.appts.filter((a) => startOfDay(a.at) === today0.getTime());
+  return `<div class="page-head"><div><h1>Appointments</h1><p class="muted">Fittings, measurements, bridal consultations · reminders on WhatsApp</p></div><div class="row"><button class="btn btn-ghost" data-go="calendar">${ic("cal")} Calendar</button>${state.role !== "TAILOR" ? `<button class="btn btn-primary" data-act="book">${ic("plus")} Book appointment</button>` : ""}</div></div>
+    <div class="grid g4">${[["Today", todays.length, "primary"], ["Checked in", todays.filter((a) => a.status === "Checked in").length, "success"], ["Still to come", todays.filter((a) => ["Booked", "Confirmed"].includes(a.status)).length, "info"], ["No-shows (14 days)", DATA.appts.filter((a) => a.status === "No-show" && a.at > Date.now() - 14 * DAY).length, "danger"]].map(([l, v, t]) => `<div class="card lift"><p class="small" style="color:var(--${t});font-weight:700">${l}</p><p class="num" style="font-size:32px;font-weight:800">${v}</p></div>`).join("")}</div>
+    <div class="seg">${[["today", "Today"], ["tomorrow", "Tomorrow"], ["week", "Next 7 days"], ["all", "All upcoming"], ["past", "Past"]].map(([k, l]) => `<button class="${r === k ? "on" : ""}" data-act="apptrange" data-v="${k}">${l}</button>`).join("")}</div>
+    ${Object.keys(groups).length ? Object.entries(groups).map(([k, arr]) => `<section class="card"><div class="card-title"><h2>${dayLabel(arr[0].at)}</h2><span class="small muted">${fmtDate(arr[0].at, { weekday: "long", day: "numeric", month: "long" })}</span></div>
+      ${arr.map((a) => { const c = DATA.customers.find((x) => x.id === a.customer); const next = NEXT_APPT[a.status]; const open = ["Booked", "Confirmed", "Checked in"].includes(a.status);
+        const msg = `Hello ${c.name.split(" ")[0]}, reminder: your ${a.type.toLowerCase()} at ${DATA.shop.name} is on ${fmtDate(a.at, { weekday: "short", day: "numeric", month: "short" })} at ${fmtTime(a.at)}. Reply to reschedule.`;
+        return `<div class="appt-row"><span class="mono" style="font-weight:700;width:58px">${fmtTime(a.at)}</span>${avatar(c.name, "sm")}<span style="flex:1;min-width:160px"><b>${esc(c.name)}</b><br><span class="small muted">${esc(a.type)} · ${a.dur} min · ${esc(staffName(a.staff))}${a.notes ? ` · ${esc(a.notes)}` : ""}</span></span>${apptPill(a.status)}
+          <span class="row" style="gap:6px">${next ? `<button class="btn btn-primary btn-sm" data-act="apptset" data-id="${a.id}" data-v="${next[0]}">${next[1]}</button>` : ""}${open ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}" aria-label="Send WhatsApp reminder to ${esc(c.name)}">${ic("wa")}</a>${a.status !== "Checked in" ? `<button class="btn btn-ghost btn-sm" data-act="apptset" data-id="${a.id}" data-v="No-show">No-show</button>` : ""}<button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-act="apptset" data-id="${a.id}" data-v="Cancelled">Cancel</button>` : ""}</span></div>`; }).join("")}</section>`).join("") : `<section class="card"><p class="empty">No appointments here.${state.role !== "TAILOR" ? `<br><button class="btn btn-outline btn-sm" style="margin-top:10px" data-act="book">Book one</button>` : ""}</p></section>`}`;
+};
+function openBooking(dateKey) {
+  const date = dateKey && dateKey >= dayKey(today0) ? dateKey : dayKey(today0);
+  openModal("Book appointment", `<form id="bk-form" class="stack" novalidate>
+    <div class="seg" role="radiogroup" aria-label="Customer"><button type="button" class="on" data-act="bkmode" data-v="existing">Existing customer</button><button type="button" data-act="bkmode" data-v="new">New customer</button></div>
+    <div id="bk-existing"><label class="lbl" for="bk-cust">Customer</label><select class="input" id="bk-cust">${DATA.customers.map((c) => `<option value="${c.id}">${esc(c.name)} · ${c.phone}</option>`).join("")}</select></div>
+    <div id="bk-new" class="grid g2" style="gap:10px" hidden><label><span class="lbl">Name</span><input class="input" id="bk-name" autocomplete="off" /></label><label><span class="lbl">Mobile</span><input class="input num" id="bk-phone" inputmode="tel" maxlength="10" /></label></div>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Service</span><select class="input" id="bk-type">${Object.entries(APPT_TYPES).map(([t, d]) => `<option value="${t}">${t} · ${d} min</option>`).join("")}</select></label>
+    <label><span class="lbl">With</span><select class="input" id="bk-staff">${DATA.staff.filter((s) => ["Owner", "Manager", "Tailor"].includes(s.role)).map((s) => `<option value="${s.id}">${esc(s.name)} · ${s.role}</option>`).join("")}</select></label></div>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Date</span><input class="input" type="date" id="bk-date" min="${dayKey(today0)}" value="${date}" /></label>
+    <label><span class="lbl">Time</span><select class="input" id="bk-time">${SLOTS.map((h) => `<option value="${h}" ${h === 11 ? "selected" : ""}>${slotLabel(h)}</option>`).join("")}</select></label></div>
+    <label><span class="lbl">Notes (optional)</span><input class="input" id="bk-notes" placeholder="e.g. bring reference photos" /></label>
+    <p id="bk-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p>
+    <button class="btn btn-primary btn-lg" type="submit">Book appointment</button></form>`, () => {
+    $("#bk-form").addEventListener("submit", (e) => { e.preventDefault(); saveBooking(); });
+  });
+}
+function saveBooking() {
+  const err = (m) => ($("#bk-err").textContent = m);
+  const isNew = !$("#bk-new").hidden;
+  let customer = $("#bk-cust").value;
+  if (isNew) {
+    const name = $("#bk-name").value.trim(), phone = $("#bk-phone").value.replace(/\D/g, "");
+    if (name.length < 2) return err("Enter the customer's name.");
+    if (!/^[6-9]\d{9}$/.test(phone)) return err("Enter a 10-digit mobile number.");
+    const ex = DATA.customers.find((c) => c.phone === phone);
+    customer = ex ? ex.id : addCustomer(name, phone).id;
+  }
+  const type = $("#bk-type").value, staff = $("#bk-staff").value, date = $("#bk-date").value, h = parseFloat($("#bk-time").value);
+  if (!date) return err("Pick a date.");
+  const at = new Date(date + "T00:00:00").getTime() + h * 3600000;
+  if (at < Date.now()) return err("That time has already passed. Pick a later slot.");
+  const end = at + APPT_TYPES[type] * 60000;
+  const clash = DATA.appts.find((a) => a.staff === staff && !["Cancelled", "No-show", "Done"].includes(a.status) && a.at < end && a.at + a.dur * 60000 > at);
+  if (clash) return err(`${staffName(staff)} already has ${clash.type.toLowerCase()} with ${custName(clash.customer)} at ${fmtTime(clash.at)}. Choose another time or person.`);
+  const a = { id: "a" + Date.now(), at, dur: APPT_TYPES[type], customer, type, staff, status: "Booked", notes: $("#bk-notes").value.trim() };
+  DATA.appts.push(a); DATA.appts.sort((x, y) => x.at - y.at);
+  const c = DATA.customers.find((x) => x.id === customer);
+  const msg = `Hello ${c.name.split(" ")[0]}, your ${type.toLowerCase()} at ${DATA.shop.name} is booked for ${fmtDate(at, { weekday: "short", day: "numeric", month: "short" })} at ${fmtTime(at)} with ${staffName(staff).split(" ")[0]}. See you soon!`;
+  notify("appt", `New appointment: ${c.name} · ${type}`, `${dayLabel(at)} ${fmtTime(at)} with ${staffName(staff)}`, "appts");
+  state.calDay = dayKey(at);
+  render();
+  openModal("Appointment booked", `<div class="stack"><p>${pill("warning", "Booked")} <b>${esc(c.name)}</b> · ${esc(type)}</p><p class="muted">${dayLabel(at)}, ${fmtDate(at, { day: "numeric", month: "long" })} at ${fmtTime(at)} · ${esc(staffName(staff))}</p>
+    <div class="row"><a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}">${ic("wa")} Send confirmation on WhatsApp</a><button class="btn btn-ghost" data-act="close">Done</button></div></div>`);
+}
+
+/* ── Rentals ── */
+const RENT_TONE = { "Out on rent": "primary", Overdue: "danger", Booked: "info", Returned: "neutral", Cancelled: "neutral" };
+V.rentals = () => {
+  const list = DATA.rentals.slice().sort((a, b) => a.from - b.from);
+  return `<div class="page-head"><div><h1>Rentals</h1><p class="muted">Bridal wear and jewellery on rent · deposits and late fees (₹500/day)</p></div><button class="btn btn-primary" data-act="newrental">${ic("plus")} New booking</button></div>
+  <div class="grid g3">${DATA.rentalItems.map((it) => { const busy = DATA.rentals.find((r) => r.item === it.id && ["Out on rent"].includes(r.status)); const next = DATA.rentals.filter((r) => r.item === it.id && r.status === "Booked").sort((a, b) => a.from - b.from)[0];
+    return `<div class="card lift"><b>${esc(it.name)}</b><p class="small muted">Rent ${inr.format(it.fee)} · deposit ${inr.format(it.deposit)}</p><p style="margin-top:10px">${busy ? pill(rentalStatus(busy) === "Overdue" ? "danger" : "primary", rentalStatus(busy) === "Overdue" ? "Overdue" : `Out until ${fmtDate(busy.to)}`) : pill("success", "Available now", "check")} ${next ? `<span class="xs muted">next booking ${fmtDate(next.from)}</span>` : ""}</p></div>`; }).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Bookings</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Item</th><th>Customer</th><th>Dates</th><th>Status</th><th class="r">Rent</th><th class="r">Deposit</th><th></th></tr></thead><tbody>
+  ${list.map((r) => { const st = rentalStatus(r), it = rentalItem(r.item); return `<tr><td><b>${esc(it.name)}</b></td><td>${esc(r.customer)}<br><span class="xs muted num">${r.phone}</span></td><td class="small muted">${fmtDate(r.from)} → ${fmtDate(r.to)}</td><td>${pill(RENT_TONE[st], st === "Overdue" ? `Overdue ${lateDays(r)}d · fee ${inr.format(500 * lateDays(r))}` : st)}</td><td class="r num">${inr.format(it.fee)}</td><td class="r num">${inr.format(it.deposit)}</td>
+    <td><span class="row" style="gap:6px;flex-wrap:nowrap">${st === "Booked" ? `<button class="btn btn-primary btn-sm" data-act="rentout" data-id="${r.id}">Hand over</button><button class="btn btn-ghost btn-sm" data-act="rentcancel" data-id="${r.id}">Cancel</button>` : ""}${["Out on rent", "Overdue"].includes(st) ? `<button class="btn btn-outline btn-sm" data-act="rentreturn" data-id="${r.id}">Mark returned</button>` : ""}</span></td></tr>`; }).join("")}
+  </tbody></table></div></section>`;
+};
+function openRental() {
+  openModal("New rental booking", `<form id="rt-form" class="stack" novalidate>
+    <label><span class="lbl">Item</span><select class="input" id="rt-item">${DATA.rentalItems.map((i) => `<option value="${i.id}">${esc(i.name)} · rent ${inr.format(i.fee)}</option>`).join("")}</select></label>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Customer name</span><input class="input" id="rt-name" autocomplete="off" /></label><label><span class="lbl">Mobile</span><input class="input num" id="rt-phone" inputmode="tel" maxlength="10" /></label></div>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Pickup</span><input class="input" type="date" id="rt-from" min="${dayKey(today0)}" value="${dayKey(today0.getTime() + 2 * DAY)}" /></label><label><span class="lbl">Return</span><input class="input" type="date" id="rt-to" min="${dayKey(today0)}" value="${dayKey(today0.getTime() + 4 * DAY)}" /></label></div>
+    <p id="rt-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p>
+    <button class="btn btn-primary btn-lg" type="submit">Check availability & book</button></form>`, () => $("#rt-form").addEventListener("submit", (e) => { e.preventDefault(); saveRental(); }));
+}
+function saveRental() {
+  const err = (m) => ($("#rt-err").textContent = m);
+  const item = $("#rt-item").value, name = $("#rt-name").value.trim(), phone = $("#rt-phone").value.replace(/\D/g, "");
+  const from = new Date($("#rt-from").value + "T11:00:00").getTime(), to = new Date($("#rt-to").value + "T19:00:00").getTime();
+  if (name.length < 2) return err("Enter the customer's name.");
+  if (!/^[6-9]\d{9}$/.test(phone)) return err("Enter a 10-digit mobile number.");
+  if (!(to > from)) return err("Return date must be after the pickup date.");
+  const clash = DATA.rentals.find((r) => r.item === item && !["Returned", "Cancelled"].includes(r.status) && r.from < to && r.to > from);
+  if (clash) return err(`Not available — booked by ${clash.customer} from ${fmtDate(clash.from)} to ${fmtDate(clash.to)}.`);
+  DATA.rentals.push({ id: "r" + Date.now(), item, customer: name, phone, from, to, status: "Booked" });
+  closeModal(); render(); toast(`${rentalItem(item).name} booked for ${name} · ${fmtDate(from)} → ${fmtDate(to)}`);
+}
+
+/* ── Purchases ── */
+const PO_TONE = { Draft: "neutral", Sent: "info", "Partly received": "warning", Received: "success", Billed: "primary" };
+V.purchases = () => `<div class="page-head"><div><h1>Purchases</h1><p class="muted">Suppliers, purchase orders and what you owe</p></div><button class="btn btn-primary" data-act="newpo">${ic("plus")} New purchase order</button></div>
+  <div class="grid g4">${DATA.suppliers.map((s) => `<div class="card lift"><p style="font-weight:700">${esc(s.name)}</p><p class="small muted">${esc(s.city)} · ${s.phone}</p><p class="num" style="margin-top:10px;font-size:22px;font-weight:800;color:${s.due ? "var(--warning)" : "var(--success)"}">${s.due ? inr.format(s.due) : "Settled"}</p><div class="between"><p class="xs muted">${s.due ? "payable" : "nothing due"}</p>${s.due ? `<button class="btn btn-outline btn-sm" data-act="paysup" data-id="${s.id}">Pay</button>` : ""}</div></div>`).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Purchase orders</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>PO</th><th>Supplier</th><th>Items</th><th>Expected</th><th>Status</th><th class="r">Value</th><th></th></tr></thead><tbody>
+  ${DATA.pos.slice().reverse().map((p) => { const next = { Draft: ["Send to supplier", "posend"], Sent: ["Receive goods", "poreceive"], "Partly received": ["Receive rest", "poreceive"], Received: ["Record supplier bill", "pobill"] }[p.status];
+    return `<tr><td class="mono small" style="font-weight:600">${p.no}</td><td>${esc(DATA.suppliers.find((s) => s.id === p.supplier).name)}</td><td class="small">${esc(p.items)}</td><td class="small muted">${fmtDate(p.eta)}</td><td>${pill(PO_TONE[p.status], p.status)}</td><td class="r num">${inr.format(p.value)}</td><td>${next ? `<button class="btn btn-outline btn-sm" data-act="${next[1]}" data-no="${p.no}">${next[0]}</button>` : ""}</td></tr>`; }).join("")}
+  </tbody></table></div></section>`;
+function openNewPO() {
+  const goodsList = DATA.products.filter(tracks);
+  openModal("New purchase order", `<form id="po-form" class="stack" novalidate>
+    <label><span class="lbl">Supplier</span><select class="input" id="po-sup">${DATA.suppliers.map((s) => `<option value="${s.id}">${esc(s.name)} · ${esc(s.city)}</option>`).join("")}</select></label>
+    <label><span class="lbl">Product</span><select class="input" id="po-prod">${goodsList.map((p) => `<option value="${p.id}" data-cost="${p.variants[0].cost}">${esc(p.name)} · cost ${inr.format(p.variants[0].cost)}</option>`).join("")}</select></label>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Quantity</span><input class="input num" id="po-qty" inputmode="numeric" value="12" /></label><label><span class="lbl">Expected on</span><input class="input" type="date" id="po-eta" min="${dayKey(today0)}" value="${dayKey(today0.getTime() + 5 * DAY)}" /></label></div>
+    <p class="small muted" id="po-total"></p><p id="po-err" role="alert" class="small" style="color:var(--danger)"></p>
+    <button class="btn btn-primary btn-lg" type="submit">Create draft PO</button></form>`, () => {
+    const upd = () => { const o = $("#po-prod").selectedOptions[0]; $("#po-total").textContent = `Value: ${inr.format((+o.dataset.cost) * (parseInt($("#po-qty").value) || 0))}`; };
+    $("#po-prod").addEventListener("change", upd); $("#po-qty").addEventListener("input", upd); upd();
+    $("#po-form").addEventListener("submit", (e) => { e.preventDefault();
+      const qty = parseInt($("#po-qty").value); if (!(qty > 0)) return ($("#po-err").textContent = "Enter a quantity above 0.");
+      const p = DATA.products.find((x) => x.id === $("#po-prod").value);
+      const no = `PO-${String(Math.max(...DATA.pos.map((x) => +x.no.slice(3))) + 1).padStart(4, "0")}`;
+      DATA.pos.push({ no, supplier: $("#po-sup").value, pid: p.id, items: `${p.name} × ${qty}`, qty, value: p.variants[0].cost * qty, status: "Draft", eta: new Date($("#po-eta").value + "T12:00:00").getTime() });
+      closeModal(); render(); toast(`${no} created as draft`); });
+  });
+}
+
+/* ── Accounts ── */
 V.accounts = () => {
   const todayBills = billsBetween(today0.getTime(), Date.now() + 1);
   const cashIn = todayBills.filter((b) => b.method === "CASH").reduce((s, b) => s + b.total, 0);
   const cashOut = DATA.expenses.filter((e) => e.at >= today0.getTime() && e.method === "CASH").reduce((s, e) => s + e.amount, 0);
   const month = billsBetween(monthStart, Date.now() + 1); const lines = month.flatMap((b) => b.lines);
   const revenue = lines.reduce((s, l) => s + l.taxable, 0), cogs = lines.reduce((s, l) => s + l.cost * l.qty, 0), exp = DATA.expenses.filter((e) => e.at >= monthStart).reduce((s, e) => s + e.amount, 0);
-  return `${preview("Phase 6 (Purchases & accounts)")}
-  <div class="page-head"><div><h1>Cash & accounts</h1><p class="muted">Drawer, expenses and monthly profit & loss</p></div><button class="btn btn-primary" data-act="toast" data-msg="Expense form: category, amount, paid by, photo of receipt">${ic("plus")} Add expense</button></div>
-  <div class="grid g3"><section class="card"><div class="card-title"><h2>Cash drawer · today</h2></div><dl class="stack" style="gap:6px;margin:0">${[["Opening cash", 5000], ["Cash sales", cashIn], ["Cash expenses", -cashOut]].map(([k, v]) => `<div class="between"><dt class="muted">${k}</dt><dd class="num" style="margin:0">${inr.format(v)}</dd></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);padding-top:8px"><dt style="font-weight:700">Expected in drawer</dt><dd class="num" style="margin:0;font-weight:800;font-size:20px">${inr.format(5000 + cashIn - cashOut)}</dd></div></dl><button class="btn btn-outline" style="margin-top:14px;width:100%" data-act="toast" data-msg="Close shift: count cash → over/short is recorded → Z report prints">Close shift & print Z report</button></section>
+  const closed = DATA.shifts.find((x) => startOfDay(x.at) === today0.getTime());
+  return `<div class="page-head"><div><h1>Cash & accounts</h1><p class="muted">Drawer, expenses and monthly profit & loss</p></div><button class="btn btn-primary" data-act="newexpense">${ic("plus")} Add expense</button></div>
+  <div class="grid g3"><section class="card"><div class="card-title"><h2>Cash drawer · today</h2>${closed ? pill("neutral", "Shift closed") : pill("success", "Open")}</div><dl class="stack" style="gap:6px;margin:0">${[["Opening cash", 5000], ["Cash sales", cashIn], ["Cash expenses", -cashOut]].map(([k, v]) => `<div class="between"><dt class="muted">${k}</dt><dd class="num" style="margin:0">${inr.format(v)}</dd></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);padding-top:8px"><dt style="font-weight:700">Expected in drawer</dt><dd class="num" style="margin:0;font-weight:800;font-size:20px">${inr.format(5000 + cashIn - cashOut)}</dd></div></dl>
+    ${closed ? `<p class="small" style="margin-top:12px">Counted ${inr.format(closed.counted)} · <b style="color:${closed.diff === 0 ? "var(--success)" : "var(--danger)"}">${closed.diff === 0 ? "matches" : closed.diff > 0 ? "over " + inr.format(closed.diff) : "short " + inr.format(-closed.diff)}</b></p><button class="btn btn-ghost" style="margin-top:8px;width:100%" data-act="zreport">View Z report</button>` : `<button class="btn btn-outline" style="margin-top:14px;width:100%" data-act="closeshift">Close shift & print Z report</button>`}</section>
   <section class="card"><div class="card-title"><h2>Profit & loss · month</h2></div><dl class="stack" style="gap:6px;margin:0">${[["Sales (before GST)", revenue], ["Cost of goods", -cogs], ["Gross profit", revenue - cogs], ["Expenses", -exp]].map(([k, v]) => `<div class="between"><dt class="muted">${k}</dt><dd class="num" style="margin:0">${inr.format(Math.round(v))}</dd></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);padding-top:8px"><dt style="font-weight:700">Net profit</dt><dd class="num" style="margin:0;font-weight:800;font-size:20px;color:var(--success)">${inr.format(Math.round(revenue - cogs - exp))}</dd></div></dl></section>
-  <section class="card"><div class="card-title"><h2>Dues</h2></div><div class="between"><span class="muted">Customers owe you</span><b class="num">${inr.format(DATA.bills.filter((b) => b.status === "Credit").reduce((s, b) => s + b.total, 0))}</b></div><div class="between" style="margin-top:8px"><span class="muted">You owe suppliers</span><b class="num">${inr.format(DATA.suppliers.reduce((s, x) => s + x.due, 0))}</b></div><button class="btn btn-ghost" style="margin-top:14px" data-act="toast" data-msg="Tally / accountant export comes with the app">Export for accountant</button></section></div>
-  <section class="card"><div class="card-title"><h2>Expenses</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Paid by</th><th>Mode</th><th class="r">Amount</th></tr></thead><tbody>${DATA.expenses.map((e) => `<tr><td class="small muted">${fmtDate(e.at)}</td><td>${esc(e.cat)}</td><td class="small">${esc(e.by)}</td><td class="small">${e.method}</td><td class="r num">${inr.format(e.amount)}</td></tr>`).join("")}</tbody></table></div></section>`;
+  <section class="card"><div class="card-title"><h2>Dues</h2></div><div class="between"><span class="muted">Customers owe you</span><b class="num">${inr.format(DATA.bills.filter((b) => b.status === "Credit").reduce((s, b) => s + b.total, 0))}</b></div><div class="between" style="margin-top:8px"><span class="muted">You owe suppliers</span><b class="num">${inr.format(DATA.suppliers.reduce((s, x) => s + x.due, 0))}</b></div><button class="btn btn-ghost" style="margin-top:14px" data-go="purchases">Pay suppliers</button></section></div>
+  <section class="card"><div class="card-title"><h2>Expenses</h2><span class="small muted num">${inr.format(exp)} this month</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Paid by</th><th>Mode</th><th class="r">Amount</th></tr></thead><tbody>${DATA.expenses.slice().sort((a, b) => b.at - a.at).map((e) => `<tr><td class="small muted">${fmtDate(e.at)}</td><td>${esc(e.cat)}${e.note ? `<br><span class="xs muted">${esc(e.note)}</span>` : ""}</td><td class="small">${esc(e.by)}</td><td class="small">${e.method}</td><td class="r num">${inr.format(e.amount)}</td></tr>`).join("")}</tbody></table></div></section>`;
 };
 
-/* ── Rentals, offers, appointments (Phase 7 preview) ── */
-const RENT_TONE = { "Out on rent": "primary", Overdue: "danger", Booked: "info", Returned: "neutral" };
-V.rentals = () => `${preview("Phase 7 (Rentals, loyalty & offers)")}
-  <div class="page-head"><div><h1>Rentals</h1><p class="muted">Bridal wear and jewellery on rent · deposits and late fees</p></div><button class="btn btn-primary" data-act="toast" data-msg="New booking: item → dates (no double-booking) → deposit">${ic("plus")} New booking</button></div>
-  <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Item</th><th>Customer</th><th>Dates</th><th>Status</th><th class="r">Rent</th><th class="r">Deposit</th><th></th></tr></thead><tbody>
-  ${DATA.rentals.map((r, i) => `<tr><td><b>${esc(r.item)}</b></td><td>${esc(r.customer)}</td><td class="small muted">${fmtDate(today0.getTime() + r.from * DAY)} → ${fmtDate(today0.getTime() + r.to * DAY)}</td><td>${pill(RENT_TONE[r.status], r.status === "Overdue" ? `Overdue · late fee ${inr.format(500 * Math.abs(r.to))}` : r.status)}</td><td class="r num">${inr.format(r.fee)}</td><td class="r num">${inr.format(r.deposit)}</td><td>${["Out on rent", "Overdue"].includes(r.status) ? `<button class="btn btn-outline btn-sm" data-act="rentreturn" data-i="${i}">Mark returned</button>` : ""}</td></tr>`).join("")}
-  </tbody></table></div></section>`;
-V.offers = () => `${preview("Phase 7 (Rentals, loyalty & offers)")}
-  <div class="page-head"><div><h1>Offers & loyalty</h1><p class="muted">Discount rules, coupons, gift cards and loyalty tiers</p></div><button class="btn btn-primary" data-act="toast" data-msg="New offer: % or ₹, category/brand/customer group, dates">${ic("plus")} New offer</button></div>
-  <div class="grid g4">${DATA.offers.map((o) => `<div class="card lift"><div class="between">${pill(o.active ? "success" : "neutral", o.active ? "Active" : "Ended")}<span class="xs muted">${o.until > 0 ? `${o.until} days left` : "ended"}</span></div><p style="font-weight:700;margin-top:10px">${esc(o.name)}</p><p class="small muted">${esc(o.rule)}</p><p class="small" style="margin-top:8px">Used <b class="num">${o.used}</b> times</p></div>`).join("")}</div>
-  <div class="grid g3"><section class="card"><div class="card-title"><h2>Coupons</h2></div>${DATA.coupons.map((c) => `<div class="list-row"><span class="mono" style="font-weight:700">${c.code}</span><span class="small muted" style="flex:1">${esc(c.value)}</span><span class="xs num">${c.uses}</span></div>`).join("")}</section>
+/* ── Offers & loyalty ── */
+V.offers = () => `<div class="page-head"><div><h1>Offers & loyalty</h1><p class="muted">Discount rules, coupons, gift cards and loyalty tiers</p></div><div class="row"><button class="btn btn-outline" data-act="newcoupon">${ic("tag")} New coupon</button><button class="btn btn-primary" data-act="newoffer">${ic("plus")} New offer</button></div></div>
+  <div class="grid g4">${DATA.offers.map((o, i) => `<div class="card lift"><div class="between">${pill(o.active ? "success" : "neutral", o.active ? "Active" : "Paused")}<button role="switch" aria-checked="${o.active}" aria-label="Turn ${esc(o.name)} ${o.active ? "off" : "on"}" class="switch ${o.active ? "on" : ""}" data-act="offertoggle" data-i="${i}"><i></i></button></div><p style="font-weight:700;margin-top:10px">${esc(o.name)}</p><p class="small muted">${esc(o.rule)}</p><p class="small" style="margin-top:8px">Used <b class="num">${o.used}</b> times · ${o.until > 0 ? `${o.until} days left` : "ended"}</p></div>`).join("")}</div>
+  <div class="grid g3"><section class="card"><div class="card-title"><h2>Coupons</h2></div>${DATA.coupons.map((c) => `<div class="list-row"><span class="mono" style="font-weight:700">${esc(c.code)}</span><span class="small muted" style="flex:1">${esc(c.value)}</span><span class="xs num">${c.uses}</span></div>`).join("")}</section>
   <section class="card"><div class="card-title"><h2>Loyalty tiers</h2></div>${[["Classic", "0–150 pts", "1 pt per ₹100"], ["Silver", "150+ pts", "+5% birthday offer"], ["Gold", "400+ pts", "Free fall & pico, early access"]].map(([t, r, b]) => `<div class="list-row">${pill(t === "Gold" ? "warning" : t === "Silver" ? "info" : "neutral", t)}<span class="small" style="flex:1">${r}<br><span class="muted xs">${b}</span></span><b class="num">${DATA.customers.filter((c) => c.tier === t).length}</b></div>`).join("")}</section>
-  <section class="card"><div class="card-title"><h2>Gift cards</h2></div>${DATA.giftCards.map((g) => `<div class="list-row"><span class="mono small" style="font-weight:700">${g.code}</span><span class="small muted" style="flex:1">expires in ${g.expires} days</span><b class="num">${inr.format(g.balance)}</b></div>`).join("")}<button class="btn btn-outline" style="margin-top:10px;width:100%" data-act="toast" data-msg="Sell a gift card at billing — it works as a payment method">Sell gift card</button></section></div>`;
-V.appts = () => `${preview("Phase 7 (Appointments)")}
-  <div class="page-head"><div><h1>Appointments</h1><p class="muted">Fittings, measurements, bridal consultations · reminders on WhatsApp</p></div><button class="btn btn-primary" data-act="toast" data-msg="Book: customer → service → staff → time slot">${ic("plus")} Book</button></div>
-  <section class="card"><div class="card-title"><h2>Today</h2><span class="muted small">${fmtDate(Date.now(), { weekday: "long", day: "numeric", month: "long" })}</span></div>
-  ${DATA.appts.filter((a) => state.role !== "TAILOR" || a.staff === "Lakshmi Devi").map((a) => `<div class="list-row"><span class="mono" style="font-weight:700;width:56px">${a.time}</span>${avatar(a.customer, "sm")}<span style="flex:1;min-width:0"><b>${esc(a.customer)}</b><br><span class="small muted">${esc(a.type)} · ${esc(a.staff)}</span></span>${pill(a.status === "Done" ? "neutral" : a.status === "Checked in" ? "success" : a.status === "Confirmed" ? "info" : "warning", a.status)}</div>`).join("")}</section>`;
+  <section class="card"><div class="card-title"><h2>Gift cards</h2></div>${DATA.giftCards.map((g) => `<div class="list-row"><span class="mono small" style="font-weight:700">${g.code}</span><span class="small muted" style="flex:1">${g.to ? esc(g.to) + " · " : ""}${g.expires} days left</span><b class="num">${inr.format(g.balance)}</b></div>`).join("")}
+    <div class="row" style="margin-top:12px;flex-wrap:nowrap"><input class="input" id="gc-check" placeholder="Gift card code" aria-label="Gift card code" /><button class="btn btn-outline" data-act="gccheck">Check</button></div><p id="gc-res" class="small" style="min-height:20px;margin-top:6px"></p>
+    <button class="btn btn-primary" style="width:100%" data-act="gcsell">Sell gift card</button></section></div>`;
 
 /* ── Team ── */
 const PERMS = [["Billing", [1, 1, 1, 0, 0, 0]], ["Discount above limit", [1, 1, 0, 0, 0, 0]], ["Returns & cancel", [1, 1, 0, 0, 0, 0]], ["Products & stock", [1, 1, 0, 1, 0, 0]], ["Orders & jobs", [1, 1, 1, 0, 0, 0]], ["Update own jobs", [1, 1, 0, 0, 1, 0]], ["Reports", [1, 1, 0, 0, 0, 1]], ["Profit & cost price", [1, 0, 0, 0, 0, 1]], ["Team & settings", [1, 0, 0, 0, 0, 0]]];
 V.team = () => {
   const month = billsBetween(monthStart, Date.now() + 1);
-  return `<div class="page-head"><div><h1>Team & roles</h1><p class="muted">PIN switching at the counter · every action logged</p></div><button class="btn btn-primary" data-act="toast" data-msg="Add staff: name, role, 4–6 digit PIN, optional email login">${ic("plus")} Add staff</button></div>
-  <div class="grid g3">${DATA.staff.map((s) => { const sales = sumNet(month.filter((b) => b.staff === s.id)); return `<div class="card lift"><div class="row" style="flex-wrap:nowrap">${avatar(s.name)}<span style="flex:1;min-width:0"><b>${esc(s.name)}</b><br><span class="small muted">${esc(s.role)}</span></span>${s.inAt ? pill("success", "In " + s.inAt) : pill("neutral", "Off today")}</div><div class="between small" style="margin-top:14px"><span class="muted">Sales this month</span><b class="num">${inr.format(sales)}</b></div><div class="between small"><span class="muted">Commission ${s.commission}%</span><b class="num">${inr.format(Math.round((sales * s.commission) / 100))}</b></div></div>`; }).join("")}</div>
-  <section class="card"><div class="card-title"><h2>Permissions</h2><span class="small muted">Editable per shop</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Can…</th>${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"].map((r) => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${PERMS.map(([p, v]) => `<tr><td>${p}</td>${v.map((x) => `<td style="text-align:center;color:${x ? "var(--success)" : "var(--border)"}">${x ? ic("check", 'width="18" height="18" aria-label="Yes"') : "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`;
+  return `<div class="page-head"><div><h1>Team & roles</h1><p class="muted">PIN switching at the counter · every action logged</p></div><button class="btn btn-primary" data-act="newstaff">${ic("plus")} Add staff</button></div>
+  <div class="grid g3">${DATA.staff.map((s) => { const sales = sumNet(month.filter((b) => b.staff === s.id)); return `<div class="card lift"><div class="row" style="flex-wrap:nowrap">${avatar(s.name)}<span style="flex:1;min-width:0"><b>${esc(s.name)}</b><br><span class="small muted">${esc(s.role)}</span></span>${s.inAt ? pill("success", "In " + s.inAt) : pill("neutral", "Off")}</div><div class="between small" style="margin-top:14px"><span class="muted">Sales this month</span><b class="num">${inr.format(sales)}</b></div><div class="between small"><span class="muted">Commission ${s.commission}%</span><b class="num">${inr.format(Math.round((sales * s.commission) / 100))}</b></div><button class="btn ${s.inAt ? "btn-ghost" : "btn-outline"} btn-sm" style="margin-top:10px;width:100%" data-act="clock" data-id="${s.id}">${s.inAt ? "Clock out" : "Clock in"}</button></div>`; }).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Permissions</h2><span class="small muted">Editable per shop</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Can…</th>${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"].map((r) => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${PERMS.map(([p, v], pi) => `<tr><td>${p}</td>${v.map((x, ri) => `<td style="text-align:center"><button class="perm ${x ? "on" : ""}" data-act="perm" data-p="${pi}" data-r="${ri}" ${ri === 0 ? "disabled" : ""} aria-pressed="${!!x}" aria-label="${p}: ${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"][ri]}">${x ? ic("check", 'width="16" height="16"') : ""}</button></td>`).join("")}</tr>`).join("")}</tbody></table></div><p class="xs muted" style="margin-top:8px">Tap a box to change a role's access. The owner always has full access.</p></section>`;
 };
+
+/* ── Customers: add ── */
+function addCustomer(name, phone) {
+  const c = { id: "c" + Date.now(), name, phone, points: 0, tier: "Classic", birthday: null, measurements: [] };
+  DATA.customers.unshift(c);
+  return c;
+}
+function openNewCustomer(attach) {
+  openModal("Add customer", `<form id="nc-form" class="stack" novalidate>
+    <label><span class="lbl">Name</span><input class="input" id="nc-name" autocomplete="off" /></label>
+    <label><span class="lbl">Mobile</span><input class="input num" id="nc-phone" inputmode="tel" maxlength="10" placeholder="10 digits" /></label>
+    <label><span class="lbl">Birthday (optional)</span><input class="input" type="date" id="nc-bday" /></label>
+    <p id="nc-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p>
+    <button class="btn btn-primary btn-lg" type="submit">${attach ? "Add & attach to bill" : "Add customer"}</button></form>`, () => {
+    $("#nc-name").focus();
+    $("#nc-form").addEventListener("submit", (e) => { e.preventDefault();
+      const name = $("#nc-name").value.trim(), phone = $("#nc-phone").value.replace(/\D/g, "");
+      if (name.length < 2) return ($("#nc-err").textContent = "Enter the customer's name.");
+      if (!/^[6-9]\d{9}$/.test(phone)) return ($("#nc-err").textContent = "Enter a 10-digit mobile number.");
+      if (DATA.customers.some((c) => c.phone === phone)) return ($("#nc-err").textContent = "A customer with this number already exists.");
+      const c = addCustomer(name, phone);
+      if ($("#nc-bday").value) { const b = new Date($("#nc-bday").value); c.birthday = b.getMonth() === today0.getMonth() ? "this month" : fmtDate(b, { day: "numeric", month: "short" }); }
+      closeModal();
+      if (attach) state.cart.customer = c.id;
+      render(); toast(`${name} added${attach ? " to the bill" : ""}`);
+    });
+  });
+}
+
+/* ── Notifications ── */
+const NOTIF_TYPES = [
+  ["job", "Job or order assigned to me", "When someone gives you a stitching job or customer order."],
+  ["due", "Trials, pickups and deliveries due", "Morning reminder of what is due today, and anything overdue."],
+  ["appt", "Appointment reminders", "15 minutes before each fitting or consultation."],
+  ["stock", "Low stock alerts", "When a size or colour drops to its alert level."],
+  ["sales", "Daily sales summary", "At closing time: sales, cash, returns and top items."],
+  ["birthday", "Customer birthdays", "Each morning, so you can send a wish or an offer."],
+  ["dues", "Payment dues", "Customer credit and supplier bills that are due."],
+];
+function buildNotifications() {
+  const list = [], P = state.notifPrefs;
+  if (P.due.on) DATA.orders.filter((o) => !["Delivered", "Cancelled"].includes(o.stage) && o.due < today0.getTime() + DAY && (state.role !== "TAILOR" || o.tailor === "s5")).forEach((o) => list.push({ key: "due-" + o.id, type: "due", title: `${o.no} ${o.due < today0.getTime() ? "is overdue" : "is due today"}`, sub: `${custName(o.customer)} · ${o.stage}`, go: "orders", at: o.due }));
+  if (P.job.on && state.role === "TAILOR") DATA.orders.filter((o) => o.tailor === "s5" && ["Received", "Measured"].includes(o.stage)).forEach((o) => list.push({ key: "job-" + o.id, type: "job", title: `${o.no} assigned to you`, sub: o.items.map((i) => i.name).join(", "), go: "orders", at: o.events[o.events.length - 1].at }));
+  if (P.appt.on) DATA.appts.filter((a) => a.at > Date.now() && a.at < Date.now() + 6 * 3600000 && ["Booked", "Confirmed"].includes(a.status) && (state.role !== "TAILOR" || a.staff === "s5")).forEach((a) => list.push({ key: "appt-" + a.id, type: "appt", title: `${a.type} at ${fmtTime(a.at)}`, sub: `${custName(a.customer)} with ${staffName(a.staff)}`, go: "appts", at: a.at }));
+  if (P.stock.on && state.role === "OWNER") { let n = 0; DATA.products.forEach((p) => p.variants.forEach((v) => { if (n < 4 && stockStatus(p, v) !== "IN" && tracks(p)) { n++; list.push({ key: "stock-" + v.id + "-" + v.stock, type: "stock", title: `${p.name} ${vLabel(v)} ${available(v) <= 0 ? "is out of stock" : "is low"}`, sub: `${Math.max(0, available(v))} left`, go: "inventory", at: Date.now() - 3600000 }); } })); }
+  if (P.sales.on && state.role !== "TAILOR") { const t = billsBetween(today0.getTime(), Date.now() + 1); list.push({ key: "sales-" + dayKey(today0), type: "sales", title: `Today so far: ${inr.format(sumNet(t))}`, sub: `${t.length} bills`, go: "reports", at: Date.now() - 600000 }); }
+  if (P.birthday.on && state.role !== "TAILOR") DATA.customers.filter((c) => c.birthday === "this month").slice(0, 2).forEach((c) => list.push({ key: "bday-" + c.id, type: "birthday", title: `${c.name}'s birthday is this month`, sub: "Send a wish with a birthday offer", go: "customers", at: today0.getTime() + 9 * 3600000 }));
+  if (P.dues.on && state.role === "OWNER") DATA.suppliers.filter((s) => s.due).slice(0, 2).forEach((s) => list.push({ key: "dues-" + s.id + "-" + s.due, type: "dues", title: `${inr.format(s.due)} due to ${s.name}`, sub: "Supplier bill", go: "purchases", at: today0.getTime() + 8 * 3600000 }));
+  DATA.extraNotifs.filter((n) => P[n.type]?.on).forEach((n) => list.push(n));
+  return list.sort((a, b) => b.at - a.at);
+}
+function notify(type, title, sub, go) { DATA.extraNotifs.unshift({ key: "x" + Date.now(), type, title, sub, go, at: Date.now() }); }
+const NOTIF_ICON = { job: "scissors", due: "orders", appt: "cal", stock: "box", sales: "chart", birthday: "gift", dues: "wallet" };
+function openNotifications() {
+  const list = buildNotifications();
+  const unread = list.filter((n) => !state.readNotifs.includes(n.key)).length;
+  openModal("Notifications", `<div class="between" style="margin:-8px 0 12px"><span class="small muted">${unread} unread</span><span class="row"><button class="btn btn-ghost btn-sm" data-act="notifread">Mark all read</button><button class="btn btn-ghost btn-sm" data-act="notifprefs">Settings</button></span></div>
+    ${list.length ? list.map((n) => { const unread = !state.readNotifs.includes(n.key); return `<button class="list-row notif ${unread ? "unread" : ""}" style="width:100%;border:0;text-align:left" data-act="notifopen" data-key="${esc(n.key)}" data-go-to="${n.go}"><span class="notif-ic">${ic(NOTIF_ICON[n.type] || "sparkle", 'width="18" height="18"')}</span><span style="flex:1;min-width:0"><b>${esc(n.title)}</b><br><span class="small muted">${esc(n.sub)}</span></span><span class="xs muted">${dayLabel(n.at)}</span></button>`; }).join("") : `<p class="empty">You're all caught up. Turn on alerts in Settings → Notifications.</p>`}`);
+}
+function updateBell() {
+  const b = $("#bell-count"); if (!b) return;
+  const n = buildNotifications().filter((x) => !state.readNotifs.includes(x.key)).length;
+  b.textContent = n > 9 ? "9+" : n; b.hidden = n === 0;
+}
 
 /* ── Settings ── */
 V.settings = () => {
-  const tabs = [["appearance", "Appearance"], ["receipt", "Bill templates"], ["printers", "Printers"], ["stores", "Stores & offline"]];
+  const tabs = [["profile", "Profile"], ["notifications", "Notifications"], ["appearance", "Appearance"], ["receipt", "Bill templates"], ["printers", "Printers"], ["stores", "Stores & offline"]];
   const T = state.template;
   const sampleBill = DATA.bills[DATA.bills.length - 1];
+  const m = me(), CH = [["app", "In app"], ["whatsapp", "WhatsApp"], ["email", "Email"]];
   const body = {
+    profile: `<div class="row" style="gap:16px;margin-bottom:18px">${avatar(m.name)}<span><b style="font-size:18px">${esc(m.name)}</b><br><span class="small muted">${esc(m.role)} · ${esc(DATA.shop.name)} · ${esc(state.store)}</span></span></div>
+      <div class="grid g2" style="gap:12px"><label><span class="lbl">Full name</span><input class="input" id="pf-name" value="${esc(m.name)}" /></label><label><span class="lbl">Mobile</span><input class="input num" id="pf-phone" inputmode="tel" maxlength="10" value="${esc(m.phone || "")}" placeholder="10 digits" /></label>
+      <label><span class="lbl">Email (for reports)</span><input class="input" type="email" id="pf-email" value="${esc(m.email || "")}" placeholder="name@example.com" /></label><label><span class="lbl">Language</span><select class="input" id="pf-lang">${["English", "हिन्दी", "தமிழ்", "తెలుగు", "ಕನ್ನಡ", "മലയാളം"].map((l) => `<option ${m.lang === l ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
+      <p id="pf-err" role="alert" class="small" style="color:var(--danger);min-height:18px;margin-top:8px"></p>
+      <div class="between"><button class="btn btn-primary" data-act="saveprofile">Save profile</button><span class="small muted">Counter PIN: ${"•".repeat(4)} · ask the owner to reset</span></div>
+      <hr class="div" style="margin:22px 0" /><div class="between"><span><b>Reset demo</b><br><span class="small muted">Your bookings, bills and changes are kept on this device. Reset to start fresh.</span></span><button class="btn btn-danger" data-act="resetdemo">Reset demo</button></div>`,
+    notifications: `<div class="between" style="margin-bottom:6px"><div><h2 style="font-size:19px">Notifications</h2><p class="small muted">Choose what reaches you and where.</p></div><button class="btn btn-outline btn-sm" data-act="notiftest">${ic("bell")} Send test</button></div>
+      ${NOTIF_TYPES.map(([k, l, d]) => { const p = state.notifPrefs[k]; return `<div class="pref-row"><span style="flex:1;min-width:200px"><b>${l}</b><br><span class="small muted">${d}</span></span>${p.on ? `<span class="seg" role="radiogroup" aria-label="${l}: channel">${CH.map(([v, t]) => `<button class="${p.channel === v ? "on" : ""}" data-act="notifchannel" data-k="${k}" data-v="${v}" aria-pressed="${p.channel === v}">${t}</button>`).join("")}</span>` : ""}<button role="switch" aria-checked="${p.on}" aria-label="${l}" class="switch ${p.on ? "on" : ""}" data-act="notiftoggle" data-k="${k}"><i></i></button></div>`; }).join("")}`,
     appearance: `<div class="card-title"><h2>Theme</h2></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">${Object.entries(SKINS).map(([k, s]) => `<button class="card lift" style="padding:12px;text-align:left;${state.skin === k ? "outline:3px solid var(--primary);outline-offset:-1px" : ""}" data-act="skin" data-v="${k}" aria-pressed="${state.skin === k}"><span style="display:flex;height:54px;border-radius:12px;overflow:hidden">${s.sw.map((c) => `<span style="flex:1;background:${c}"></span>`).join("")}</span><b style="display:block;margin-top:8px">${s.name}</b></button>`).join("")}</div>
       <div class="card-title" style="margin-top:20px"><h2>Mode</h2></div><div class="seg">${[["light", "Light"], ["dark", "Dark"], ["", "Auto"]].map(([v, l]) => `<button class="${(document.documentElement.dataset.theme || "") === v ? "on" : ""}" data-act="mode" data-v="${v}">${l}</button>`).join("")}</div><p class="small muted" style="margin-top:10px">Each staff member keeps their own theme.</p>`,
     receipt: `<div class="grid g2"><div class="stack"><div><span class="lbl">Paper</span><div class="seg">${[["t58", "58 mm"], ["t80", "80 mm"], ["a4", "A4 / A5"]].map(([v, l]) => `<button class="${T.paper === v ? "on" : ""}" data-act="tpl" data-k="paper" data-v="${v}">${l}</button>`).join("")}</div></div>
@@ -1161,6 +1508,24 @@ function render() {
   if (state.route === "dashboard") afterDashboard(); else clearInterval(clockTimer);
   if (state.route === "reports") countUp();
   drawBarcodes($("#view"));
+  updateBell();
+  saveDemo();
+}
+/* Demo changes stay on this device for the day, so a client can click around and come back. */
+const SAVE_KEY = "aurapos-demo-v2";
+function saveDemo() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ day: dayKey(today0), DATA, PERMS, skin: state.skin, template: state.template, notifPrefs: state.notifPrefs, readNotifs: state.readNotifs.slice(-300) })); } catch (e) { /* storage blocked or full */ }
+}
+function loadDemo() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
+    if (!saved || saved.day !== dayKey(today0)) return;
+    Object.assign(DATA, saved.DATA);
+    saved.PERMS?.forEach((row, i) => PERMS[i] && (PERMS[i][1] = row[1]));
+    Object.assign(state, { skin: SKINS[saved.skin] ? saved.skin : state.skin, template: { ...state.template, ...saved.template }, notifPrefs: { ...state.notifPrefs, ...saved.notifPrefs }, readNotifs: saved.readNotifs || [] });
+    billSeq = Math.max(billSeq, ...DATA.bills.map((b) => parseInt(b.no.split("/").pop()) || 0));
+    DATA.products.forEach((p) => p.variants.forEach((v) => { vidSeq = Math.max(vidSeq, +v.id.slice(1) || 0); barcodeSeq = Math.max(barcodeSeq, +v.barcode.slice(2, 12) || 0); }));
+  } catch (e) { /* ignore a broken save */ }
 }
 function go(route) {
   state.route = route;
@@ -1196,9 +1561,9 @@ const A = {
   saveline: (d) => { const l = state.cart.lines[+d.i]; const { v } = findV(l.vid); const price = parseFloat($("#le-price").value); l.price = isFinite(price) && price !== v.price ? price : null; l.disc = $("#le-disc").value.trim(); closeModal(); render(); },
   rmline: (d) => { state.cart.lines.splice(+d.i, 1); closeModal(); render(); },
   clear: () => { state.cart = { lines: [], billDisc: "", customer: null, orderId: null }; state.approved = false; render(); },
-  customer: () => openModal("Customer", `<input class="input" id="cust-q" placeholder="Mobile number or name" autocomplete="off" /><div id="cust-res" style="margin-top:10px">${DATA.customers.slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone} · ${c.points} pts</span></span></button>`).join("")}</div>`, () => {
+  customer: () => openModal("Customer", `<input class="input" id="cust-q" placeholder="Mobile number or name" autocomplete="off" /><button class="btn btn-outline btn-sm" style="margin-top:10px" data-act="newcust" data-attach="1">${ic("plus")} New customer</button><div id="cust-res" style="margin-top:10px">${DATA.customers.slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone} · ${c.points} pts</span></span></button>`).join("")}</div>`, () => {
     $("#cust-q").focus();
-    $("#cust-q").addEventListener("input", (e) => { const q = e.target.value.toLowerCase(); $("#cust-res").innerHTML = DATA.customers.filter((c) => (c.name + c.phone).toLowerCase().includes(q)).slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone}</span></span></button>`).join("") || `<p class="small muted">No match — the app lets you add a new customer here.</p>`; });
+    $("#cust-q").addEventListener("input", (e) => { const q = e.target.value.toLowerCase(); $("#cust-res").innerHTML = DATA.customers.filter((c) => (c.name + c.phone).toLowerCase().includes(q)).slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone}</span></span></button>`).join("") || `<p class="small muted">No match.</p>`; });
   }),
   setcust: (d) => { state.cart.customer = d.id; closeModal(); render(); },
   pay: openPay,
@@ -1230,14 +1595,187 @@ const A = {
   adjkind: (d) => document.querySelectorAll("[data-act=adjkind]").forEach((b) => b.classList.toggle("on", b.dataset.v === d.v)),
   saveadjust: (d) => { const { p, v } = findV(d.id); const kind = $("[data-act=adjkind].on").dataset.v; const q = Math.max(0, parseInt($("#adj-qty").value) || 0); if (kind === "Stock in") v.stock += q; else if (kind === "Set count") v.stock = q; else if (q > available(v)) return toast(`Only ${available(v)} available`); else v.stock -= q; closeModal(); render(); toast(`${p.name} ${vLabel(v)}: ${kind.toLowerCase()} saved · now ${v.stock}`); },
   rrange: (d) => { state.reportRange = +d.v; render(); },
-  receivepo: (d) => { const po = DATA.pos.find((x) => x.no === d.no); po.status = "Received"; DATA.products[2].variants.forEach((v) => (v.stock += 6)); render(); toast(`${po.no} received · stock updated · supplier bill recorded`); },
-  rentreturn: (d) => { const r = DATA.rentals[+d.i]; const late = r.status === "Overdue" ? 500 * Math.abs(r.to) : 0; r.status = "Returned"; render(); toast(`Returned · deposit ${inr.format(r.deposit - late)} refunded${late ? ` after ${inr.format(late)} late fee` : ""}`); },
   stab: (d) => { state.settingsTab = d.v; render(); },
   skin: (d) => { state.skin = d.v; applySkin(); render(); toast(`${SKINS[d.v].name} theme applied`); },
   mode: (d) => { if (d.v) document.documentElement.dataset.theme = d.v; else delete document.documentElement.dataset.theme; applySkin(); render(); },
   tpl: (d) => { state.template[d.k] = d.v; render(); },
   tplcheck: (d, el) => { state.template[d.k] = el.checked; $("#tpl-preview").innerHTML = receiptHTML(DATA.bills[DATA.bills.length - 1]); },
 };
+/* ── Scheduling, purchases, money, team, notification actions ── */
+const findAppt = (id) => DATA.appts.find((a) => a.id === id);
+function openAppt(id) {
+  const a = findAppt(id), c = DATA.customers.find((x) => x.id === a.customer), next = NEXT_APPT[a.status], open = ["Booked", "Confirmed", "Checked in"].includes(a.status);
+  openModal(a.type, `<div class="stack"><p>${apptPill(a.status)} <b>${esc(c.name)}</b> · <span class="num">${c.phone}</span></p>
+    <p class="muted">${dayLabel(a.at)}, ${fmtDate(a.at, { day: "numeric", month: "long" })} · ${fmtTime(a.at)}–${fmtTime(a.at + a.dur * 60000)} · ${esc(staffName(a.staff))}</p>${a.notes ? `<p class="small">${esc(a.notes)}</p>` : ""}
+    <div class="row">${next ? `<button class="btn btn-primary" data-act="apptset" data-id="${a.id}" data-v="${next[0]}" data-modal="1">${next[1]}</button>` : ""}${open ? `<button class="btn btn-outline" data-act="resched" data-id="${a.id}">Reschedule</button><button class="btn btn-ghost" style="color:var(--danger)" data-act="apptset" data-id="${a.id}" data-v="Cancelled" data-modal="1">Cancel</button>` : ""}<button class="btn btn-ghost" data-act="cust" data-id="${c.id}">Customer profile</button></div></div>`);
+}
+function openReschedule(id) {
+  const a = findAppt(id);
+  openModal("Reschedule", `<form id="rs-form" class="stack" novalidate><p class="muted" style="margin-top:-8px">${esc(custName(a.customer))} · ${esc(a.type)} · now ${dayLabel(a.at)} ${fmtTime(a.at)}</p>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">New date</span><input class="input" type="date" id="rs-date" min="${dayKey(today0)}" value="${dayKey(Math.max(a.at, today0.getTime()))}" /></label><label><span class="lbl">Time</span><select class="input" id="rs-time">${SLOTS.map((h) => `<option value="${h}">${slotLabel(h)}</option>`).join("")}</select></label></div>
+    <p id="rs-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p><button class="btn btn-primary btn-lg" type="submit">Move appointment</button></form>`, () => {
+    $("#rs-form").addEventListener("submit", (e) => { e.preventDefault();
+      const at = new Date($("#rs-date").value + "T00:00:00").getTime() + parseFloat($("#rs-time").value) * 3600000, end = at + a.dur * 60000;
+      if (!(at > Date.now())) return ($("#rs-err").textContent = "Pick a time later than now.");
+      const clash = DATA.appts.find((x) => x !== a && x.staff === a.staff && ["Booked", "Confirmed", "Checked in"].includes(x.status) && x.at < end && x.at + x.dur * 60000 > at);
+      if (clash) return ($("#rs-err").textContent = `${staffName(a.staff)} is busy then (${clash.type.toLowerCase()} at ${fmtTime(clash.at)}).`);
+      a.at = at; a.status = "Booked"; DATA.appts.sort((x, y) => x.at - y.at); state.calDay = dayKey(at);
+      closeModal(); render(); toast(`Moved to ${dayLabel(at)} ${fmtTime(at)}`); });
+  });
+}
+function openRentalInfo(id) {
+  const r = DATA.rentals.find((x) => x.id === id), it = rentalItem(r.item), st = rentalStatus(r);
+  openModal("Rental", `<div class="stack"><p>${pill(RENT_TONE[st], st)} <b>${esc(it.name)}</b></p><p class="muted">${esc(r.customer)} · <span class="num">${r.phone}</span><br>${fmtDate(r.from, { weekday: "short", day: "numeric", month: "short" })} → ${fmtDate(r.to, { weekday: "short", day: "numeric", month: "short" })} · rent ${inr.format(it.fee)} · deposit ${inr.format(it.deposit)}</p>
+    <div class="row">${st === "Booked" ? `<button class="btn btn-primary" data-act="rentout" data-id="${r.id}">Hand over</button>` : ""}${["Out on rent", "Overdue"].includes(st) ? `<button class="btn btn-primary" data-act="rentreturn" data-id="${r.id}">Mark returned</button>` : ""}<button class="btn btn-ghost" data-go="rentals">All rentals</button></div></div>`);
+}
+function openPOInfo(no) {
+  const p = DATA.pos.find((x) => x.no === no);
+  openModal(p.no, `<div class="stack"><p>${pill(PO_TONE[p.status], p.status)} <b>${esc(DATA.suppliers.find((s) => s.id === p.supplier).name)}</b></p><p class="muted">${esc(p.items)} · ${inr.format(p.value)} · expected ${fmtDate(p.eta)}</p><div class="row"><button class="btn btn-primary" data-act="poreceive" data-no="${p.no}">Receive goods</button><button class="btn btn-ghost" data-go="purchases">All purchases</button></div></div>`);
+}
+function openExpense() {
+  openModal("Add expense", `<form id="ex-form" class="stack" novalidate>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Category</span><select class="input" id="ex-cat">${["Tea & snacks", "Courier", "Packaging", "Electricity", "Tailor wages", "Shop rent", "Repairs", "Marketing", "Other"].map((c) => `<option>${c}</option>`).join("")}</select></label><label><span class="lbl">Amount (₹)</span><input class="input num" id="ex-amt" inputmode="decimal" placeholder="0" /></label></div>
+    <div><span class="lbl">Paid by</span><div class="seg" id="ex-mode">${["CASH", "UPI", "BANK"].map((m, i) => `<button type="button" class="${i ? "" : "on"}" data-act="segpick" data-v="${m}">${m === "CASH" ? "Cash drawer" : m === "UPI" ? "UPI" : "Bank"}</button>`).join("")}</div></div>
+    <label><span class="lbl">Note (optional)</span><input class="input" id="ex-note" /></label>
+    <p id="ex-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p><button class="btn btn-primary btn-lg" type="submit">Save expense</button></form>`, () => {
+    $("#ex-amt").focus();
+    $("#ex-form").addEventListener("submit", (e) => { e.preventDefault();
+      const amount = parseFloat($("#ex-amt").value.replace(/[₹,]/g, ""));
+      if (!(amount > 0)) return ($("#ex-err").textContent = "Enter an amount above 0.");
+      const method = $("#ex-mode .on").dataset.v;
+      DATA.expenses.push({ at: Date.now(), cat: $("#ex-cat").value, amount, by: me().name, method, note: $("#ex-note").value.trim() });
+      closeModal(); render(); toast(`${$("#ex-cat").value || "Expense"} · ${inr.format(amount)} saved${method === "CASH" ? " · taken from drawer" : ""}`); });
+  });
+}
+function drawerToday() {
+  const cashIn = billsBetween(today0.getTime(), Date.now() + 1).filter((b) => b.method === "CASH").reduce((s, b) => s + b.total, 0);
+  const cashOut = DATA.expenses.filter((e) => e.at >= today0.getTime() && e.method === "CASH").reduce((s, e) => s + e.amount, 0);
+  return { cashIn, cashOut, expected: 5000 + cashIn - cashOut };
+}
+function zReportHTML(z) {
+  const t = billsBetween(today0.getTime(), Date.now() + 1), by = {}; t.forEach((b) => (by[b.method] = (by[b.method] || 0) + b.total));
+  const row = (k, v) => `<div style="display:flex;justify-content:space-between"><span>${k}</span><span>${v}</span></div>`;
+  return `<div class="paper t80" style="font-family:var(--font-mono)"><p style="text-align:center;font-weight:700">${esc(DATA.shop.name)} · ${esc(state.store)}</p><p style="text-align:center">Z REPORT · ${fmtDate(Date.now(), { day: "numeric", month: "short", year: "numeric" })}</p><div class="dash"></div>
+    ${row("Bills", t.length)}${row("Items", itemsOf(t))}${row("Net sales", inr.format(sumNet(t)))}${row("GST", inr2.format(t.reduce((s, b) => s + b.tax, 0)))}<div class="dash"></div>
+    ${Object.entries(by).map(([k, v]) => row(k, inr.format(v))).join("")}<div class="dash"></div>${row("Opening cash", inr.format(5000))}${row("Cash expenses", inr.format(z.cashOut))}${row("Expected", inr.format(z.expected))}${z.counted != null ? row("Counted", inr.format(z.counted)) + row("Difference", (z.diff >= 0 ? "+" : "") + inr.format(z.diff)) : ""}<div class="dash"></div><p style="text-align:center">Closed by ${esc(me().name)} · ${fmtTime(Date.now())}</p></div>`;
+}
+function openCloseShift() {
+  const z = drawerToday();
+  openModal("Close shift", `<form id="cs-form" class="stack" novalidate><p class="muted" style="margin-top:-8px">Expected in drawer: <b class="num">${inr.format(z.expected)}</b> (₹5,000 opening + ${inr.format(z.cashIn)} cash sales − ${inr.format(z.cashOut)} cash expenses)</p>
+    <label><span class="lbl">Cash counted (₹)</span><input class="input num" id="cs-count" inputmode="decimal" style="font-size:22px" value="${z.expected}" /></label><p class="small" id="cs-diff"></p>
+    <button class="btn btn-primary btn-lg" type="submit">${ic("print")} Close shift & print Z report</button></form>`, () => {
+    const upd = () => { const d = (parseFloat($("#cs-count").value) || 0) - z.expected; $("#cs-diff").innerHTML = d === 0 ? `<span style="color:var(--success)">Matches the expected amount.</span>` : `<span style="color:var(--danger)">${d > 0 ? "Over" : "Short"} by ${inr.format(Math.abs(d))}</span>`; };
+    $("#cs-count").addEventListener("input", upd); upd();
+    $("#cs-form").addEventListener("submit", (e) => { e.preventDefault();
+      const counted = parseFloat($("#cs-count").value); if (!(counted >= 0)) return;
+      const rec = { at: Date.now(), counted, expected: z.expected, diff: counted - z.expected, by: me().name };
+      DATA.shifts.push(rec); render();
+      openModal("Z report", `${zReportHTML({ ...z, ...rec })}<div class="row" style="margin-top:14px;justify-content:center"><button class="btn btn-primary" data-act="toastprint">${ic("print")} Print</button><button class="btn btn-ghost" data-act="close">Done</button></div>`); });
+  });
+}
+function openSimpleForm(title, fields, submitLabel, onSave) {
+  openModal(title, `<form id="sf-form" class="stack" novalidate>${fields.map(([id, label, attrs = "", opts]) => `<label><span class="lbl">${label}</span>${opts ? `<select class="input" id="sf-${id}">${opts.map((o) => `<option>${esc(o)}</option>`).join("")}</select>` : `<input class="input" id="sf-${id}" ${attrs} />`}</label>`).join("")}
+    <p id="sf-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p><button class="btn btn-primary btn-lg" type="submit">${submitLabel}</button></form>`, () => {
+    $("#sf-form input")?.focus();
+    $("#sf-form").addEventListener("submit", (e) => { e.preventDefault();
+      const v = {}; fields.forEach(([id]) => (v[id] = $("#sf-" + id).value.trim()));
+      const msg = onSave(v); if (msg) $("#sf-err").textContent = msg; });
+  });
+}
+const gcCode = () => "GC-" + Array.from({ length: 2 }, () => Array.from({ length: 4 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("")).join("-");
+const IMPORT_SAMPLE = [["Mirror-work Kurti", "Kurtis", "S,M,L", "Maroon", 1199, 1499, 560, 6], ["Leheriya Saree", "Sarees", "Free size", "Mustard", 2299, 2799, 1200, 4], ["Silk Dupatta", "Accessories", "", "Gold", 899, 1099, 380, 10], ["Velvet Blouse", "Blouses", "XXS", "Navy", 0, 999, 300, 3]];
+function openImport() {
+  openModal("Import products from Excel", `<div class="stack"><div class="drop">${ic("upload", 'width="28" height="28"')}<p style="font-weight:700;margin-top:6px">Choose an Excel or CSV file</p><p class="small muted">Columns: name, category, sizes, colours, price, MRP, cost, opening stock</p>
+    <div class="row" style="justify-content:center;margin-top:12px"><label class="btn btn-outline">Choose file<input type="file" id="imp-file" accept=".csv,.xlsx,.xls" hidden /></label><button class="btn btn-primary" data-act="impsample">Use sample sheet</button></div></div><div id="imp-prev"></div></div>`, () => {
+    $("#imp-file").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return;
+      if (!/\.csv$/i.test(f.name)) { toast(`${f.name} received — the demo previews the sample sheet`); return A.impsample(); }
+      f.text().then((t) => { const rows = t.split(/\r?\n/).slice(1).filter(Boolean).map((l) => l.split(",").map((x) => x.trim())).map((r) => [r[0], r[1], (r[2] || "").replace(/;/g, ","), r[3] || "", +r[4], +r[5] || +r[4], +r[6] || 0, +r[7] || 0]); showImportPreview(rows.length ? rows : IMPORT_SAMPLE); });
+    });
+  }, true);
+}
+let importRows = [];
+function showImportPreview(rows) {
+  importRows = rows.map((r) => ({ r, err: !r[0] ? "Name missing" : !(r[4] > 0) ? "Price missing" : DATA.products.some((p) => p.name.toLowerCase() === String(r[0]).toLowerCase()) ? "Already exists" : "" }));
+  const ok = importRows.filter((x) => !x.err).length;
+  $("#imp-prev").innerHTML = `<div class="scroll-x"><table class="tbl"><thead><tr><th>Name</th><th>Category</th><th>Sizes</th><th>Colours</th><th class="r">Price</th><th class="r">Stock</th><th>Check</th></tr></thead><tbody>${importRows.map(({ r, err }) => `<tr><td><b>${esc(r[0])}</b></td><td class="small">${esc(r[1])}</td><td class="small">${esc(r[2]) || "—"}</td><td class="small">${esc(r[3]) || "—"}</td><td class="r num">${r[4] ? inr.format(r[4]) : "—"}</td><td class="r num">${r[7]}</td><td>${err ? pill("danger", err) : pill("success", "Ready", "check")}</td></tr>`).join("")}</tbody></table></div>
+    <div class="between" style="margin-top:12px"><span class="small muted">${ok} of ${importRows.length} rows ready · rows with errors are skipped</span><button class="btn btn-primary" data-act="impgo" ${ok ? "" : "disabled"}>Import ${ok} product${ok === 1 ? "" : "s"}</button></div>`;
+}
+function openNotifSettings() { closeModal(); state.settingsTab = "notifications"; go("settings"); }
+
+Object.assign(A, {
+  calday: (d) => { state.calDay = d.v; render(); },
+  calmove: (d) => { const m = state.calMonth; state.calMonth = new Date(m.getFullYear(), m.getMonth() + +d.v, 1); render(); },
+  caltoday: () => { state.calMonth = new Date(today0.getFullYear(), today0.getMonth(), 1); state.calDay = dayKey(today0); render(); },
+  book: (d) => openBooking(d.date),
+  bkmode: (d) => { const isNew = d.v === "new"; $("#bk-new").hidden = !isNew; $("#bk-existing").hidden = isNew; document.querySelectorAll("[data-act=bkmode]").forEach((b) => b.classList.toggle("on", b.dataset.v === d.v)); (isNew ? $("#bk-name") : $("#bk-cust")).focus(); },
+  openev: (d) => (d.k === "appt" ? openAppt(d.id) : d.k === "order" ? openOrder(d.id) : d.k === "rental" ? openRentalInfo(d.id) : openPOInfo(d.id)),
+  apptrange: (d) => { state.apptRange = d.v; render(); },
+  apptset: (d) => {
+    const a = findAppt(d.id); a.status = d.v;
+    const c = DATA.customers.find((x) => x.id === a.customer);
+    if (d.v === "Checked in") notify("appt", `${c.name} has arrived`, `${a.type} with ${staffName(a.staff)}`, "appts");
+    render(); if (d.modal) { if (d.v === "Cancelled") closeModal(); else openAppt(a.id); }
+    toast({ Confirmed: `Confirmed · ${c.name}`, "Checked in": `${c.name} checked in`, Done: `${a.type} marked done`, "No-show": `${c.name} marked as no-show`, Cancelled: `Appointment cancelled · slot is free again` }[d.v]);
+  },
+  resched: (d) => openReschedule(d.id),
+  newrental: openRental,
+  rentout: (d) => { const r = DATA.rentals.find((x) => x.id === d.id), it = rentalItem(r.item); const busy = DATA.rentals.find((x) => x !== r && x.item === r.item && x.status === "Out on rent"); if (busy) return toast(`${it.name} is still out with ${busy.customer}`); r.status = "Out on rent"; r.from = Math.min(r.from, Date.now()); closeModal(); render(); toast(`Handed over to ${r.customer} · collected ${inr.format(it.fee)} rent + ${inr.format(it.deposit)} deposit`); },
+  rentcancel: (d) => { const r = DATA.rentals.find((x) => x.id === d.id); r.status = "Cancelled"; render(); toast(`Booking cancelled · ${rentalItem(r.item).name} is free on those dates`); },
+  rentreturn: (d) => { const r = DATA.rentals.find((x) => x.id === d.id), it = rentalItem(r.item); const late = rentalStatus(r) === "Overdue" ? 500 * lateDays(r) : 0; r.status = "Returned"; r.returnedAt = Date.now(); closeModal(); render(); toast(`Returned · refund ${inr.format(Math.max(0, it.deposit - late))} deposit${late ? ` (${inr.format(late)} late fee kept)` : ""}`); },
+  newpo: openNewPO,
+  posend: (d) => { const p = DATA.pos.find((x) => x.no === d.no); p.status = "Sent"; render(); toast(`${p.no} sent to ${DATA.suppliers.find((s) => s.id === p.supplier).name} on WhatsApp`); },
+  poreceive: (d) => {
+    const p = DATA.pos.find((x) => x.no === d.no), prod = DATA.products.find((x) => x.id === p.pid);
+    if (prod) { const vs = prod.variants; vs.forEach((v, i) => (v.stock += Math.floor(p.qty / vs.length) + (i < p.qty % vs.length ? 1 : 0))); }
+    p.status = "Received"; closeModal(); render(); toast(`${p.no} received · ${p.qty} pcs added to stock${prod ? ` across ${prod.variants.length} variants` : ""}`);
+  },
+  pobill: (d) => { const p = DATA.pos.find((x) => x.no === d.no), s = DATA.suppliers.find((x) => x.id === p.supplier); p.status = "Billed"; s.due += p.value; render(); toast(`Supplier bill recorded · you now owe ${s.name} ${inr.format(s.due)}`); },
+  paysup: (d) => { const s = DATA.suppliers.find((x) => x.id === d.id); openSimpleForm(`Pay ${s.name}`, [["amt", `Amount (₹) · due ${inr.format(s.due)}`, `class="input num" inputmode="decimal" value="${s.due}"`], ["mode", "Mode", "", ["Bank transfer", "UPI", "Cash", "Cheque"]]], "Record payment", (v) => {
+    const amt = parseFloat(v.amt.replace(/[₹,]/g, "")); if (!(amt > 0) || amt > s.due) return `Enter an amount between ₹1 and ${inr.format(s.due)}.`;
+    s.due -= amt; DATA.expenses.push({ at: Date.now(), cat: "Supplier payment", amount: amt, by: me().name, method: v.mode === "Cash" ? "CASH" : v.mode === "UPI" ? "UPI" : "BANK", note: s.name }); closeModal(); render(); toast(`Paid ${inr.format(amt)} to ${s.name}${s.due ? ` · ${inr.format(s.due)} left` : " · settled"}`); }); },
+  newexpense: openExpense,
+  segpick: (d, el) => el.parentElement.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === el)),
+  closeshift: openCloseShift,
+  zreport: () => { const z = drawerToday(), rec = DATA.shifts.find((x) => startOfDay(x.at) === today0.getTime()); openModal("Z report", `${zReportHTML({ ...z, ...rec })}<div class="row" style="margin-top:14px;justify-content:center"><button class="btn btn-primary" data-act="toastprint">${ic("print")} Print</button></div>`); },
+  offertoggle: (d) => { const o = DATA.offers[+d.i]; o.active = !o.active; if (o.active && o.until <= 0) o.until = 14; render(); toast(`${o.name} ${o.active ? "is live at billing" : "paused"}`); },
+  newoffer: () => openSimpleForm("New offer", [["name", "Offer name", 'placeholder="e.g. Weekend 10% off kurtis"'], ["cat", "Applies to", "", ["All items", ...new Set(DATA.products.map((p) => p.cat))]], ["pct", "Discount %", 'class="input num" inputmode="numeric" value="10"'], ["days", "Runs for (days)", 'class="input num" inputmode="numeric" value="7"']], "Create offer", (v) => {
+    const pct = parseInt(v.pct), days = parseInt(v.days); if (v.name.length < 3) return "Give the offer a name."; if (!(pct > 0 && pct <= 90)) return "Discount must be 1–90%."; if (!(days > 0)) return "Enter how many days it runs.";
+    DATA.offers.unshift({ name: v.name, rule: `${pct}% on ${v.cat === "All items" ? "all items" : "category " + v.cat}`, until: days, active: true, used: 0 }); closeModal(); render(); toast(`${v.name} is live`); }),
+  newcoupon: () => openSimpleForm("New coupon", [["code", "Code", 'class="input mono" placeholder="e.g. FESTIVE20" style="text-transform:uppercase"'], ["value", "What it gives", 'placeholder="e.g. 20% off above ₹3,000"'], ["limit", "Total uses", 'class="input num" inputmode="numeric" value="100"']], "Create coupon", (v) => {
+    const code = v.code.toUpperCase().replace(/\s+/g, ""); if (!/^[A-Z0-9]{4,15}$/.test(code)) return "Code must be 4–15 letters or numbers."; if (DATA.coupons.some((c) => c.code === code)) return "That code already exists."; if (!v.value) return "Describe the discount.";
+    DATA.coupons.unshift({ code, value: v.value, uses: `0 / ${parseInt(v.limit) || "∞"}`, status: "Active" }); closeModal(); render(); toast(`Coupon ${code} created`); }),
+  gccheck: () => { const code = $("#gc-check").value.trim().toUpperCase(), g = DATA.giftCards.find((x) => x.code === code); $("#gc-res").innerHTML = !code ? "Enter a code." : g ? `<span style="color:var(--success)">Balance ${inr.format(g.balance)} · valid ${g.expires} more days</span>` : `<span style="color:var(--danger)">No gift card with that code.</span>`; },
+  gcsell: () => openSimpleForm("Sell gift card", [["amt", "Value (₹)", 'class="input num" inputmode="numeric" value="2000"'], ["to", "For (optional)", 'placeholder="Recipient name"']], "Create gift card", (v) => {
+    const amt = parseInt(v.amt); if (!(amt >= 100)) return "Minimum value is ₹100.";
+    const g = { code: gcCode(), balance: amt, expires: 365, to: v.to }; DATA.giftCards.unshift(g); closeModal(); render(); toast(`Gift card ${g.code} · ${inr.format(amt)} issued`); }),
+  newstaff: () => openSimpleForm("Add staff", [["name", "Name", 'autocomplete="off"'], ["role", "Role", "", ["Cashier", "Manager", "Stock staff", "Tailor", "Accountant"]], ["pin", "4-digit PIN", 'class="input num" inputmode="numeric" maxlength="4"'], ["com", "Commission %", 'class="input num" inputmode="decimal" value="1"']], "Add staff", (v) => {
+    if (v.name.length < 2) return "Enter a name."; if (!/^\d{4}$/.test(v.pin)) return "PIN must be 4 digits.";
+    DATA.staff.push({ id: "s" + Date.now(), name: v.name, role: v.role, pin: v.pin, inAt: null, commission: parseFloat(v.com) || 0 }); closeModal(); render(); toast(`${v.name} added · they sign in with their PIN`); }),
+  clock: (d) => { const s = DATA.staff.find((x) => x.id === d.id); s.inAt = s.inAt ? null : fmtTime(Date.now()); render(); toast(`${s.name} clocked ${s.inAt ? "in at " + s.inAt : "out"}`); },
+  perm: (d) => { const row = PERMS[+d.p][1]; row[+d.r] = row[+d.r] ? 0 : 1; render(); toast(`${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"][+d.r]}: ${PERMS[+d.p][0]} ${row[+d.r] ? "allowed" : "blocked"}`); },
+  newcust: (d) => openNewCustomer(!!d.attach),
+  importprod: openImport,
+  impsample: () => showImportPreview(IMPORT_SAMPLE),
+  impgo: () => {
+    const ok = importRows.filter((x) => !x.err);
+    ok.forEach(({ r }) => { const sizes = r[2] ? String(r[2]).split(",").map((x) => x.trim()).filter(Boolean) : [], cols = r[3] ? String(r[3]).split(",").map((x) => x.trim()).filter((c) => SWATCH[c]) : []; const n = Math.max(1, sizes.length || 1) * Math.max(1, cols.length || 1); const each = Math.max(0, Math.floor(r[7] / n)); DATA.products.unshift(product(r[0], r[1] || "General", "GOODS", "6204", r[4], r[5] || r[4], r[6] || Math.round(r[4] * 0.5), sizes, cols, () => each)); });
+    closeModal(); render(); toast(`${ok.length} products imported with barcodes · ${importRows.length - ok.length} skipped`);
+  },
+  bell: openNotifications,
+  notifread: () => { buildNotifications().forEach((n) => state.readNotifs.includes(n.key) || state.readNotifs.push(n.key)); updateBell(); openNotifications(); },
+  notifprefs: openNotifSettings,
+  notifopen: (d) => { if (!state.readNotifs.includes(d.key)) state.readNotifs.push(d.key); closeModal(); go(d.goTo); },
+  notiftoggle: (d) => { const p = state.notifPrefs[d.k]; p.on = !p.on; render(); toast(`${NOTIF_TYPES.find((t) => t[0] === d.k)[1]} ${p.on ? "on" : "off"}`); },
+  notifchannel: (d) => { state.notifPrefs[d.k].channel = d.v; render(); },
+  notiftest: () => { notify("sales", "Test notification", "Alerts are working on this device", "dashboard"); updateBell(); toast("Test notification sent — check the bell"); },
+  saveprofile: () => {
+    const name = $("#pf-name").value.trim(), phone = $("#pf-phone").value.replace(/\D/g, "");
+    if (name.length < 2) return ($("#pf-err").textContent = "Enter your name.");
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) return ($("#pf-err").textContent = "Enter a 10-digit mobile number.");
+    const m = me(); m.name = name; m.phone = phone; m.email = $("#pf-email").value.trim(); m.lang = $("#pf-lang").value; render(); toast("Profile saved");
+  },
+  resetdemo: () => { if (!confirm("Reset the demo? Everything you added will be cleared.")) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage blocked */ } location.hash = ""; location.reload(); },
+});
 document.addEventListener("click", (e) => {
   const nav = e.target.closest("[data-route]");
   if (nav) { e.preventDefault(); return go(nav.dataset.route); }
@@ -1283,6 +1821,7 @@ window.addEventListener("hashchange", () => { const h = location.hash.slice(1); 
 (function boot() {
   const h = (location.hash || "").slice(1);
   if (V[h]) state.route = h;
+  loadDemo();
   applySkin();
   render();
 })();
