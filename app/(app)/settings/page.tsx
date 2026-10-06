@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { Appearance } from "./appearance";
 import { StoreForm } from "./store-form";
+import { BillingForm } from "./billing-form";
 
 export const metadata = { title: "Settings" };
 
@@ -34,6 +35,13 @@ export default async function SettingsPage() {
           </section>
         )}
       </div>
+      {user.store && canManage && (
+        <section id="billing" className="card scroll-mt-4">
+          <h2 className="text-xl font-semibold">Billing & receipts</h2>
+          <p className="mb-5 mt-1 text-sm text-muted">Paper size, what prints on bills, discount limits and your monthly goal.</p>
+          <BillingForm store={user.store} />
+        </section>
+      )}
     </div>
   );
 }

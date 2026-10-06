@@ -49,3 +49,36 @@ export async function saveAppearanceAction(formData: FormData) {
   await db.user.update({ where: { id: user.id }, data: parsed.data });
   revalidatePath("/", "layout");
 }
+
+const billingSchema = z.object({
+  receiptPaper: z.enum(["THERMAL_58", "THERMAL_80", "A5", "A4"]),
+  receiptFooter: opt(200),
+  returnPolicy: opt(300),
+  roundOff: z.literal("on").optional(),
+  allowNegativeStock: z.literal("on").optional(),
+  cashierMaxDiscount: z.coerce.number().min(0, "Discount limit can't be negative").max(100, "Discount limit is a percentage up to 100"),
+  monthlyTarget: z.union([z.literal(""), z.coerce.number().min(0).max(100_000_000)]).optional(),
+});
+
+export async function saveBillingAction(_prev: SettingsState, formData: FormData): Promise<SettingsState> {
+  const user = await requirePermission("settings.manage");
+  if (!user.storeId) return { error: "No store linked to your account." };
+  const parsed = billingSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const d = parsed.data;
+  await db.store.update({
+    where: { id: user.storeId, tenantId: user.tenantId },
+    data: {
+      receiptPaper: d.receiptPaper,
+      receiptFooter: d.receiptFooter,
+      returnPolicy: d.returnPolicy,
+      roundOff: d.roundOff === "on",
+      allowNegativeStock: d.allowNegativeStock === "on",
+      cashierMaxDiscountBp: Math.round(d.cashierMaxDiscount * 100),
+      monthlyTarget: d.monthlyTarget === "" || d.monthlyTarget === undefined ? null : Math.round(d.monthlyTarget * 100),
+    },
+  });
+  await audit(user.tenantId, user.id, "settings.billing.update", { entity: "store", entityId: user.storeId });
+  revalidatePath("/", "layout");
+  return { ok: "Billing settings saved." };
+}

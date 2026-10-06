@@ -58,6 +58,8 @@ export const itemInput = z.object({
     .transform((v) => v || null)
     .refine((v) => !v || /^\d{4,8}$/.test(v), "HSN/SAC code: 4–8 digits"),
   gstRateBp: z.coerce.number().int().min(0).max(4000),
+  gstSlabAbove: z.coerce.number().int().min(1).max(100_000_000).nullable().optional(),
+  gstHighRateBp: z.coerce.number().int().min(0).max(4000).nullable().optional(),
   taxInclusive: z.boolean().default(true),
   priceAtCounter: z.boolean().default(false),
   turnaroundDays: z.coerce.number().int().min(0).max(365).nullable().optional(),
@@ -115,6 +117,8 @@ export async function saveItem(tx: Tx, tenantId: string, userId: string, input: 
     description: input.description,
     taxCode: input.taxCode,
     gstRateBp: input.gstRateBp,
+    gstSlabAbove: input.gstSlabAbove && input.gstHighRateBp != null ? input.gstSlabAbove : null,
+    gstHighRateBp: input.gstSlabAbove && input.gstHighRateBp != null ? input.gstHighRateBp : null,
     taxInclusive: input.taxInclusive,
     priceAtCounter: input.type === "SERVICE" ? input.priceAtCounter : false,
     turnaroundDays: input.type === "SERVICE" ? (input.turnaroundDays ?? null) : null,

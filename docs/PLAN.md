@@ -1,7 +1,7 @@
 # AuraPOS — Product & Build Plan
 
 > Product name: **AuraPOS**.
-> Status: Phases 0–2 built (brand, themes, sign-up, login, roles, PIN, dashboard, products & stock). Plan version 3 — this is a **commercial product sold to many
+> Status: Phases 0–3 built (brand, themes, sign-up, login, roles, PIN, dashboard, products & stock, billing). Plan version 3 — this is a **commercial product sold to many
 > boutiques** (multi-tenant SaaS), see §15. v2 added goods & services, stock status, order statuses.
 
 ---

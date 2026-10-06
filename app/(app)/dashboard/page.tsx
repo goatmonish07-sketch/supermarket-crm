@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { can, ROLE_LABELS } from "@/lib/permissions";
 import { formatMoney } from "@/lib/utils";
+import { dayRange, localDate, monthRange } from "@/lib/dates";
 import { Avatar } from "@/components/ui/avatar";
 import { Gauge } from "@/components/ui/gauge";
 import { LiveClock } from "@/components/ui/live-clock";
@@ -31,12 +32,34 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   ]);
 
   const store = user.store;
+  const tz = store?.timezone ?? "Asia/Kolkata";
+  const today = dayRange(localDate(new Date(), tz), tz);
+  const yesterday = { start: new Date(today.start.getTime() - 86_400_000), end: today.start };
+  const month = monthRange(new Date(), tz);
+
+  const salesIn = async (r: { start: Date; end: Date }) => {
+    const where = { tenantId: user.tenantId, status: { not: "CANCELLED" as const }, createdAt: { gte: r.start, lt: r.end } };
+    const [agg, items, refunds] = await Promise.all([
+      db.sale.aggregate({ where, _sum: { total: true }, _count: true }),
+      db.saleItem.aggregate({ where: { sale: where }, _sum: { qty: true, returnedQty: true } }),
+      db.saleReturn.aggregate({ where: { tenantId: user.tenantId, createdAt: { gte: r.start, lt: r.end } }, _sum: { amount: true } }),
+    ]);
+    const net = (agg._sum.total ?? 0) - (refunds._sum.amount ?? 0);
+    return { net, bills: agg._count, items: (items._sum.qty ?? 0) - (items._sum.returnedQty ?? 0) };
+  };
+  const [t, y, m, saleCount] = await Promise.all([salesIn(today), salesIn(yesterday), salesIn(month), db.sale.count({ where: { tenantId: user.tenantId } })]);
+  const avg = (x: { net: number; bills: number }) => (x.bills ? Math.round(x.net / x.bills) : 0);
+  const change = (now: number, before: number, fmt: (n: number) => string) =>
+    now === 0 && before === 0 ? undefined : { value: fmt(Math.abs(now - before)), up: now >= before, caption: "vs yesterday" };
+  const target = store?.monthlyTarget ?? 0;
+  const targetPct = target > 0 ? Math.min(100, Math.round((m.net / target) * 100)) : 0;
+
   const checklist = [
     { label: "Add shop address & GSTIN", done: Boolean(store?.address && store?.gstin), href: "/settings" },
     { label: "Pick your theme", done: user.theme !== "emerald" || user.themeMode !== "SYSTEM", href: "/settings" },
     { label: "Add a staff member", done: staffCount > 1, href: "/team" },
     { label: "Add products & services", done: itemCount > 0, href: itemCount > 0 ? "/products" : "/products/new" },
-    { label: "Make your first bill", done: false, href: "/billing" },
+    { label: "Make your first bill", done: saleCount > 0, href: "/billing" },
   ];
   const doneCount = checklist.filter((c) => c.done).length;
 
@@ -76,10 +99,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-          <StatCard featured label="Today's Sales" value={formatMoney(0)} note="Starts with your first bill" href="/reports" />
-          <StatCard label="Bills Today" value="0" note="No bills yet" href="/billing" />
-          <StatCard label="Avg. Bill Value" value={formatMoney(0)} note="Updates as you sell" href="/reports" />
-          <StatCard label="Items Sold" value="0" note="Across all products" href="/reports" />
+          <StatCard
+            featured
+            label="Today's Sales"
+            value={formatMoney(t.net)}
+            change={change(t.net, y.net, formatMoney)}
+            note={t.bills ? undefined : "Starts with your first bill"}
+            href="/billing/day-end"
+          />
+          <StatCard label="Bills Today" value={String(t.bills)} change={change(t.bills, y.bills, String)} note="No bills yet" href="/billing/bills" />
+          <StatCard label="Avg. Bill Value" value={formatMoney(avg(t))} change={change(avg(t), avg(y), formatMoney)} note="Updates as you sell" href="/billing/bills" />
+          <StatCard label="Items Sold" value={String(t.items)} change={change(t.items, y.items, String)} note="Across all products" href="/billing/day-end" />
         </div>
       </section>
 
@@ -140,9 +170,25 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
         <section className="card flex flex-col">
           <h2 className="text-2xl font-semibold">Monthly Target</h2>
+          <p className="mt-1 text-sm text-muted">
+            <span className="tabular font-semibold text-fg">{formatMoney(m.net)}</span>
+            {target > 0 ? (
+              <>
+                {" "}
+                of <span className="tabular">{formatMoney(target)}</span>
+              </>
+            ) : (
+              " this month"
+            )}
+          </p>
           <div className="flex flex-1 items-center py-6">
-            <Gauge percent={0} label="of this month's target" />
+            <Gauge percent={targetPct} label={target > 0 ? "of this month's target" : "no target set"} />
           </div>
+          {target === 0 && can(user.role, "settings.manage") && (
+            <Link href="/settings#billing" className="btn-ghost mb-2 h-11 self-center text-sm">
+              Set a monthly target
+            </Link>
+          )}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted">
             <span className="inline-flex items-center gap-2">
               <span className="h-3.5 w-3.5 rounded-full bg-primary" /> Achieved

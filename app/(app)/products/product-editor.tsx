@@ -34,6 +34,9 @@ export type EditorItem = {
   description: string;
   taxCode: string;
   gstRateBp: number;
+  gstSlab: boolean; // rate depends on per-piece value
+  gstSlabAbove: string; // rupees
+  gstHighRateBp: number;
   taxInclusive: boolean;
   priceAtCounter: boolean;
   turnaroundDays: string;
@@ -109,6 +112,8 @@ export function ProductEditor({ initial, categories }: { initial: EditorItem; ca
         description: item.description,
         taxCode: item.taxCode,
         gstRateBp: item.gstRateBp,
+        gstSlabAbove: item.gstSlab && Number(item.gstSlabAbove) > 0 ? Math.round(Number(item.gstSlabAbove) * 100) : null,
+        gstHighRateBp: item.gstSlab ? item.gstHighRateBp : null,
         taxInclusive: item.taxInclusive,
         priceAtCounter: item.priceAtCounter,
         turnaroundDays: item.turnaroundDays === "" ? null : item.turnaroundDays,
@@ -262,6 +267,33 @@ export function ProductEditor({ initial, categories }: { initial: EditorItem; ca
               </div>
             )}
           </div>
+          {!isService && (
+            <div className="rounded-2xl bg-surface-2 p-4">
+              <Toggle
+                label="Rate depends on price per piece"
+                hint="For ready-made garments: lower rate up to the limit, higher rate above it."
+                checked={item.gstSlab}
+                onChange={(v) => set("gstSlab", v)}
+              />
+              {item.gstSlab && (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <MoneyInput label="Price limit per piece" value={item.gstSlabAbove} onChange={(v) => set("gstSlabAbove", v)} hint="Value before GST, e.g. 2500" />
+                  <div>
+                    <label htmlFor="gst-high" className="label">
+                      GST above the limit
+                    </label>
+                    <select id="gst-high" className="input" value={item.gstHighRateBp} onChange={(e) => set("gstHighRateBp", Number(e.target.value))}>
+                      {GST_RATES_BP.map((bp) => (
+                        <option key={bp} value={bp}>
+                          {formatRate(bp)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {stock && !hasVariants && (
             <div className="grid gap-4 sm:grid-cols-2">
               {singleRow.id ? (

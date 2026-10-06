@@ -60,6 +60,17 @@ model Tenant {
   items          Item[]
   variants       Variant[]
   stockMovements StockMovement[]
+  customers      Customer[]
+  sales          Sale[]
+  heldBills      HeldBill[]
+  saleReturns    SaleReturn[]
+}
+
+enum ReceiptPaper {
+  THERMAL_58
+  THERMAL_80
+  A5
+  A4
 }
 
 model Store {
@@ -78,11 +89,21 @@ model Store {
   timezone  String   @default("Asia/Kolkata")
   invoicePrefix String @default("INV")
   logoUrl   String?
+  // Billing & receipts
+  receiptPaper         ReceiptPaper @default(THERMAL_80)
+  receiptFooter        String?      @default("Thank you for shopping with us!")
+  returnPolicy         String?      @default("Exchange within 7 days with bill. No cash refunds on sale items.")
+  roundOff             Boolean      @default(true)
+  allowNegativeStock   Boolean      @default(false)
+  cashierMaxDiscountBp Int          @default(1000) // 10% without manager approval
+  monthlyTarget        Int? // paise, for the dashboard gauge
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  users  User[]
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users           User[]
+  sales           Sale[]
+  invoiceCounters InvoiceCounter[]
 
   @@index([tenantId])
 }
@@ -108,6 +129,10 @@ model User {
   store          Store?          @relation(fields: [storeId], references: [id], onDelete: SetNull)
   auditLogs      AuditLog[]
   stockMovements StockMovement[]
+  salesRung      Sale[]          @relation("cashier")
+  salesSold      Sale[]          @relation("salesperson")
+  heldBills      HeldBill[]
+  saleReturns    SaleReturn[]
 
   // Email is unique per business, not globally, so one person can own two shops.
   @@unique([tenantId, email])
@@ -172,6 +197,9 @@ model Item {
   description    String?
   taxCode        String? // HSN for goods, SAC for services
   gstRateBp      Int      @default(500) // basis points: 500 = 5%
+  // Garment rule: when the per-piece value is above gstSlabAbove (paise), use gstHighRateBp.
+  gstSlabAbove   Int?
+  gstHighRateBp  Int?
   taxInclusive   Boolean  @default(true)
   priceAtCounter Boolean  @default(false) // service price decided while billing
   turnaroundDays Int? // services: default days until ready
@@ -215,6 +243,7 @@ model Variant {
   tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   item      Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
   movements StockMovement[]
+  saleItems SaleItem[]
 
   @@unique([tenantId, sku])
   @@unique([tenantId, barcode])
@@ -239,4 +268,172 @@ model StockMovement {
 
   @@index([tenantId, createdAt])
   @@index([variantId, createdAt])
+}
+
+// ─── Billing (Phase 3) ───────────────────────────────────────────────────────
+
+enum SaleStatus {
+  PAID
+  PARTLY_PAID // balance due (credit / khata)
+  UNPAID
+  CANCELLED
+}
+
+enum ReturnState {
+  NONE
+  PARTLY_RETURNED
+  RETURNED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK
+  OTHER
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  tenantId  String
+  name      String
+  phone     String
+  email     String?
+  birthday  DateTime?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sales  Sale[]
+
+  @@unique([tenantId, phone])
+  @@index([tenantId, name])
+}
+
+/// Sequential invoice numbers per store and Indian financial year (Apr–Mar).
+model InvoiceCounter {
+  storeId String
+  fy      String // e.g. "2026-27"
+  last    Int    @default(0)
+
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@id([storeId, fy])
+}
+
+model Sale {
+  id            String      @id @default(cuid())
+  tenantId      String
+  storeId       String
+  number        String // e.g. DB/2026-27/00042
+  fy            String
+  seq           Int
+  status        SaleStatus  @default(PAID)
+  returnState   ReturnState @default(NONE)
+  customerId    String?
+  cashierId     String?
+  salespersonId String?
+  // Money in paise
+  grossTotal    Int // sum of list price x qty
+  discountTotal Int // line + bill discounts
+  taxableTotal  Int
+  taxTotal      Int
+  roundOff      Int
+  total         Int // amount payable
+  paidTotal     Int
+  changeGiven   Int         @default(0)
+  refundedTotal Int         @default(0)
+  billDiscount  Int         @default(0) // the bill-level part of discountTotal
+  approvedById  String? // manager who approved an over-limit discount / price change
+  note          String?
+  cancelledAt   DateTime?
+  cancelReason  String?
+  createdAt     DateTime    @default(now())
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  store       Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  cashier     User?        @relation("cashier", fields: [cashierId], references: [id], onDelete: SetNull)
+  salesperson User?        @relation("salesperson", fields: [salespersonId], references: [id], onDelete: SetNull)
+  items       SaleItem[]
+  payments    Payment[]
+  returns     SaleReturn[]
+
+  @@unique([storeId, fy, seq])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, number])
+}
+
+model SaleItem {
+  id           String  @id @default(cuid())
+  saleId       String
+  variantId    String?
+  // Snapshot at time of sale
+  name         String
+  size         String?
+  colour       String?
+  sku          String?
+  taxCode      String?
+  itemType     ItemType
+  qty          Int
+  unitPrice    Int // list price per unit (paise)
+  lineDiscount Int // discount on this line incl. share of bill discount
+  taxRateBp    Int
+  taxable      Int
+  tax          Int
+  total        Int // taxable + tax
+  returnedQty  Int     @default(0)
+  note         String?
+
+  sale    Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  variant Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([saleId])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  saleId    String
+  method    PaymentMethod
+  amount    Int // paise; negative for refunds
+  reference String?
+  createdAt DateTime      @default(now())
+
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+}
+
+model SaleReturn {
+  id        String        @id @default(cuid())
+  tenantId  String
+  saleId    String
+  userId    String?
+  amount    Int // paise refunded
+  method    PaymentMethod
+  reason    String?
+  lines     Json // [{ saleItemId, qty, amount }]
+  createdAt DateTime      @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}
+
+/// Parked cart that any counter in the shop can resume.
+model HeldBill {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?
+  label     String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
 }
