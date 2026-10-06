@@ -36,7 +36,7 @@ export default async function TeamPage() {
                 {!locked && (
                   <form action={toggleStaffAction}>
                     <input type="hidden" name="id" value={s.id} />
-                    <button className="btn-ghost h-9 px-3 text-xs">{s.active ? "Deactivate" : "Activate"}</button>
+                    <button className="btn-ghost h-11 px-4 text-sm">{s.active ? "Deactivate" : "Activate"}</button>
                   </form>
                 )}
               </li>

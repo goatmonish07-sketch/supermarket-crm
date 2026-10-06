@@ -21,9 +21,12 @@ export function AppShell({ user, shopName, allowedHrefs, children }: Props) {
 
   return (
     <div className="lg:flex">
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <Sidebar main={main} general={GENERAL_NAV} open={open} onClose={() => setOpen(false)} />
-      <div className="min-w-0 flex-1 px-3 pb-10 pt-3 sm:px-4 lg:py-4 lg:pl-0">
-        <header className="flex items-center gap-3 rounded-card bg-surface/80 p-3 shadow-card backdrop-blur sm:p-4">
+      <div className="min-w-0 flex-1 px-3 pb-10 pt-3 sm:px-4 lg:py-4 lg:pl-0 print:p-0">
+        <header className="flex items-center gap-3 print:hidden rounded-card bg-surface/80 p-3 shadow-card backdrop-blur sm:p-4">
           <button type="button" onClick={() => setOpen(true)} className="btn-ghost h-11 w-11 p-0 lg:hidden" aria-label="Open menu">
             <Menu className="h-6 w-6" />
           </button>
@@ -47,7 +50,7 @@ export function AppShell({ user, shopName, allowedHrefs, children }: Props) {
             <Avatar name={user.name} />
           </Link>
         </header>
-        <main className="mt-4">{children}</main>
+        <main id="main" tabIndex={-1} className="mt-4 focus:outline-none print:mt-0">{children}</main>
       </div>
     </div>
   );

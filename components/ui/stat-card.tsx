@@ -27,14 +27,14 @@ export function StatCard({ label, value, change, note, href = "#", featured }: P
           href={href}
           aria-label={`Open ${label}`}
           className={cn(
-            "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition",
+            "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition",
             featured ? "bg-primary-fg text-primary-strong hover:scale-105" : "border-2 border-fg/80 hover:bg-surface-2",
           )}
         >
           <ArrowUpRight className="h-4 w-4" />
         </Link>
       </div>
-      <p className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{value}</p>
+      <p className="tabular mt-4 text-4xl font-bold tracking-tight sm:text-5xl">{value}</p>
       {change ? (
         <p className={cn("mt-3 flex items-center gap-2 text-xs", featured ? "text-primary-fg/80" : "text-muted")}>
           <span

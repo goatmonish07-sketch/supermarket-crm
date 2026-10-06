@@ -49,12 +49,17 @@ model Tenant {
   plan        Plan         @default(TRIAL)
   status      TenantStatus @default(ACTIVE)
   trialEndsAt DateTime?
+  barcodeSeq  Int          @default(0) // last in-store barcode number issued
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  stores    Store[]
-  users     User[]
-  auditLogs AuditLog[]
+  stores         Store[]
+  users          User[]
+  auditLogs      AuditLog[]
+  categories     Category[]
+  items          Item[]
+  variants       Variant[]
+  stockMovements StockMovement[]
 }
 
 model Store {
@@ -99,9 +104,10 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  store     Store?     @relation(fields: [storeId], references: [id], onDelete: SetNull)
-  auditLogs AuditLog[]
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  store          Store?          @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  auditLogs      AuditLog[]
+  stockMovements StockMovement[]
 
   // Email is unique per business, not globally, so one person can own two shops.
   @@unique([tenantId, email])
@@ -122,4 +128,115 @@ model AuditLog {
   user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, createdAt])
+}
+
+// ─── Catalogue & stock (Phase 2) ────────────────────────────────────────────
+
+enum ItemType {
+  GOODS // stock tracked per variant
+  SERVICE // alteration, stitching, styling… no stock
+  RENTAL // stock tracked, goes out on rent
+  NON_INVENTORY // carry bag, custom charge… no stock
+}
+
+enum MovementType {
+  OPENING
+  STOCK_IN
+  STOCK_OUT
+  DAMAGED
+  COUNT_CORRECTION
+  SALE
+  RETURN
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  Item[]
+
+  @@unique([tenantId, name])
+}
+
+model Item {
+  id             String   @id @default(cuid())
+  tenantId       String
+  categoryId     String?
+  type           ItemType @default(GOODS)
+  name           String
+  brand          String?
+  collection     String? // season / collection, e.g. "Diwali 2026"
+  description    String?
+  taxCode        String? // HSN for goods, SAC for services
+  gstRateBp      Int      @default(500) // basis points: 500 = 5%
+  taxInclusive   Boolean  @default(true)
+  priceAtCounter Boolean  @default(false) // service price decided while billing
+  turnaroundDays Int? // services: default days until ready
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants Variant[]
+
+  @@index([tenantId, active])
+  @@index([tenantId, name])
+}
+
+/// A sellable unit. Every item has at least one variant (size/colour may be empty).
+model Variant {
+  id           String  @id @default(cuid())
+  tenantId     String
+  itemId       String
+  size         String?
+  colour       String?
+  sku          String
+  barcode      String
+  mrp          Int // paise
+  price        Int // paise, selling price
+  cost         Int? // paise, hidden from cashiers
+  reorderLevel Int     @default(2)
+  // Stock buckets. available = onHand - reserved - inAlteration - damaged
+  onHand       Int     @default(0)
+  reserved     Int     @default(0)
+  inAlteration Int     @default(0)
+  damaged      Int     @default(0)
+  onRent       Int     @default(0)
+  onOrder      Int     @default(0)
+  sortOrder    Int     @default(0)
+  active       Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  item      Item            @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  movements StockMovement[]
+
+  @@unique([tenantId, sku])
+  @@unique([tenantId, barcode])
+  @@index([itemId])
+}
+
+/// Append-only stock ledger. Stock is never edited without a movement row.
+model StockMovement {
+  id           String       @id @default(cuid())
+  tenantId     String
+  variantId    String
+  userId       String?
+  type         MovementType
+  qty          Int // signed change to onHand (or damaged bucket for DAMAGED)
+  balanceAfter Int // onHand after this movement
+  reason       String?
+  createdAt    DateTime     @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variant Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([variantId, createdAt])
 }

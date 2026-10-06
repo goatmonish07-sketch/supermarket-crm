@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, Circle, PackagePlus, Plus, ReceiptText, UserPlus } from "lucide-react";
+import { CheckCircle2, Circle, PackagePlus, PartyPopper, Plus, ReceiptText, UserPlus } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { can, ROLE_LABELS } from "@/lib/permissions";
@@ -25,14 +25,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     orderBy: [{ active: "desc" }, { createdAt: "asc" }],
     take: 5,
   });
-  const staffCount = await db.user.count({ where: { tenantId: user.tenantId } });
+  const [staffCount, itemCount] = await Promise.all([
+    db.user.count({ where: { tenantId: user.tenantId } }),
+    db.item.count({ where: { tenantId: user.tenantId, active: true } }),
+  ]);
 
   const store = user.store;
   const checklist = [
     { label: "Add shop address & GSTIN", done: Boolean(store?.address && store?.gstin), href: "/settings" },
     { label: "Pick your theme", done: user.theme !== "emerald" || user.themeMode !== "SYSTEM", href: "/settings" },
     { label: "Add a staff member", done: staffCount > 1, href: "/team" },
-    { label: "Add products & services", done: false, href: "/products" },
+    { label: "Add products & services", done: itemCount > 0, href: itemCount > 0 ? "/products" : "/products/new" },
     { label: "Make your first bill", done: false, href: "/billing" },
   ];
   const doneCount = checklist.filter((c) => c.done).length;
@@ -47,9 +50,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <section className="card">
         {welcome && (
-          <div className="mb-6 rounded-2xl bg-primary-soft px-4 py-3 text-sm">
-            🎉 Your shop is ready. Your <strong>Shop ID</strong> for logging in is{" "}
+          <div className="mb-6 flex items-start gap-3 rounded-2xl bg-primary-soft px-4 py-3 text-sm" role="status">
+            <PartyPopper className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <span>
+            Your shop is ready. Your <strong>Shop ID</strong> for logging in is{" "}
             <code className="rounded bg-surface px-1.5 py-0.5 font-mono font-semibold">{user.tenant.slug}</code>.
+            </span>
           </div>
         )}
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Dashboard</h1>
@@ -63,7 +69,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </Link>
           )}
           {can(user.role, "products.manage") && (
-            <Link href="/products" className="btn-outline h-14 px-6 text-base">
+            <Link href="/products/new" className="btn-outline h-14 px-6 text-base">
               <PackagePlus className="h-5 w-5" /> Add Product
             </Link>
           )}

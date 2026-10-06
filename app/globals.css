@@ -31,7 +31,7 @@
   --primary-fg: 250 252 249;
   --accent: 214 168 92;
   --success: 46 125 80;
-  --warning: 196 128 34;
+  --warning: 160 98 16;
   --danger: 196 68 60;
   --info: 59 108 196;
 }
@@ -179,6 +179,43 @@
   ::selection {
     background: rgb(var(--primary) / 0.2);
   }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  select,
+  label[for] {
+    cursor: pointer;
+  }
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary {
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
+  }
+  @media print {
+    body {
+      background: #fff;
+    }
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -195,6 +232,9 @@
   .btn-outline {
     @apply btn border-2 border-primary-strong/80 text-fg hover:bg-primary-soft dark:border-primary/60;
   }
+  .btn-danger {
+    @apply btn border-2 border-danger/60 text-danger hover:bg-danger/10;
+  }
   .btn-ghost {
     @apply btn text-muted hover:bg-surface-2 hover:text-fg;
   }
@@ -204,6 +244,9 @@
   }
   .label {
     @apply mb-1.5 block text-sm font-medium text-muted;
+  }
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-surface focus:px-5 focus:py-3 focus:font-semibold focus:shadow-card;
   }
   /* Signature pattern used on dark feature cards. */
   .aura-pattern {

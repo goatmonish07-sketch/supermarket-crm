@@ -42,13 +42,13 @@ export function Sidebar({ main, general, open, onClose }: Props) {
   return (
     <>
       <div
-        className={cn("fixed inset-0 z-30 bg-black/30 backdrop-blur-[1px] transition lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}
+        className={cn("fixed inset-0 z-30 bg-black/30 backdrop-blur-[1px] transition print:hidden lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}
         onClick={onClose}
         aria-hidden="true"
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col rounded-r-[2rem] bg-surface px-4 pb-4 pt-6 shadow-xl transition-transform",
+          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col print:hidden rounded-r-[2rem] bg-surface px-4 pb-4 pt-6 shadow-xl transition-transform",
           "lg:sticky lg:top-4 lg:z-0 lg:m-4 lg:h-[calc(100dvh-2rem)] lg:translate-x-0 lg:rounded-card lg:border lg:border-border/60 lg:shadow-card",
           open ? "translate-x-0" : "-translate-x-full",
         )}
