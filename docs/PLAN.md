@@ -1,24 +1,29 @@
 # Boutique POS — Product & Build Plan
 
-> Working name: **Boutique POS** (rename any time — the name lives in one settings value).
-> Status: planning. Nothing is built yet. Plan version 2 — adds goods & services, stock status,
-> order statuses and the full extended feature list.
+> Working name: **Boutique POS** (product name to be chosen — it lives in one config value).
+> Status: planning. Nothing is built yet. Plan version 3 — this is a **commercial product sold to many
+> boutiques** (multi-tenant SaaS), see §15. v2 added goods & services, stock status, order statuses.
 
 ---
 
 ## 1. What we're building
 
-A complete point-of-sale and back-office system for a clothing boutique: fast billing at the counter
+A **sellable, multi-shop software product**. Each customer (a boutique owner) signs up, picks a plan,
+sets up their own shop(s), staff, branding, bill templates and theme, and runs their business on it.
+We (the vendor) run a super-admin console to manage shops, subscriptions, support and updates.
+
+For each shop it is a complete point-of-sale and back-office system: fast billing at the counter
 for **goods and services**, printed or shared bills, stock by size and colour with clear **stock
 status**, customer orders with **status tracking**, tailoring/alteration jobs, rentals, multiple staff
 logins with permissions, simple accounts, and monthly reports.
 
 ### About the reference screenshots
 
-The shared demo ("Fernly") is a **project-management dashboard template**, not a POS. We are taking
-its *look and feel* as inspiration only — calm deep-green palette, soft off-white rounded cards, pill
-buttons, big KPI numbers, slide-out side menu, pastel initials avatars, coloured status pills, a
-half-donut progress gauge. All code, the name, logo, icons and wording will be our own.
+The shared demo ("Fernly") is a **project-management dashboard template**, not a POS. We take only the
+general *style direction* — calm, card-based, rounded, generous spacing, big KPI numbers, status pills.
+Because this is a commercial product, we design **our own visual identity** (name, logo, colour
+palette, illustrations, icons set, layouts, copy) and write all code ourselves. Nothing is copied from
+that template, so we fully own and can sell everything we ship.
 
 | Reference screen         | Becomes in Boutique POS                                          |
 | ------------------------ | ---------------------------------------------------------------- |
@@ -324,7 +329,14 @@ All statuses use the same coloured pill component (as in the reference's Complet
 
 ## 11. Data model (draft)
 
+Every table below carries a `tenantId`; one tenant = one customer business (which may have several stores).
+
 ```
+Platform ─┬─ Tenant (business, plan, subscription status, branding, custom domain)
+          │    └─ Subscription, PlatformInvoice, UsageCounter, FeatureFlags
+          ├─ PlatformAdmin (vendor staff) ── SupportTicket, Announcement
+          └─ Tenant ─▶ Store(s) ─▶ everything below
+
 Store ─┬─ User (role, pin, theme) ── Attendance, AuditLog, CommissionRule
        ├─ Settings (invoice series, tax, loyalty, stock rules, templates, printers, themes, notifications)
        ├─ Category / Brand / Collection
@@ -381,7 +393,8 @@ Money stored as integer paise; every stock change is a movement row; every statu
 
 | Phase | Scope | Result |
 | ----- | ----- | ------ |
-| **1. Foundation** | Project setup, theme system + layout, auth, users/roles/PIN, store settings, audit log | Logged-in shell with themes |
+| **0. Brand & design system** | Product name, logo, colour palette, typography, component library, theme presets | Our own identity, ready to sell |
+| **1. Foundation (multi-tenant)** | Project setup, tenant isolation, sign-up + onboarding wizard, theme system + layout, auth, users/roles/PIN, store settings, audit log | Any shop can sign up and log in |
 | **2. Catalog & stock** | Goods & services items, variants, barcodes & labels, stock levels + **stock status**, adjustments, Excel import | Items ready to sell |
 | **3. Billing** | POS screen, goods + services cart, discounts, customers, split payments, hold/resume, GST, invoice series, **print templates (58/80 mm, A4/A5)**, returns/exchange, shifts & Z report | **Shop can start billing** |
 | **4. Orders & jobs** | Customer orders with **status pipeline**, alteration/stitching jobs, measurements, calendar, WhatsApp status alerts | Orders tracked end to end |
@@ -389,19 +402,81 @@ Money stored as integer paise; every stock change is a movement row; every statu
 | **6. Purchasing & accounts** | Suppliers, purchase orders (statuses → *On order*), receiving, payables, expenses, cash/bank book, P&L | Full stock & money cycle |
 | **7. Growth extras** | Rentals, loyalty tiers, offers/coupons, gift cards, quotations, layaway, appointments, campaigns, consignment | All boutique features |
 | **8. Scale** | Direct ESC/POS & cash drawer, customer display, offline mode, multi-store & transfers, e-invoice, online catalogue | Ready to grow |
+| **9. Commercial launch** | Plans & subscription billing, free trial, super-admin console, marketing website, demo shop, help centre, legal pages, monitoring & backups | **Ready to sell** |
 
+Phases 1–3 + a minimal Phase 9 (manual subscriptions, landing page, demo) = **first sellable version (MVP)**.
 Each phase ends with a working, demo-able build pushed to the repo.
 
 ---
 
 ## 14. Decisions needed from you
 
-1. **Shop name & logo** (or keep "Boutique POS" for now).
-2. **Single store or multiple branches?**
-3. **Where does it run?** Online (cloud) or on one shop PC (works without internet)?
-4. **GST**: registered (GSTIN, HSN/SAC on bills) or not?
-5. **Printer model(s)**: 58 mm / 80 mm thermal, A4, label printer.
-6. Which **services** you offer (stitching, alterations, makeup, rentals…) and their typical prices.
-7. Do you take **customer orders / home delivery**?
-8. **WhatsApp**: send bills/alerts manually (free, opens WhatsApp) or automatically (paid WhatsApp Business API)?
-9. Languages needed on the app/bill besides English.
+1. **Product name** (and do you have a logo or should we design one?).
+2. **Delivery model**: cloud SaaS (monthly/yearly subscription — recommended), installable desktop
+   with licence key, or both?
+3. **Target market**: India only (GST, ₹, UPI, regional languages) or also other countries?
+4. **Pricing idea**: plans and price points (draft in §15.2 to react to).
+5. **White-label** for resellers — needed at launch or later?
+6. **WhatsApp**: manual "open WhatsApp" sharing (free) or automatic via WhatsApp Business API (paid, per message)?
+7. **Payment gateway** for collecting subscriptions: Razorpay, Cashfree, Stripe?
+8. A **pilot boutique** to test with before launch?
+
+---
+
+## 15. Selling it: product & SaaS layer
+
+### 15.1 Multi-tenant architecture
+- One cloud app serves all customers; **strict tenant isolation** (tenant ID on every row, enforced in
+  one data-access layer + Postgres row-level security as a second guard).
+- Each tenant: own sub-domain (`shopname.ourproduct.in`), optional **custom domain**.
+- Per-tenant settings, branding, templates, themes, currency, language, time-zone, tax regime.
+- Nothing hard-coded to one shop — every label, tax, status name, template and category is configurable.
+
+### 15.2 Plans, trial & subscription billing (draft — to adjust)
+| Plan | For | Limits / features |
+| ---- | --- | ----------------- |
+| **Free trial** (14 days) | Everyone | All features, watermark on bills after trial ends |
+| **Starter** | Small single counter | 1 store, 2 users, billing, stock, customers, basic reports |
+| **Growth** | Typical boutique | 1 store, 5 users, + orders & jobs, services, loyalty, offers, all reports, WhatsApp share |
+| **Pro** | Busy / multi-branch | 3 stores, 15 users, + rentals, purchases & accounts, transfers, campaigns, API |
+| **Enterprise** | Chains / franchises | Unlimited, white-label, custom domain, priority support |
+- Monthly / yearly billing (yearly discount), add-ons (extra store, extra user, WhatsApp message packs, SMS credits).
+- Feature flags + usage limits enforced per plan; upgrade/downgrade prompts in-app.
+- Automated invoices (GST invoices for our own sales), payment retries, grace period, read-only mode
+  when unpaid (data never deleted without notice).
+- Coupons & referral discounts for our sales; reseller/partner commissions.
+
+### 15.3 Onboarding (self-serve)
+- Sign up → verify phone/email → **setup wizard**: shop details, logo, GST, invoice prefix, theme,
+  printer test, add first staff, import products (Excel template) or load **sample data**.
+- Interactive product tour; checklist ("Make your first bill").
+- Data import from Excel and common other POS exports.
+
+### 15.4 Vendor super-admin console (for us)
+- All tenants: plan, status, usage, last active, revenue (MRR/ARR, churn, trial conversions).
+- Manage subscriptions, extend trials, apply discounts, suspend/restore.
+- **Impersonate** (support login with tenant permission, fully logged).
+- Feature flags / staged roll-outs, in-app announcements & "what's new".
+- Support tickets / chat inbox, help-centre article management.
+- System health, error monitoring, background jobs, backups.
+
+### 15.5 Trust, security & reliability (needed to sell)
+- HTTPS everywhere, hashed passwords, optional 2FA for owners, session/device management.
+- Daily automated backups + point-in-time restore; tenant self-service **data export** (they own their data).
+- Rate limiting, audit logs, encrypted secrets; uptime monitoring and status page.
+- Legal: Terms of Service, Privacy Policy, refund policy, data-processing terms (India DPDP Act).
+- Versioned database migrations so all tenants upgrade safely; zero-downtime deploys.
+
+### 15.6 Go-to-market assets
+- **Marketing website**: features, pricing, demo video, testimonials, FAQs, sign-up.
+- **Live demo shop** with sample boutique data (resets nightly).
+- Help centre, video tutorials, printer setup guides; WhatsApp support number.
+- Recommended hardware list (printers, scanners, drawers) — optional hardware bundles via partners.
+- Android/iOS: installable PWA first; store apps later.
+
+### 15.7 Delivery options
+| Option | Pros | Cons |
+| ------ | ---- | ---- |
+| **Cloud SaaS** (recommended first) | Recurring revenue, instant updates, one codebase, works on any device | Needs internet (mitigated by offline mode, §8 phase) |
+| Desktop (Electron) + licence key | Works fully offline, one-time sale appeal | Updates & support harder, piracy risk |
+| Self-hosted for enterprise | Big clients that want own server | Custom installs |
