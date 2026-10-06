@@ -1,0 +1,125 @@
+// AuraPOS data model — Phase 1 (platform, tenants, stores, users, audit).
+// Every tenant-owned table carries tenantId; queries go through lib/db.ts
+// helpers that always scope by the signed-in tenant.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  TRIAL
+  STARTER
+  GROWTH
+  PRO
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELLED
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  CASHIER
+  STOCK
+  TAILOR
+  ACCOUNTANT
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+/// One customer business that bought AuraPOS.
+model Tenant {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique // sub-domain: <slug>.aurapos.in
+  plan        Plan         @default(TRIAL)
+  status      TenantStatus @default(ACTIVE)
+  trialEndsAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  stores    Store[]
+  users     User[]
+  auditLogs AuditLog[]
+}
+
+model Store {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  city      String?
+  state     String?
+  pincode   String?
+  gstin     String?
+  upiId     String?
+  currency  String   @default("INR")
+  timezone  String   @default("Asia/Kolkata")
+  invoicePrefix String @default("INV")
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users  User[]
+
+  @@index([tenantId])
+}
+
+model User {
+  id           String    @id @default(cuid())
+  tenantId     String
+  storeId      String?
+  name         String
+  email        String?
+  phone        String?
+  passwordHash String?
+  pinHash      String?
+  role         Role      @default(CASHIER)
+  active       Boolean   @default(true)
+  theme        String    @default("emerald")
+  themeMode    ThemeMode @default(SYSTEM)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  store     Store?     @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  auditLogs AuditLog[]
+
+  // Email is unique per business, not globally, so one person can own two shops.
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?
+  action    String // e.g. "user.create", "auth.login", "settings.update"
+  entity    String?
+  entityId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}

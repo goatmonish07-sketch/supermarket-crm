@@ -1,7 +1,7 @@
-# Boutique POS — Product & Build Plan
+# AuraPOS — Product & Build Plan
 
-> Working name: **Boutique POS** (product name to be chosen — it lives in one config value).
-> Status: planning. Nothing is built yet. Plan version 3 — this is a **commercial product sold to many
+> Product name: **AuraPOS**.
+> Status: Phase 0–1 foundation built (brand, themes, sign-up, login, roles, PIN, dashboard shell). Plan version 3 — this is a **commercial product sold to many
 > boutiques** (multi-tenant SaaS), see §15. v2 added goods & services, stock status, order statuses.
 
 ---

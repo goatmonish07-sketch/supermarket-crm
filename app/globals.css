@@ -1,0 +1,214 @@
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource-variable/jetbrains-mono";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * AuraPOS theme tokens. Values are "R G B" channels so Tailwind can apply alpha.
+ * A theme = data-theme on <html>; dark mode = .dark on <html>.
+ * Keep the preset list in sync with lib/themes.ts.
+ */
+
+/* Emerald (default) */
+:root {
+  --font-sans: "Plus Jakarta Sans Variable";
+  --font-mono: "JetBrains Mono Variable";
+}
+
+:root,
+[data-theme="emerald"] {
+  --bg: 241 242 238;
+  --surface: 252 252 249;
+  --surface-2: 246 247 243;
+  --border: 226 228 221;
+  --fg: 22 27 24;
+  --muted: 107 114 109;
+  --primary: 38 98 68;
+  --primary-strong: 21 60 41;
+  --primary-soft: 222 236 227;
+  --primary-fg: 250 252 249;
+  --accent: 214 168 92;
+  --success: 46 125 80;
+  --warning: 196 128 34;
+  --danger: 196 68 60;
+  --info: 59 108 196;
+}
+.dark,
+[data-theme="emerald"].dark {
+  --bg: 13 18 15;
+  --surface: 21 28 24;
+  --surface-2: 27 36 31;
+  --border: 40 52 45;
+  --fg: 233 238 234;
+  --muted: 150 161 154;
+  --primary: 92 176 128;
+  --primary-strong: 52 128 88;
+  --primary-soft: 30 52 40;
+  --primary-fg: 10 20 14;
+  --accent: 226 184 112;
+  --success: 92 186 128;
+  --warning: 226 166 72;
+  --danger: 232 108 98;
+  --info: 112 156 236;
+}
+
+/* Rose */
+[data-theme="rose"] {
+  --bg: 246 240 241;
+  --surface: 253 251 251;
+  --surface-2: 249 244 245;
+  --border: 236 224 226;
+  --fg: 36 22 27;
+  --muted: 122 104 110;
+  --primary: 160 64 98;
+  --primary-strong: 112 36 66;
+  --primary-soft: 246 226 233;
+  --primary-fg: 255 250 252;
+  --accent: 200 150 90;
+}
+[data-theme="rose"].dark {
+  --bg: 22 14 17;
+  --surface: 32 21 26;
+  --surface-2: 40 27 33;
+  --border: 60 40 49;
+  --fg: 244 232 237;
+  --muted: 176 152 162;
+  --primary: 228 128 164;
+  --primary-strong: 186 84 122;
+  --primary-soft: 64 32 45;
+  --primary-fg: 28 10 18;
+  --accent: 226 180 120;
+}
+
+/* Midnight (dark-first indigo) */
+[data-theme="midnight"] {
+  --bg: 238 239 246;
+  --surface: 251 251 254;
+  --surface-2: 244 245 251;
+  --border: 222 224 238;
+  --fg: 20 22 38;
+  --muted: 102 106 132;
+  --primary: 72 72 168;
+  --primary-strong: 42 42 116;
+  --primary-soft: 226 226 246;
+  --primary-fg: 250 250 255;
+  --accent: 120 200 220;
+}
+[data-theme="midnight"].dark {
+  --bg: 11 12 22;
+  --surface: 19 20 34;
+  --surface-2: 25 27 44;
+  --border: 40 43 66;
+  --fg: 232 233 246;
+  --muted: 146 150 182;
+  --primary: 140 140 240;
+  --primary-strong: 98 98 206;
+  --primary-soft: 34 34 66;
+  --primary-fg: 12 12 30;
+  --accent: 120 210 228;
+}
+
+/* Sand */
+[data-theme="sand"] {
+  --bg: 244 239 230;
+  --surface: 253 250 245;
+  --surface-2: 248 243 235;
+  --border: 232 223 208;
+  --fg: 38 30 20;
+  --muted: 122 110 94;
+  --primary: 150 104 40;
+  --primary-strong: 104 70 22;
+  --primary-soft: 244 232 210;
+  --primary-fg: 255 252 246;
+  --accent: 110 140 100;
+}
+[data-theme="sand"].dark {
+  --bg: 20 16 11;
+  --surface: 30 25 18;
+  --surface-2: 38 32 23;
+  --border: 58 49 36;
+  --fg: 242 236 226;
+  --muted: 172 160 142;
+  --primary: 222 174 98;
+  --primary-strong: 180 132 62;
+  --primary-soft: 60 46 26;
+  --primary-fg: 28 20 8;
+  --accent: 150 186 138;
+}
+
+/* Ocean */
+[data-theme="ocean"] {
+  --bg: 236 242 244;
+  --surface: 250 253 253;
+  --surface-2: 242 247 248;
+  --border: 218 230 233;
+  --fg: 16 30 36;
+  --muted: 96 116 124;
+  --primary: 24 112 132;
+  --primary-strong: 12 72 88;
+  --primary-soft: 218 238 242;
+  --primary-fg: 246 253 255;
+  --accent: 236 150 96;
+}
+[data-theme="ocean"].dark {
+  --bg: 9 18 22;
+  --surface: 15 28 33;
+  --surface-2: 20 36 42;
+  --border: 33 54 62;
+  --fg: 228 240 243;
+  --muted: 142 166 174;
+  --primary: 86 190 212;
+  --primary-strong: 46 146 168;
+  --primary-soft: 22 50 58;
+  --primary-fg: 6 22 28;
+  --accent: 240 168 120;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+  }
+  ::selection {
+    background: rgb(var(--primary) / 0.2);
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-border/60 bg-surface p-6 shadow-card;
+  }
+  .btn {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-br from-primary to-primary-strong text-primary-fg shadow-glow hover:brightness-110;
+  }
+  .btn-outline {
+    @apply btn border-2 border-primary-strong/80 text-fg hover:bg-primary-soft dark:border-primary/60;
+  }
+  .btn-ghost {
+    @apply btn text-muted hover:bg-surface-2 hover:text-fg;
+  }
+  .input {
+    @apply h-12 w-full rounded-2xl border border-border bg-surface-2 px-4 text-[15px] text-fg placeholder:text-muted/70
+      transition focus:border-primary focus:bg-surface focus:outline-none focus:ring-4 focus:ring-primary/15;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-muted;
+  }
+  /* Signature pattern used on dark feature cards. */
+  .aura-pattern {
+    background-image: radial-gradient(circle at 110% 120%, rgb(var(--primary) / 0.45), transparent 55%),
+      repeating-radial-gradient(circle at 100% 100%, rgb(255 255 255 / 0.07) 0 1px, transparent 1px 18px),
+      linear-gradient(135deg, rgb(var(--primary-strong)), rgb(var(--primary-strong) / 0.85));
+  }
+}
