@@ -1,0 +1,1289 @@
+<title>AuraPOS Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Lora:wght@500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.12.3/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+/* Layout: app shell — floating rounded sidebar + glass top bar + card grid; dashboard sits on a slow "aura" glow. */
+:root {
+  --bg: #eef0eb;
+  --surface: #fcfcf9;
+  --surface-2: #f3f5f0;
+  --border: #e0e3db;
+  --fg: #161b18;
+  --muted: #5f6862;
+  --primary: #266244;
+  --primary-strong: #153c29;
+  --primary-soft: #deece3;
+  --on-primary: #f7fbf8;
+  --accent: #c9973f;
+  --success: #2e7d50;
+  --warning: #a0620f;
+  --danger: #c4443c;
+  --info: #3b6cc4;
+  --glow-a: rgba(38, 98, 68, 0.18);
+  --glow-b: rgba(201, 151, 63, 0.16);
+  --shadow: 0 1px 2px rgba(20, 30, 24, 0.05), 0 10px 30px -14px rgba(20, 30, 24, 0.18);
+  --font-ui: "Plus Jakarta Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-serif: "Lora", Georgia, "Times New Roman", serif;
+  --radius-card: 26px;
+  --radius: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c110e; --surface: #141b17; --surface-2: #1a231e; --border: #26322b; --fg: #e8eee9; --muted: #98a59c;
+    --primary: #5cb080; --primary-strong: #348058; --primary-soft: #1d3327; --on-primary: #0a140e; --accent: #e2b870;
+    --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec;
+    --glow-a: rgba(92, 176, 128, 0.16); --glow-b: rgba(226, 184, 112, 0.10);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c110e; --surface: #141b17; --surface-2: #1a231e; --border: #26322b; --fg: #e8eee9; --muted: #98a59c;
+  --primary: #5cb080; --primary-strong: #348058; --primary-soft: #1d3327; --on-primary: #0a140e; --accent: #e2b870;
+  --success: #5cba80; --warning: #e2a648; --danger: #e86c62; --info: #709cec;
+  --glow-a: rgba(92, 176, 128, 0.16); --glow-b: rgba(226, 184, 112, 0.10);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { margin: 0; text-wrap: balance; line-height: 1.2; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.xs { font-size: 12px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── Shell ── */
+.app { display: grid; grid-template-columns: 272px minmax(0, 1fr); gap: 16px; min-height: 100%; padding: 16px; }
+.sidebar { position: sticky; top: 16px; height: calc(100dvh - 32px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow); padding: 20px 14px 14px; overflow: hidden; z-index: 40; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px 14px; font-weight: 800; font-size: 21px; letter-spacing: -0.02em; }
+.brand b { color: var(--primary); }
+.store-switch { margin: 0 6px 12px; }
+.nav { flex: 1; overflow-y: auto; padding: 0 2px; }
+.nav-group { margin: 14px 10px 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.nav a { position: relative; display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; color: var(--muted); text-decoration: none; font-weight: 500; transition: background 0.15s, color 0.15s; }
+.nav a:hover { background: var(--surface-2); color: var(--fg); }
+.nav a.on { color: var(--fg); font-weight: 700; background: var(--primary-soft); }
+.nav a.on::before { content: ""; position: absolute; left: -2px; top: 9px; bottom: 9px; width: 4px; border-radius: 4px; background: var(--primary); }
+.nav svg { width: 19px; height: 19px; flex: none; }
+.nav a.on svg { color: var(--primary); }
+.tag { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+.badge-count { margin-left: auto; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--primary-strong); color: var(--on-primary); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.side-promo { margin-top: 10px; border-radius: 22px; padding: 16px; color: #fff; background: radial-gradient(circle at 110% 120%, rgba(255,255,255,0.18), transparent 55%), repeating-radial-gradient(circle at 100% 100%, rgba(255,255,255,0.07) 0 1px, transparent 1px 16px), linear-gradient(135deg, var(--primary-strong), var(--primary)); }
+.side-promo strong { display: block; margin-top: 8px; line-height: 1.3; }
+
+.main { min-width: 0; display: flex; flex-direction: column; gap: 16px; position: relative; }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-card); background: color-mix(in srgb, var(--surface) 82%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.search { position: relative; flex: 1; min-width: 0; }
+.search input { width: 100%; height: 46px; border-radius: 999px; border: 1px solid transparent; background: var(--surface-2); padding: 0 16px 0 44px; }
+.search svg { position: absolute; left: 15px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--muted); }
+.role-pick { display: flex; align-items: center; gap: 8px; }
+.role-pick select { height: 46px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); padding: 0 14px; font-weight: 600; }
+.avatar { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex: none; }
+.avatar.sm { width: 34px; height: 34px; font-size: 12px; }
+.menu-btn { display: none; }
+.demo-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 16px; border-radius: 18px; background: var(--primary-soft); font-size: 13px; }
+.demo-banner .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--primary); }
+
+/* ── Components ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+.card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-title h2 { font-size: 19px; font-weight: 700; }
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; }
+.page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; }
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.g21 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 2px solid transparent; font-weight: 600; font-size: 14px; background: transparent; transition: transform 0.15s, background 0.15s, filter 0.15s; text-decoration: none; color: inherit; white-space: nowrap; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; pointer-events: none; }
+.btn svg { width: 17px; height: 17px; }
+.btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-strong)); color: var(--on-primary); box-shadow: 0 10px 24px -12px var(--primary); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-outline { border-color: color-mix(in srgb, var(--primary-strong) 70%, var(--fg)); }
+.btn-outline:hover { background: var(--primary-soft); }
+.btn-ghost { color: var(--muted); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--fg); }
+.btn-danger { border-color: color-mix(in srgb, var(--danger) 60%, transparent); color: var(--danger); }
+.btn-lg { min-height: 54px; font-size: 16px; padding: 0 24px; }
+.btn-sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.icon-btn { width: 44px; padding: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; font-size: 13px; font-weight: 600; color: var(--muted); }
+.chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip .sw { width: 13px; height: 13px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.12); }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 8px; border: 1px solid; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.pill svg { width: 13px; height: 13px; }
+.t-success { color: var(--success); border-color: color-mix(in srgb, var(--success) 45%, transparent); background: color-mix(in srgb, var(--success) 7%, transparent); }
+.t-warning { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, transparent); background: color-mix(in srgb, var(--warning) 7%, transparent); }
+.t-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); background: color-mix(in srgb, var(--danger) 7%, transparent); }
+.t-info { color: var(--info); border-color: color-mix(in srgb, var(--info) 45%, transparent); background: color-mix(in srgb, var(--info) 7%, transparent); }
+.t-primary { color: var(--primary); border-color: color-mix(in srgb, var(--primary) 45%, transparent); background: color-mix(in srgb, var(--primary) 7%, transparent); }
+.t-neutral { color: var(--muted); border-color: var(--border); background: var(--surface-2); }
+.input, select.input, textarea.input { width: 100%; min-height: 46px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface-2); padding: 0 14px; transition: border 0.15s, box-shadow 0.15s; }
+textarea.input { padding: 10px 14px; min-height: 80px; }
+.input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent); background: var(--surface); }
+label.lbl { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface-2); }
+.seg button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 0; background: transparent; font-weight: 600; font-size: 13px; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 10px; border-bottom: 1px solid var(--border); }
+.tbl td { padding: 11px 10px; border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent); vertical-align: middle; }
+.tbl tr.click { cursor: pointer; transition: background 0.12s; }
+.tbl tr.click:hover td { background: var(--surface-2); }
+.tbl .r { text-align: right; }
+.scroll-x { overflow-x: auto; }
+.list-row { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-radius: 14px; }
+.list-row + .list-row { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.empty { padding: 36px 12px; text-align: center; color: var(--muted); }
+hr.div { border: 0; border-top: 1px dashed var(--border); margin: 12px 0; }
+
+/* ── Dashboard effects ── */
+.aura-bg { position: absolute; inset: 0 0 auto 0; height: 520px; pointer-events: none; z-index: 0; overflow: hidden; border-radius: 40px; }
+.aura-bg i { position: absolute; width: 520px; height: 520px; border-radius: 50%; filter: blur(60px); }
+.aura-bg i:nth-child(1) { left: -80px; top: -160px; background: var(--glow-a); animation: drift 18s ease-in-out infinite alternate; }
+.aura-bg i:nth-child(2) { right: -60px; top: -120px; background: var(--glow-b); animation: drift 22s ease-in-out infinite alternate-reverse; }
+@keyframes drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(60px, 40px, 0) scale(1.12); } }
+.main > :not(.aura-bg) { position: relative; z-index: 1; }
+.rise { animation: rise 0.55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes rise { from { transform: translateY(10px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+.lift { transition: transform 0.2s cubic-bezier(.2,.8,.2,1), box-shadow 0.2s; }
+.lift:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 22px 40px -18px rgba(20, 30, 24, 0.35); }
+.kpi { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 170px; }
+.kpi .val { font-size: clamp(22px, 3.4vw, 44px); overflow-wrap: anywhere; font-weight: 800; letter-spacing: -0.03em; }
+.kpi .go { width: 40px; height: 40px; border-radius: 999px; border: 2px solid color-mix(in srgb, var(--fg) 75%, transparent); display: inline-flex; align-items: center; justify-content: center; background: transparent; }
+.kpi .go svg { width: 16px; height: 16px; }
+.kpi.hero { color: #fff; border: 0; background: linear-gradient(135deg, var(--primary), var(--primary-strong)); box-shadow: 0 22px 44px -22px var(--primary); }
+.kpi.hero .go { border: 0; background: rgba(255,255,255,0.92); color: var(--primary-strong); }
+.kpi.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.18) 45%, transparent 60%); transform: translateX(-100%); animation: sheen 5.5s ease-in-out infinite 1.2s; }
+.kpi.hero::before { content: ""; position: absolute; right: -60px; bottom: -80px; width: 220px; height: 220px; border-radius: 50%; background: repeating-radial-gradient(circle, rgba(255,255,255,0.10) 0 1px, transparent 1px 14px); }
+@keyframes sheen { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.delta { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.delta b { display: inline-flex; align-items: center; gap: 2px; padding: 1px 7px; border-radius: 7px; border: 1px solid currentColor; font-weight: 700; }
+.live-dot { width: 8px; height: 8px; border-radius: 999px; background: #8ff0b6; box-shadow: 0 0 0 0 rgba(143, 240, 182, 0.7); animation: pulse 2s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(143, 240, 182, 0); } 100% { box-shadow: 0 0 0 0 rgba(143, 240, 182, 0); } }
+.bar { transform-origin: bottom; animation: grow 0.8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes grow { from { transform: scaleY(0.05); } to { transform: scaleY(1); } }
+.hbar { transform-origin: left; animation: growx 0.9s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes growx { from { transform: scaleX(0.05); } to { transform: scaleX(1); } }
+.draw { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: draw 1.6s ease-out forwards 0.2s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.gauge-arc { transition: stroke-dasharray 1.2s cubic-bezier(.2,.8,.2,1); }
+.clock-card { color: #fff; border: 0; overflow: hidden; position: relative; background: radial-gradient(circle at 105% 115%, color-mix(in srgb, var(--primary) 70%, transparent), transparent 55%), repeating-radial-gradient(circle at 100% 100%, rgba(255,255,255,0.06) 0 1px, transparent 1px 18px), linear-gradient(135deg, var(--primary-strong), color-mix(in srgb, var(--primary-strong) 80%, #000)); }
+.clock { font-family: var(--font-mono); font-size: clamp(40px, 6vw, 64px); font-weight: 600; letter-spacing: -0.02em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .aura-bg i { animation: none; }
+}
+
+/* ── Billing ── */
+.pos { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
+.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 14px; }
+.prod { text-align: left; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); padding: 12px; min-height: 126px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.prod:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 50%, transparent); box-shadow: var(--shadow); }
+.dots { display: flex; gap: 4px; }
+.dots i { width: 11px; height: 11px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.12); }
+.cart { position: sticky; top: 92px; display: flex; flex-direction: column; max-height: calc(100dvh - 110px); }
+.cart-lines { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin: 12px -4px 0; padding: 0 4px; min-height: 120px; }
+.line { border: 1px solid var(--border); border-radius: 16px; padding: 10px; }
+.qty { display: inline-flex; align-items: center; gap: 4px; }
+.qty button { width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--border); background: transparent; font-size: 18px; }
+.total-big { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+.pay-methods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.pay-methods button { min-height: 58px; border-radius: 16px; border: 2px solid var(--border); background: transparent; font-weight: 700; font-size: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.pay-methods button.on { border-color: var(--primary); background: var(--primary-soft); }
+.qr-box { background: #fff; color: #111; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.qr-box svg { width: 180px; height: 180px; }
+
+/* ── Board ── */
+.board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.col { flex: 0 0 260px; background: color-mix(in srgb, var(--surface-2) 80%, transparent); border-radius: 22px; padding: 12px; }
+.col h3 { font-size: 14px; display: flex; justify-content: space-between; margin: 2px 4px 10px; }
+.ocard { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow); }
+.ocard + .ocard { margin-top: 8px; }
+.stepper { display: flex; flex-wrap: wrap; gap: 6px; }
+.stepper span { min-height: 34px; display: inline-flex; align-items: center; gap: 4px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--muted); }
+.stepper span.done { background: var(--primary-soft); color: var(--fg); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.stepper span.now { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+/* ── Receipt / labels (paper is always white) ── */
+.paper { background: #fff; color: #111; margin: 0 auto; box-shadow: 0 8px 26px -12px rgba(0,0,0,0.35); border-radius: 8px; }
+.paper.t58 { width: 220px; padding: 12px 10px; font-size: 10.5px; }
+.paper.t80 { width: 300px; padding: 14px 12px; font-size: 11.5px; }
+.paper.a4 { width: 100%; max-width: 620px; padding: 26px; font-size: 12px; }
+.paper .dash { border-top: 1px dashed #111; margin: 6px 0; }
+.paper table { width: 100%; border-collapse: collapse; }
+.paper th, .paper td { padding: 3px 4px; text-align: left; }
+.paper th { border-bottom: 1px solid #111; font-size: 10px; text-transform: uppercase; }
+.label-sheet { display: flex; flex-wrap: wrap; gap: 8px; }
+.label { width: 189px; height: 95px; background: #fff; color: #111; border: 1px dashed #c8c8c8; border-radius: 6px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center; font-size: 9px; overflow: hidden; }
+.label svg { width: 100%; height: 44px; }
+
+/* ── Dialog & toast ── */
+dialog.modal { width: min(640px, calc(100vw - 24px)); max-height: 90dvh; border: 0; padding: 0; border-radius: 28px; background: var(--surface); color: var(--fg); box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5); }
+dialog.modal.wide { width: min(940px, calc(100vw - 24px)); }
+dialog.modal::backdrop { background: rgba(8, 12, 10, 0.5); backdrop-filter: blur(2px); }
+.modal-body { padding: 22px; overflow-y: auto; max-height: 90dvh; }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 100; padding: 12px 20px; border-radius: 999px; background: var(--fg); color: var(--bg); font-weight: 600; font-size: 14px; box-shadow: 0 14px 30px -10px rgba(0,0,0,0.45); max-width: calc(100vw - 32px); }
+
+/* ── Responsive ── */
+@media (max-width: 1180px) {
+  .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pos { grid-template-columns: minmax(0, 1fr); }
+  .cart { position: static; max-height: none; }
+}
+@media (max-width: 1023px) {
+  .app { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: 100dvh; width: 280px; border-radius: 0 28px 28px 0; transform: translateX(-102%); transition: transform 0.25s; padding-top: calc(20px + env(safe-area-inset-top, 0px)); }
+  .sidebar.open { transform: none; }
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 35; }
+  .menu-btn { display: inline-flex; }
+  .g3, .g2, .g21 { grid-template-columns: minmax(0, 1fr); }
+  .role-pick .lbl-role { display: none; }
+}
+@media (max-width: 560px) {
+  .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .card { padding: 16px; border-radius: 22px; }
+  .kpi { min-height: 140px; }
+  .kpi .val { font-size: 22px !important; }
+  .kpi .delta { flex-wrap: wrap; }
+  .pay-methods { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .topbar .search { display: none; }
+  .role-pick select { max-width: 150px; }
+}
+</style>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation"></aside>
+  <div class="main" id="main">
+    <div class="aura-bg" id="aura" aria-hidden="true"><i></i><i></i></div>
+    <header class="topbar">
+      <button class="btn btn-ghost icon-btn menu-btn" data-act="menu" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <label class="search"><span class="sr">Search</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="global-search" type="search" placeholder="Search products, bills or customers" autocomplete="off" />
+      </label>
+      <div class="role-pick">
+        <label for="role" class="xs muted lbl-role">Viewing as</label>
+        <select id="role" data-input="role" aria-label="Viewing as role">
+          <option value="OWNER">Owner</option>
+          <option value="CASHIER">Cashier</option>
+          <option value="TAILOR">Tailor</option>
+        </select>
+      </div>
+      <span class="avatar" id="me-avatar" aria-hidden="true">AS</span>
+    </header>
+    <div id="view"></div>
+  </div>
+</div>
+<div id="scrim"></div>
+<dialog class="modal" id="modal" aria-labelledby="modal-title"><div class="modal-body" id="modal-body"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+"use strict";
+/* ───────────── Helpers ───────────── */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+const inr2 = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) => (Math.round(n) === n ? inr.format(n) : inr2.format(n));
+const rnd = (n) => Math.round(n * 100) / 100;
+const DAY = 86400000;
+const today0 = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+const dayKey = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; };
+const fmtDate = (d, o = { day: "numeric", month: "short" }) => new Date(d).toLocaleDateString("en-IN", o);
+const fmtTime = (d) => new Date(d).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+const initials = (n) => n.split(/\s+/).filter(Boolean).map((w, i, a) => (i === 0 || i === a.length - 1 ? w[0] : "")).join("").toUpperCase();
+const TONES = [["#f9dede", "#8a2c2c"], ["#d9f0e3", "#1f5e3c"], ["#dfe3fb", "#33408c"], ["#f8ebcd", "#7a5410"], ["#d8ecf6", "#1d5675"], ["#ebe0f7", "#5b3487"]];
+const tone = (n) => { let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TONES[h % TONES.length]; };
+const avatar = (n, cls = "") => { const [b, f] = tone(n); return `<span class="avatar ${cls}" style="background:${b};color:${f}" aria-hidden="true">${esc(initials(n))}</span>`; };
+function mulberry32(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const R = mulberry32(20261006);
+const pick = (arr) => arr[Math.floor(R() * arr.length)];
+const ean13 = (seq) => { const b = "20" + String(seq).padStart(10, "0"); let s = 0; for (let i = 0; i < 12; i++) s += +b[i] * (i % 2 ? 3 : 1); return b + ((10 - (s % 10)) % 10); };
+
+const I = {
+  dash: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  bill: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+  orders: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v3h6V3M9 11h6M9 15h4"/>',
+  scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+  rental: '<path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  users: '<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M16 4a4 4 0 0 1 0 8M22 21c0-3-1.7-5.4-4-6.5"/>',
+  box: '<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
+  boxes: '<path d="M7 3h10v7H7zM3 14h8v7H3zM13 14h8v7h-8z"/>',
+  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  truck: '<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  chart: '<path d="M3 3v18h18"/><path d="M7 15v3M11 10v8M15 12v6M19 6v12"/>',
+  wallet: '<path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12v4"/><circle cx="16" cy="13.5" r="1.5"/>',
+  gift: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M7.5 8a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 1 1 0 5"/>',
+  team: '<circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  crown: '<path d="M3 18h18l-2-11-5 5-2-7-2 7-5-5z"/>',
+  arrow: '<path d="M7 17 17 7M8 7h9v9"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  alert: '<path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18h.01"/>',
+  x: '<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  minus: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  wa: '<path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12z"/><path d="M9 9.5c.5 2 2 3.6 4 4.5l1.2-1.2 2 1-.6 1.8c-3.5-.3-6.6-3.4-7-7l1.8-.6 1 2z"/>',
+  print: '<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="14" width="12" height="7"/>',
+  store: '<path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/>',
+  up: '<path d="m6 15 6-6 6 6"/>',
+  down: '<path d="m6 9 6 6 6-6"/>',
+  sparkle: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+};
+const ic = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${I[name] || ""}</svg>`;
+const pill = (tone, text, icon) => `<span class="pill t-${tone}">${icon ? ic(icon) : ""}${esc(text)}</span>`;
+
+/* ───────────── Sample data (all fictional) ───────────── */
+const SWATCH = { Black: "#1f1f1f", White: "#f7f7f2", Red: "#c0392b", Maroon: "#7b1e2b", Pink: "#e889a8", Peach: "#f4b494", Mustard: "#d4a017", Green: "#2e8b57", Teal: "#14808a", Blue: "#2f6fbf", Navy: "#1f2f5a", Lavender: "#b7a6d9", Beige: "#d9c7a7", Gold: "#c9a23f", Ivory: "#efe6cf" };
+let barcodeSeq = 0, vidSeq = 0;
+function product(name, cat, type, hsn, price, mrp, cost, sizes, colours, stockFn, extra = {}) {
+  const variants = [];
+  for (const s of sizes.length ? sizes : [null]) for (const c of colours.length ? colours : [null]) {
+    variants.push({ id: "v" + ++vidSeq, size: s, colour: c, barcode: ean13(++barcodeSeq), sku: [name.split(" ").map((w) => w.slice(0, 3)).join("").toUpperCase().slice(0, 6), s, c && c.slice(0, 3).toUpperCase()].filter(Boolean).join("-"), price, mrp, cost, stock: type === "SERVICE" ? 0 : stockFn(), reorder: 2, reserved: 0 });
+  }
+  return { id: "p" + vidSeq, name, cat, type, hsn, gst: 5, slab: type === "GOODS" && cat !== "Sarees", variants, ...extra };
+}
+const st = (a, b) => () => Math.floor(a + R() * (b - a + 1));
+const DATA = {
+  shop: { name: "Demo Boutique", branch: "MG Road", address: "12 MG Road, Chennai 600001", phone: "98765 43210", gstin: "33ABCDE1234F1Z5", upi: "demoboutique@okbank" },
+  stores: ["MG Road", "Anna Nagar"],
+  staff: [
+    { id: "s1", name: "Anita Sharma", role: "Owner", pin: "1234", inAt: "09:41", commission: 0 },
+    { id: "s2", name: "Rahul Verma", role: "Manager", pin: "1234", inAt: "09:55", commission: 1.5 },
+    { id: "s3", name: "Kavya Nair", role: "Cashier", pin: "1111", inAt: "10:02", commission: 1 },
+    { id: "s4", name: "Imran Khan", role: "Stock staff", pin: "2222", inAt: "10:15", commission: 0 },
+    { id: "s5", name: "Lakshmi Devi", role: "Tailor", pin: "3333", inAt: "10:05", commission: 4 },
+    { id: "s6", name: "Farah Ali", role: "Accountant", pin: "4444", inAt: null, commission: 0 },
+  ],
+  products: [
+    product("Anarkali Kurti", "Kurtis", "GOODS", "6204", 1499, 1999, 720, ["S", "M", "L", "XL"], ["Maroon", "Teal"], st(0, 7)),
+    product("Chikankari Kurti", "Kurtis", "GOODS", "6204", 1299, 1599, 610, ["S", "M", "L"], ["White", "Pink"], st(1, 8)),
+    product("Cotton Straight Kurti", "Kurtis", "GOODS", "6204", 899, 899, 410, ["S", "M", "L", "XL"], ["Mustard", "Navy"], st(3, 10)),
+    product("Banarasi Silk Saree", "Sarees", "GOODS", "5007", 8499, 9999, 5200, ["Free size"], ["Red", "Gold", "Green"], st(0, 3)),
+    product("Kanjivaram Silk Saree", "Sarees", "GOODS", "5007", 14999, 17999, 9800, ["Free size"], ["Maroon", "Teal"], st(0, 2)),
+    product("Organza Party Saree", "Sarees", "GOODS", "5407", 3999, 4999, 2100, ["Free size"], ["Peach", "Lavender"], st(1, 5)),
+    product("Bridal Lehenga Set", "Lehengas", "GOODS", "6204", 32999, 38999, 21000, ["S", "M", "L"], ["Red", "Maroon"], st(0, 2)),
+    product("Palazzo Pants", "Bottoms", "GOODS", "6204", 699, 799, 280, ["S", "M", "L", "XL"], ["Black", "White", "Beige"], st(2, 9)),
+    product("Dupatta – Bandhani", "Accessories", "GOODS", "6214", 599, 699, 240, [], ["Red", "Green", "Blue"], st(3, 12)),
+    product("Kundan Earrings", "Accessories", "GOODS", "7117", 899, 1199, 380, [], ["Gold"], st(4, 15)),
+    product("Kids Lehenga", "Kids", "GOODS", "6209", 1799, 2199, 850, ["2-3Y", "4-5Y", "6-7Y"], ["Pink", "Mustard"], st(0, 4)),
+    product("Linen Co-ord Set", "Western", "GOODS", "6204", 2499, 2999, 1150, ["S", "M", "L"], ["Ivory", "Navy"], st(0, 5)),
+    product("Blouse Stitching", "Tailoring", "SERVICE", "998821", 650, 650, 0, [], [], () => 0, { days: 4 }),
+    product("Fall & Pico", "Tailoring", "SERVICE", "998821", 150, 150, 0, [], [], () => 0, { days: 1 }),
+    product("Alteration", "Tailoring", "SERVICE", "998821", 0, 0, 0, [], [], () => 0, { days: 2, atCounter: true }),
+    product("Saree Draping", "Styling", "SERVICE", "999723", 500, 500, 0, [], [], () => 0, { days: 0 }),
+    product("Carry Bag (Large)", "Packaging", "OTHER", "4819", 20, 20, 8, [], [], () => 0),
+  ],
+  customers: [],
+  bills: [],
+  orders: [],
+  rentals: [],
+  suppliers: [
+    { id: "su1", name: "Varanasi Weaves Co.", city: "Varanasi", phone: "94150 22110", due: 46500 },
+    { id: "su2", name: "Jaipur Prints House", city: "Jaipur", phone: "98290 33441", due: 12800 },
+    { id: "su3", name: "Kanchi Silk Traders", city: "Kanchipuram", phone: "94430 55102", due: 0 },
+    { id: "su4", name: "Surat Fabric Mart", city: "Surat", phone: "98250 77810", due: 8400 },
+  ],
+  pos: [],
+  offers: [
+    { name: "Festive 15% off sarees", rule: "15% on category Sarees", until: 14, active: true, used: 23 },
+    { name: "Buy 2 kurtis, get 10% off", rule: "Bill has 2+ items from Kurtis", until: 30, active: true, used: 41 },
+    { name: "Birthday month ₹300 off", rule: "Customer birthday this month, bill above ₹2,000", until: 365, active: true, used: 9 },
+    { name: "Monsoon clearance 30%", rule: "Collection Monsoon 2026", until: -3, active: false, used: 112 },
+  ],
+  coupons: [
+    { code: "WELCOME10", value: "10% off first bill", uses: "38 / 200", status: "Active" },
+    { code: "DIWALI500", value: "₹500 off above ₹5,000", uses: "12 / 100", status: "Active" },
+    { code: "STAFF20", value: "20% staff discount", uses: "7 / ∞", status: "Manager only" },
+  ],
+  giftCards: [{ code: "GC-7Q2M-4K9D", balance: 2000, expires: 210 }, { code: "GC-9HX1-PL3A", balance: 750, expires: 64 }],
+  expenses: [],
+  appts: [],
+};
+const CUSTOMER_NAMES = ["Riya Menon", "Meena Raghavan", "Divya Iyer", "Kiran Shah", "Pooja Reddy", "Sneha Kulkarni", "Aisha Siddiqui", "Lavanya Krishnan", "Nandini Rao", "Harpreet Kaur", "Fatima Begum", "Ishita Banerjee", "Swathi Pillai", "Gayathri Subramanian"];
+DATA.customers = CUSTOMER_NAMES.map((name, i) => ({ id: "c" + (i + 1), name, phone: String(9876500001 + i * 137), points: 0, tier: "Silver", birthday: i % 5 === 0 ? "this month" : null, measurements: [] }));
+DATA.customers[1].measurements.push({ label: "Blouse", date: Date.now() - 40 * DAY, values: { Bust: 34, "Under bust": 29, Waist: 30, Shoulder: 14, Armhole: 16, "Sleeve length": 10, "Front neck depth": 7, "Back neck depth": 8, "Blouse length": 14.5 } });
+DATA.customers[2].measurements.push({ label: "Kurti", date: Date.now() - 12 * DAY, values: { Bust: 36, Waist: 32, Hip: 38, Shoulder: 14.5, "Sleeve length": 17, "Kurti length": 42 } });
+
+const findV = (vid) => { for (const p of DATA.products) for (const v of p.variants) if (v.id === vid) return { p, v }; return null; };
+const vLabel = (v) => [v.size, v.colour].filter(Boolean).join(" / ");
+const available = (v) => v.stock - v.reserved;
+const tracks = (p) => p.type === "GOODS";
+const stockStatus = (p, v) => (!tracks(p) ? "NONE" : available(v) <= 0 ? "OUT" : available(v) <= v.reorder ? "LOW" : "IN");
+const STOCK_PILL = { IN: ["success", "In stock", "check"], LOW: ["warning", "Low stock", "alert"], OUT: ["danger", "Out of stock", "x"], NONE: ["neutral", "No stock", "minus"] };
+const stockPill = (s, qty) => { const [t, l, i] = STOCK_PILL[s]; return pill(t, qty != null && s !== "NONE" ? `${l} · ${qty}` : l, i); };
+const productPill = (p, qty) => { const s = productStatus(p); return s === "LOW" ? pill("warning", "Some sizes low", "alert") : stockPill(s, s === "IN" ? qty : null); };
+const productStatus = (p) => { if (!tracks(p)) return "NONE"; const s = p.variants.map((v) => stockStatus(p, v)); return s.every((x) => x === "OUT") ? "OUT" : s.some((x) => x !== "IN") ? "LOW" : "IN"; };
+
+/* ── GST: inclusive prices; garments above ₹2,500 per piece (before tax) move to 18% ── */
+function lineTax(p, unitNet, qty) {
+  let rate = p.gst;
+  if (p.slab && unitNet / 1.05 > 2500) rate = 18;
+  const net = unitNet * qty;
+  const taxable = rnd((net * 100) / (100 + rate));
+  return { rate, taxable, tax: rnd(net - taxable) };
+}
+function calcCart(lines, billDisc) {
+  const rows = lines.map((l) => { const { p, v } = findV(l.vid); const unit = l.price ?? v.price; const gross = unit * l.qty; const off = Math.min(gross, discAmount(l.disc, gross)); return { l, p, v, unit, gross, off, net: gross - off }; });
+  const sub = rows.reduce((s, r) => s + r.net, 0);
+  const billOff = Math.min(sub, discAmount(billDisc, sub));
+  let left = billOff;
+  rows.forEach((r, i) => { const share = i === rows.length - 1 ? left : rnd((billOff * r.net) / (sub || 1)); left = rnd(left - share); r.net = rnd(r.net - share); r.off = rnd(r.off + share); Object.assign(r, lineTax(r.p, r.net / r.l.qty, r.l.qty)); });
+  const total = rnd(rows.reduce((s, r) => s + r.net, 0));
+  const payable = Math.round(total);
+  const taxByRate = {};
+  rows.forEach((r) => { taxByRate[r.rate] = taxByRate[r.rate] || { taxable: 0, tax: 0 }; taxByRate[r.rate].taxable = rnd(taxByRate[r.rate].taxable + r.taxable); taxByRate[r.rate].tax = rnd(taxByRate[r.rate].tax + r.tax); });
+  return { rows, gross: rows.reduce((s, r) => s + r.gross, 0), discount: rnd(rows.reduce((s, r) => s + r.off, 0)), tax: rnd(rows.reduce((s, r) => s + r.tax, 0)), roundOff: rnd(payable - total), payable, taxByRate, items: rows.reduce((s, r) => s + r.l.qty, 0), mrpSaved: rows.reduce((s, r) => s + Math.max(0, (r.v.mrp - r.unit) * r.l.qty), 0) };
+}
+function discAmount(input, base) { const s = String(input || "").trim(); if (!s) return 0; if (s.endsWith("%")) { const p = parseFloat(s); return isFinite(p) && p > 0 ? rnd((base * Math.min(p, 100)) / 100) : 0; } const n = parseFloat(s.replace(/[₹,]/g, "")); return isFinite(n) && n > 0 ? Math.min(base, n) : 0; }
+
+/* ── Sales history: 45 days of bills ── */
+let billSeq = 0;
+const METHODS = ["CASH", "UPI", "UPI", "CARD", "UPI", "CASH"];
+const goods = () => DATA.products.filter((p) => p.type !== "OTHER");
+function makeBill(at, staffId) {
+  const n = 1 + Math.floor(R() * 3);
+  const lines = [];
+  for (let i = 0; i < n; i++) {
+    const p = R() < 0.82 ? pick(goods().filter((x) => x.type === "GOODS")) : pick(goods().filter((x) => x.type === "SERVICE" && !x.atCounter));
+    const v = pick(p.variants);
+    lines.push({ vid: v.id, qty: R() < 0.85 ? 1 : 2, disc: R() < 0.15 ? "10%" : "" });
+  }
+  const c = calcCart(lines, R() < 0.1 ? "5%" : "");
+  const customer = R() < 0.6 ? pick(DATA.customers) : null;
+  const bill = { no: `DB/2026-27/${String(++billSeq).padStart(5, "0")}`, at, staff: staffId, customer: customer?.id ?? null, lines: c.rows.map((r) => ({ vid: r.v.id, name: r.p.name, variant: vLabel(r.v), qty: r.l.qty, unit: r.unit, off: r.off, net: r.net, rate: r.rate, taxable: r.taxable, tax: r.tax, hsn: r.p.hsn, cost: r.v.cost, cat: r.p.cat, size: r.v.size })), gross: c.gross, discount: c.discount, tax: c.tax, roundOff: c.roundOff, total: c.payable, method: pick(METHODS), status: "Paid" };
+  if (customer) customer.points += Math.floor(c.payable / 100);
+  return bill;
+}
+for (let d = 44; d >= 0; d--) {
+  const base = today0.getTime() - d * DAY;
+  const dow = new Date(base).getDay();
+  const isToday = d === 0;
+  const count = isToday ? 9 : 6 + Math.floor(R() * 9) + (dow === 0 || dow === 6 ? 5 : 0);
+  for (let i = 0; i < count; i++) {
+    const hour = 10.5 + (isToday ? (i / count) * Math.max(0.5, new Date().getHours() - 10.5) : R() * 10);
+    DATA.bills.push(makeBill(base + hour * 3600000, pick(["s2", "s3", "s3", "s1"])));
+  }
+}
+DATA.bills.sort((a, b) => a.at - b.at);
+DATA.bills[DATA.bills.length - 3].status = "Part returned";
+DATA.bills[DATA.bills.length - 12].status = "Credit";
+DATA.customers.forEach((c) => { c.tier = c.points > 400 ? "Gold" : c.points > 150 ? "Silver" : "Classic"; });
+
+/* ── Orders & jobs ── */
+const JOB_FLOW = ["Received", "Measured", "Cutting", "Stitching", "Trial", "Ready", "Delivered"];
+const ORDER_FLOW = ["Confirmed", "Awaiting stock", "In alteration", "Ready", "Out for delivery", "Delivered"];
+const STAGE_TONE = { Received: "neutral", Measured: "info", Cutting: "info", Stitching: "primary", Trial: "warning", Ready: "success", Delivered: "neutral", Confirmed: "info", "Awaiting stock": "warning", "In alteration": "primary", "Out for delivery": "primary", Cancelled: "danger" };
+const svc = (name) => DATA.products.find((p) => p.name === name).variants[0];
+const ord = (kind, n, ci, stage, dueIn, items, advance, extra = {}) => ({ id: "o" + n, no: `${kind === "JOB" ? "JOB" : "ORD"}-${String(n).padStart(4, "0")}`, kind, stage, customer: DATA.customers[ci].id, due: today0.getTime() + dueIn * DAY + 18 * 3600000, trial: kind === "JOB" ? today0.getTime() + (dueIn - 1) * DAY : null, items, advance, tailor: kind === "JOB" ? "s5" : null, hold: false, events: [{ at: Date.now() - 3 * DAY, text: "Created" }], ...extra });
+DATA.orders = [
+  ord("JOB", 1, 1, "Stitching", 1, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 2, price: 650, note: "Princess cut, padded" }], 500, { measurement: DATA.customers[1].measurements[0], design: "Boat neck, elbow sleeves, back hooks" }),
+  ord("JOB", 2, 2, "Trial", 0, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 750, note: "Heavy work blouse" }], 300, { measurement: { label: "Blouse", values: { Bust: 36, Waist: 31, "Blouse length": 15 } } }),
+  ord("JOB", 3, 4, "Received", 4, [{ vid: svc("Alteration").id, name: "Alteration", qty: 1, price: 250, note: "Shorten sleeves 1 inch" }], 0),
+  ord("JOB", 4, 6, "Cutting", 3, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "" }], 650),
+  ord("JOB", 5, 8, "Ready", -1, [{ vid: svc("Fall & Pico").id, name: "Fall & Pico", qty: 3, price: 150, note: "" }], 0),
+  ord("JOB", 6, 10, "Measured", 6, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "Bridal blouse" }], 1000),
+  ord("ORDER", 1, 3, "Awaiting stock", 5, [{ vid: DATA.products[3].variants[0].id, name: "Banarasi Silk Saree — Red", qty: 1, price: 8499 }], 2000),
+  ord("ORDER", 2, 5, "Confirmed", 2, [{ vid: DATA.products[11].variants[1].id, name: "Linen Co-ord Set — S / Navy", qty: 1, price: 2499 }], 500),
+  ord("ORDER", 3, 7, "Out for delivery", 0, [{ vid: DATA.products[6].variants[0].id, name: "Bridal Lehenga Set — S / Red", qty: 1, price: 32999 }], 15000, { delivery: "14 Lake View Rd, Adyar" }),
+  ord("ORDER", 4, 9, "Ready", 1, [{ vid: DATA.products[0].variants[2].id, name: "Anarkali Kurti — M / Maroon", qty: 2, price: 1499 }], 1000),
+];
+DATA.orders.forEach((o) => (o.estimate = o.items.reduce((s, i) => s + i.price * i.qty, 0)));
+
+/* ── Rentals, purchases, money, appointments ── */
+DATA.rentals = [
+  { item: "Bridal Lehenga — Royal Red", customer: "Nandini Rao", from: -2, to: 1, deposit: 10000, fee: 4500, status: "Out on rent" },
+  { item: "Sherwani — Ivory Gold", customer: "Harpreet Kaur", from: -6, to: -1, deposit: 6000, fee: 3000, status: "Overdue" },
+  { item: "Temple Jewellery Set", customer: "Lavanya Krishnan", from: 3, to: 5, deposit: 5000, fee: 1500, status: "Booked" },
+  { item: "Bridal Lehenga — Rose Pink", customer: "Swathi Pillai", from: 9, to: 11, deposit: 10000, fee: 4500, status: "Booked" },
+  { item: "Kanjivaram Saree — Wedding", customer: "Pooja Reddy", from: -10, to: -8, deposit: 4000, fee: 2000, status: "Returned" },
+];
+DATA.pos = [
+  { no: "PO-0018", supplier: "su1", items: "Banarasi Silk Saree × 6", value: 31200, status: "Sent", eta: 4 },
+  { no: "PO-0017", supplier: "su2", items: "Cotton Straight Kurti × 24", value: 9840, status: "Partly received", eta: 1 },
+  { no: "PO-0016", supplier: "su3", items: "Kanjivaram Silk Saree × 4", value: 39200, status: "Received", eta: -5 },
+  { no: "PO-0015", supplier: "su4", items: "Palazzo Pants × 30", value: 8400, status: "Billed", eta: -9 },
+  { no: "PO-0019", supplier: "su2", items: "Dupatta – Bandhani × 40", value: 9600, status: "Draft", eta: 10 },
+];
+DATA.expenses = [
+  { at: Date.now() - 1 * 3600000, cat: "Tea & snacks", amount: 180, by: "Kavya Nair", method: "CASH" },
+  { at: Date.now() - 26 * 3600000, cat: "Courier", amount: 420, by: "Imran Khan", method: "UPI" },
+  { at: Date.now() - 3 * DAY, cat: "Electricity", amount: 6850, by: "Anita Sharma", method: "BANK" },
+  { at: Date.now() - 5 * DAY, cat: "Tailor wages", amount: 9500, by: "Anita Sharma", method: "BANK" },
+  { at: Date.now() - 8 * DAY, cat: "Shop rent", amount: 45000, by: "Anita Sharma", method: "BANK" },
+  { at: Date.now() - 9 * DAY, cat: "Packaging", amount: 1600, by: "Imran Khan", method: "CASH" },
+];
+DATA.appts = [
+  { time: "11:00", customer: "Swathi Pillai", type: "Bridal consultation", staff: "Anita Sharma", status: "Done" },
+  { time: "12:30", customer: "Divya Iyer", type: "Trial fitting · JOB-0002", staff: "Lakshmi Devi", status: "Checked in" },
+  { time: "15:00", customer: "Ishita Banerjee", type: "Measurement", staff: "Lakshmi Devi", status: "Confirmed" },
+  { time: "16:30", customer: "Aisha Siddiqui", type: "Saree draping", staff: "Rahul Verma", status: "Confirmed" },
+  { time: "18:00", customer: "Gayathri Subramanian", type: "Styling session", staff: "Anita Sharma", status: "Booked" },
+];
+
+/* ───────────── State, nav, theming ───────────── */
+const state = {
+  route: "dashboard", role: "OWNER", skin: "emerald", store: "MG Road",
+  cart: { lines: [], billDisc: "", customer: null, orderId: null }, posQuery: "",
+  billsRange: "today", orderKind: "JOB", reportRange: 30, settingsTab: "appearance",
+  template: { paper: "t80", font: "mono", gstin: true, hsn: true, saved: true, qr: true, policy: true, footer: "Thank you for shopping with us!" },
+  invFilter: "", prodQuery: "", labelSel: new Set(),
+};
+const NAV = [
+  ["Sell", [
+    ["dashboard", "Dashboard", "dash", ["OWNER", "CASHIER", "TAILOR"]],
+    ["billing", "Billing", "bill", ["OWNER", "CASHIER"]],
+    ["bills", "Bills & returns", "history", ["OWNER", "CASHIER"]],
+    ["orders", "Orders & Jobs", "scissors", ["OWNER", "CASHIER", "TAILOR"], "orders"],
+    ["rentals", "Rentals", "rental", ["OWNER", "CASHIER"], null, "Preview"],
+    ["appts", "Appointments", "cal", ["OWNER", "CASHIER", "TAILOR"], null, "Preview"],
+    ["customers", "Customers", "users", ["OWNER", "CASHIER"]],
+  ]],
+  ["Stock", [
+    ["products", "Products & Services", "box", ["OWNER"]],
+    ["inventory", "Inventory", "boxes", ["OWNER"]],
+    ["labels", "Barcode labels", "tag", ["OWNER"]],
+    ["purchases", "Purchases", "truck", ["OWNER"], null, "Preview"],
+  ]],
+  ["Money", [
+    ["reports", "Reports", "chart", ["OWNER"], null, "Preview"],
+    ["accounts", "Cash & accounts", "wallet", ["OWNER"], null, "Preview"],
+    ["offers", "Offers & loyalty", "gift", ["OWNER"], null, "Preview"],
+  ]],
+  ["Admin", [
+    ["team", "Team & roles", "team", ["OWNER"]],
+    ["settings", "Settings", "gear", ["OWNER", "CASHIER", "TAILOR"]],
+    ["vendor", "AuraPOS plans", "crown", ["OWNER"], null, "Preview"],
+  ]],
+];
+const SKINS = {
+  emerald: { name: "Emerald", sw: ["#266244", "#153c29", "#c9973f"], light: null, dark: null },
+  rose: { name: "Rose", sw: ["#a04062", "#702442", "#c8965a"], light: ["#a04062", "#702442", "#f6e2e9", "#c8965a"], dark: ["#e480a4", "#ba547a", "#40202d", "#e2b478"] },
+  midnight: { name: "Midnight", sw: ["#4848a8", "#2a2a74", "#78c8dc"], light: ["#4848a8", "#2a2a74", "#e2e2f6", "#3f8ea3"], dark: ["#8c8cf0", "#6262ce", "#222242", "#78d2e4"] },
+  sand: { name: "Sand", sw: ["#966828", "#684616", "#6e8c64"], light: ["#966828", "#684616", "#f4e8d2", "#5d7a54"], dark: ["#deae62", "#b4843e", "#3c2e1a", "#96ba8a"] },
+  ocean: { name: "Ocean", sw: ["#187084", "#0c4858", "#ec9660"], light: ["#187084", "#0c4858", "#daeef2", "#c96f35"], dark: ["#56bed4", "#2e92a8", "#16323a", "#f0a878"] },
+};
+const isDark = () => document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+function applySkin() {
+  const root = document.documentElement.style;
+  const s = SKINS[state.skin];
+  const vals = isDark() ? s.dark : s.light;
+  ["--primary", "--primary-strong", "--primary-soft", "--accent"].forEach((k, i) => (vals ? root.setProperty(k, vals[i]) : root.removeProperty(k)));
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySkin);
+new MutationObserver(applySkin).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+const me = () => ({ OWNER: DATA.staff[0], CASHIER: DATA.staff[2], TAILOR: DATA.staff[4] })[state.role];
+const can = (route) => NAV.some(([, items]) => items.some((i) => i[0] === route && i[3].includes(state.role)));
+
+function renderSidebar() {
+  const openJobs = DATA.orders.filter((o) => o.stage !== "Delivered" && o.stage !== "Cancelled" && (state.role !== "TAILOR" || o.tailor === "s5")).length;
+  $("#sidebar").innerHTML = `
+    <div class="brand"><svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--primary)"/><stop offset="1" stop-color="var(--primary-strong)"/></linearGradient></defs><rect width="40" height="40" rx="12" fill="url(#lg)"/><circle cx="20" cy="21" r="11.5" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.5"/><path d="M13.5 28 19 13.5a1.1 1.1 0 0 1 2 0L26.5 28M16 22.5h8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 7.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" fill="var(--accent)"/></svg><span>Aura<b>POS</b></span></div>
+    <div class="store-switch"><label class="sr" for="store">Store</label><select class="input" id="store" data-input="store">${DATA.stores.map((s) => `<option ${s === state.store ? "selected" : ""}>${esc(DATA.shop.name)} · ${esc(s)}</option>`).join("")}</select></div>
+    <nav class="nav">${NAV.map(([group, items]) => {
+      const vis = items.filter((i) => i[3].includes(state.role));
+      if (!vis.length) return "";
+      return `<p class="nav-group">${group}</p>` + vis.map(([id, label, icon, , badge, tag]) => `<a href="#${id}" data-route="${id}" class="${state.route === id ? "on" : ""}" ${state.route === id ? 'aria-current="page"' : ""}>${ic(icon)}<span>${state.role === "TAILOR" && id === "orders" ? "My jobs" : label}</span>${badge === "orders" && openJobs ? `<span class="badge-count num">${openJobs}</span>` : tag ? `<span class="tag">${tag}</span>` : ""}</a>`).join("");
+    }).join("")}</nav>
+    <div class="side-promo"><span class="xs" style="opacity:.8">AuraPOS · works on phone & tablet</span><strong>Billing, stock, stitching jobs and reports in one place.</strong></div>`;
+  const [b, f] = tone(me().name);
+  const av = $("#me-avatar"); av.textContent = initials(me().name); av.style.background = b; av.style.color = f; av.title = `${me().name} · ${me().role}`;
+}
+
+/* ───────────── Numbers ───────────── */
+const live = (b) => b.status !== "Cancelled";
+const billsBetween = (from, to) => DATA.bills.filter((b) => b.at >= from && b.at < to && live(b));
+const sumNet = (bills) => bills.reduce((s, b) => s + b.total, 0);
+const itemsOf = (bills) => bills.reduce((s, b) => s + b.lines.reduce((t, l) => t + l.qty, 0), 0);
+const monthStart = new Date(today0.getFullYear(), today0.getMonth(), 1).getTime();
+const TARGET = 2500000;
+
+function countUp(root = document) {
+  root.querySelectorAll("[data-count]").forEach((el) => {
+    const end = +el.dataset.count, fmt = el.dataset.fmt;
+    const show = (v) => (el.textContent = fmt === "money" ? inr.format(Math.round(v)) : Math.round(v).toLocaleString("en-IN"));
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return show(end);
+    const t0 = performance.now(), dur = 900;
+    const step = (t) => { const k = Math.min(1, (t - t0) / dur); show(end * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+
+/* ───────────── Views ───────────── */
+const V = {};
+
+V.dashboard = () => {
+  const now = Date.now();
+  const t = billsBetween(today0.getTime(), now + 1);
+  const y = billsBetween(today0.getTime() - DAY, now - DAY + 1); // same time yesterday
+  const tNet = sumNet(t), yNet = sumNet(y);
+  const kpis = [
+    { label: "Today's sales", val: tNet, prev: yNet, fmt: "money", hero: true, route: "reports" },
+    { label: "Bills today", val: t.length, prev: y.length, route: "bills" },
+    { label: "Avg. bill value", val: t.length ? Math.round(tNet / t.length) : 0, prev: y.length ? Math.round(yNet / y.length) : 0, fmt: "money", route: "reports" },
+    { label: "Items sold", val: itemsOf(t), prev: itemsOf(y), route: "reports" },
+  ];
+  // 14-day series
+  const days = Array.from({ length: 14 }, (_, i) => { const from = today0.getTime() - (13 - i) * DAY; return { d: from, v: sumNet(billsBetween(from, from + DAY)) }; });
+  const max = Math.max(...days.map((d) => d.v)) * 1.12;
+  const W = 640, H = 220, padL = 46, padB = 26, bw = (W - padL) / 14;
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((k) => Math.round((max * k) / 1000) * 1000);
+  const bars = days.map((d, i) => { const h = ((H - padB - 10) * d.v) / max; const x = padL + i * bw + bw * 0.18; const isT = i === 13; return `<g><title>${fmtDate(d.d, { weekday: "short", day: "numeric", month: "short" })}: ${inr.format(d.v)}</title><rect class="bar" style="animation-delay:${i * 45}ms" x="${x}" y="${H - padB - h}" width="${bw * 0.64}" height="${h}" rx="7" fill="${isT ? "var(--primary)" : "color-mix(in srgb, var(--primary) 32%, transparent)"}"/><text x="${x + bw * 0.32}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${new Date(d.d).getDate()}</text></g>`; }).join("");
+  const line = days.map((d, i) => `${i ? "L" : "M"}${padL + i * bw + bw * 0.5},${H - padB - ((H - padB - 10) * d.v) / max - 6}`).join(" ");
+  const grid = yTicks.map((v) => { const yy = H - padB - ((H - padB - 10) * v) / max; return `<line x1="${padL}" x2="${W}" y1="${yy}" y2="${yy}" stroke="var(--border)" stroke-dasharray="3 5"/><text x="${padL - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v >= 100000 ? (v / 100000).toFixed(1) + "L" : Math.round(v / 1000) + "k"}</text>`; }).join("");
+  const month = sumNet(billsBetween(monthStart, now + 1));
+  const pct = Math.min(100, Math.round((month / TARGET) * 100));
+  const arcLen = Math.PI * 80;
+  const due = DATA.orders.filter((o) => !["Delivered", "Cancelled"].includes(o.stage) && o.due < today0.getTime() + DAY && (state.role !== "TAILOR" || o.tailor === "s5"));
+  const low = []; DATA.products.forEach((p) => p.variants.forEach((v) => { const s = stockStatus(p, v); if (s === "LOW" || s === "OUT") low.push({ p, v, s }); }));
+  const top = {}; billsBetween(monthStart, now + 1).forEach((b) => b.lines.forEach((l) => (top[l.name] = (top[l.name] || 0) + l.net)));
+  const topList = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topMax = topList[0]?.[1] || 1;
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const showMoney = state.role !== "TAILOR";
+
+  return `
+  <section class="card rise">
+    <div class="page-head">
+      <div><p class="muted small">${fmtDate(Date.now(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · ${esc(DATA.shop.name)}, ${esc(state.store)}</p>
+      <h1 style="margin-top:6px">${hello}, ${esc(me().name.split(" ")[0])}</h1></div>
+      <div class="row">${can("billing") ? `<button class="btn btn-primary btn-lg" data-go="billing">${ic("plus")} New bill</button>` : ""}<button class="btn btn-outline btn-lg" data-go="orders">${ic("scissors")} ${state.role === "TAILOR" ? "My jobs" : "New job"}</button></div>
+    </div>
+    ${showMoney ? `<div class="grid g4" style="margin-top:20px">${kpis.map((k, i) => {
+      const up = k.val >= k.prev; const diff = Math.abs(k.val - k.prev);
+      return `<div class="card kpi lift rise ${k.hero ? "hero" : ""}" style="animation-delay:${80 + i * 70}ms">
+        <div class="between"><span style="font-weight:600">${k.label}</span><button class="go" data-go="${k.route}" aria-label="Open ${k.label}">${ic("arrow")}</button></div>
+        <span class="val num" data-count="${k.val}" data-fmt="${k.fmt || ""}">${k.fmt === "money" ? inr.format(k.val) : k.val}</span>
+        <span class="delta" style="${k.hero ? "color:rgba(255,255,255,.85)" : "color:var(--muted)"}">${k.hero ? '<span class="live-dot" aria-hidden="true"></span>' : ""}<b>${k.fmt === "money" ? inr.format(diff) : diff}${ic(up ? "up" : "down", 'width="12" height="12"')}</b> vs this time yesterday</span>
+      </div>`;
+    }).join("")}</div>` : ""}
+  </section>
+
+  ${showMoney ? `<div class="grid g21">
+    <section class="card rise lift" style="animation-delay:200ms">
+      <div class="card-title"><h2>Sales · last 14 days</h2><span class="muted small num">${inr.format(days.reduce((s, d) => s + d.v, 0))} total</span></div>
+      <div class="scroll-x"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:520px" role="img" aria-label="Daily sales for the last 14 days, today highlighted">${grid}${bars}<path class="draw" d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <p class="xs muted" style="margin-top:6px">Bars: daily sales · Line: trend · Today in full colour</p>
+    </section>
+    <section class="card rise lift" style="animation-delay:260ms;display:flex;flex-direction:column">
+      <div class="card-title"><h2>Monthly target</h2><span class="muted small num">${inr.format(TARGET)}</span></div>
+      <div style="position:relative;max-width:300px;margin:auto;width:100%">
+        <svg viewBox="0 0 200 116" width="100%" role="img" aria-label="${pct}% of monthly target">
+          <defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="7" stroke="var(--muted)" stroke-opacity=".35" stroke-width="3"/></pattern>
+          <linearGradient id="gArc" x1="0" x2="1"><stop offset="0" stop-color="var(--primary)"/><stop offset="1" stop-color="var(--accent)"/></linearGradient></defs>
+          <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#hatch)" stroke-width="24" stroke-linecap="round"/>
+          <path class="gauge-arc" id="gauge" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#gArc)" stroke-width="24" stroke-linecap="round" stroke-dasharray="0 ${arcLen}" data-to="${(pct / 100) * arcLen} ${arcLen}"/>
+        </svg>
+        <div style="position:absolute;inset:auto 0 0 0;text-align:center"><p class="num" style="font-size:42px;font-weight:800;letter-spacing:-.03em"><span data-count="${pct}">${pct}</span>%</p><p class="small muted"><span class="num">${inr.format(month)}</span> so far</p></div>
+      </div>
+      <p class="small muted" style="text-align:center;margin-top:12px">${pct >= 100 ? "Target reached." : `${inr.format(TARGET - month)} to go · ${new Date(today0.getFullYear(), today0.getMonth() + 1, 0).getDate() - today0.getDate()} days left`}</p>
+    </section>
+  </div>` : ""}
+
+  <div class="grid g3">
+    <section class="card rise lift" style="animation-delay:320ms">
+      <div class="card-title"><h2>Due today</h2><button class="btn btn-ghost btn-sm" data-go="orders">All</button></div>
+      ${due.length ? due.map((o) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="order" data-id="${o.id}">${ic(o.kind === "JOB" ? "scissors" : "orders", 'width="20" height="20" style="color:var(--muted);flex:none"')}<span style="flex:1;min-width:0"><span class="mono small" style="font-weight:600">${o.no}</span> · ${esc(custName(o.customer))}${o.due < today0.getTime() ? `<br><span class="xs" style="color:var(--danger);font-weight:700">Overdue</span>` : ""}</span>${pill(STAGE_TONE[o.stage], o.stage)}</button>`).join("") : `<p class="empty">Nothing due. All caught up.</p>`}
+    </section>
+    <section class="card rise lift" style="animation-delay:380ms">
+      <div class="card-title"><h2>Low stock</h2>${state.role === "OWNER" ? `<button class="btn btn-ghost btn-sm" data-go="inventory">Inventory</button>` : ""}</div>
+      ${low.slice(0, 6).map(({ p, v, s }) => `<div class="list-row"><span style="flex:1;min-width:0"><span style="font-weight:600">${esc(p.name)}</span><br><span class="xs muted">${esc(vLabel(v) || "Standard")}</span></span>${stockPill(s, available(v))}</div>`).join("") || `<p class="empty">All stocked up.</p>`}
+    </section>
+    ${showMoney ? `<section class="card rise lift" style="animation-delay:440ms">
+      <div class="card-title"><h2>Top sellers · month</h2></div>
+      <div class="stack">${topList.map(([name, v], i) => `<div><div class="between small"><span style="font-weight:600">${esc(name)}</span><span class="num muted">${inr.format(v)}</span></div><div style="height:8px;border-radius:9px;background:var(--surface-2);margin-top:6px;overflow:hidden"><div class="hbar" style="height:100%;width:${(v / topMax) * 100}%;border-radius:9px;background:linear-gradient(90deg,var(--primary),var(--accent));animation-delay:${400 + i * 80}ms"></div></div></div>`).join("")}</div>
+    </section>` : `<section class="card rise"><div class="card-title"><h2>Today's appointments</h2></div>${DATA.appts.filter((a) => a.staff === "Lakshmi Devi").map((a) => `<div class="list-row"><span class="mono small" style="font-weight:600">${a.time}</span><span style="flex:1">${esc(a.customer)}<br><span class="xs muted">${esc(a.type)}</span></span>${pill(a.status === "Done" ? "neutral" : "info", a.status)}</div>`).join("")}</section>`}
+  </div>
+
+  <div class="grid g2">
+    <section class="card clock-card rise" style="animation-delay:500ms">
+      <div class="between" style="align-items:flex-end;flex-wrap:wrap;gap:16px">
+        <div><p style="opacity:.8;font-weight:600">Shift timer · ${esc(me().name.split(" ")[0])} clocked in ${me().inAt ?? "—"}</p><p class="clock num" id="clock" style="margin-top:8px">--:--:--</p></div>
+        ${can("billing") ? `<button class="btn btn-lg" style="background:#fff;color:var(--primary-strong)" data-go="billing">${ic("bill")} Open counter</button>` : ""}
+      </div>
+    </section>
+    <section class="card rise lift" style="animation-delay:560ms">
+      <div class="card-title"><h2>Team on shift</h2>${state.role === "OWNER" ? `<button class="btn btn-ghost btn-sm" data-go="team">Team</button>` : ""}</div>
+      <div class="row" style="gap:14px">${DATA.staff.filter((s) => s.inAt).map((s) => `<div class="row" style="gap:8px">${avatar(s.name, "sm")}<span class="small"><b>${esc(s.name.split(" ")[0])}</b><br><span class="muted xs">${esc(s.role)} · in ${s.inAt}</span></span></div>`).join("")}</div>
+    </section>
+  </div>`;
+};
+const custName = (id) => DATA.customers.find((c) => c.id === id)?.name ?? "Walk-in";
+let clockTimer;
+function afterDashboard() {
+  countUp();
+  const g = $("#gauge"); if (g) requestAnimationFrame(() => setTimeout(() => g.setAttribute("stroke-dasharray", g.dataset.to), 120));
+  clearInterval(clockTimer);
+  const tick = () => { const el = $("#clock"); if (el) el.textContent = new Date().toLocaleTimeString("en-IN", { hour12: false }); else clearInterval(clockTimer); };
+  tick(); clockTimer = setInterval(tick, 1000);
+}
+
+/* ── Billing ── */
+V.billing = () => {
+  const c = calcCart(state.cart.lines, state.cart.billDisc);
+  const q = state.posQuery.trim().toLowerCase();
+  const list = DATA.products.filter((p) => !q || `${p.name} ${p.cat} ${p.variants.map((v) => v.barcode + " " + v.sku).join(" ")}`.toLowerCase().includes(q));
+  const order = state.cart.orderId ? DATA.orders.find((o) => o.id === state.cart.orderId) : null;
+  const advance = order?.advance ?? 0;
+  const toPay = Math.max(0, c.payable - advance);
+  const cust = state.cart.customer ? DATA.customers.find((x) => x.id === state.cart.customer) : null;
+  return `
+  <div class="page-head"><h1>Billing</h1><div class="row"><span class="small muted">Shortcuts: <span class="mono">F2</span> search · <span class="mono">F8</span> pay</span><button class="btn btn-ghost" data-go="bills">${ic("history")} Bills</button></div></div>
+  <div class="pos">
+    <section class="card">
+      <label class="search" style="display:block"><span class="sr">Scan barcode or search</span>${ic("bill")}
+        <input id="pos-search" class="input" style="border-radius:999px;padding-left:44px;height:54px;font-size:16px" placeholder="Scan barcode or search… try 2000000000015" value="${esc(state.posQuery)}" autocomplete="off" data-input="posQuery" /></label>
+      <div class="prod-grid">${list.map((p) => {
+        const prices = p.variants.map((v) => v.price); const min = Math.min(...prices);
+        const stock = p.variants.reduce((s, v) => s + Math.max(0, available(v)), 0);
+        const cols = [...new Set(p.variants.map((v) => v.colour).filter(Boolean))];
+        return `<button class="prod" data-act="pick" data-id="${p.id}"><span><span style="font-weight:700;display:block;line-height:1.25">${esc(p.name)}</span><span class="xs muted">${p.variants.length > 1 ? p.variants.length + " options" : esc(p.cat)}</span></span>
+          ${cols.length ? `<span class="dots">${cols.map((c) => `<i style="background:${SWATCH[c]}"></i>`).join("")}</span>` : ""}
+          <span class="between" style="flex-wrap:wrap"><span class="num" style="font-weight:800">${p.atCounter ? "At counter" : inr.format(min) + (prices.some((x) => x !== min) ? "+" : "")}</span>${productPill(p, stock)}</span></button>`;
+      }).join("") || `<p class="empty">No match for “${esc(q)}”.</p>`}</div>
+    </section>
+    <aside class="card cart" aria-label="Current bill">
+      ${order ? `<p class="demo-banner" style="margin-bottom:10px">${ic("orders", 'width="16" height="16"')} Billing <b class="mono">${order.no}</b>${advance ? ` · advance ${inr.format(advance)}` : ""}</p>` : ""}
+      <button class="btn btn-outline" style="justify-content:flex-start;border-style:dashed" data-act="customer" ${order ? "disabled" : ""}>${ic("users")} ${cust ? `<b>${esc(cust.name)}</b>&nbsp;<span class="muted num">${cust.phone}</span>` : "Add customer"}</button>
+      <div class="cart-lines">${state.cart.lines.length ? c.rows.map((r, i) => `
+        <div class="line">
+          <div class="between" style="align-items:flex-start"><button style="all:unset;cursor:pointer;flex:1;min-width:0" data-act="editline" data-i="${i}"><b>${esc(r.p.name)}</b><br><span class="xs muted">${esc(vLabel(r.v) || r.p.cat)} · ${inr2.format(r.unit)} each${r.l.price != null && r.l.price !== r.v.price ? ' · <span style="color:var(--warning)">price changed</span>' : ""}</span>${r.off ? `<br><span class="xs" style="color:var(--success)">− ${inr2.format(r.off)} discount</span>` : ""}</button><b class="num">${inr2.format(r.net)}</b></div>
+          <div class="between" style="margin-top:8px"><span class="qty"><button data-act="qty" data-i="${i}" data-d="-1" aria-label="One less">−</button><b class="num" style="width:30px;text-align:center">${r.l.qty}</b><button data-act="qty" data-i="${i}" data-d="1" aria-label="One more">+</button></span><button class="btn btn-ghost btn-sm" data-act="editline" data-i="${i}">Price / discount</button></div>
+        </div>`).join("") : `<div class="empty">${ic("bill", 'width="40" height="40"')}<p style="margin-top:8px;font-weight:600;color:var(--fg)">Scan or tap a product</p><p class="small">The cart fills here.</p></div>`}</div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px" class="stack">
+        <div class="grid g2" style="gap:8px"><label><span class="xs muted">Bill discount</span><input class="input" id="billdisc" placeholder="10% or ₹" value="${esc(state.cart.billDisc)}" data-input="billDisc" /></label>
+        <label><span class="xs muted">Salesperson</span><select class="input" id="salesperson">${DATA.staff.slice(0, 3).map((s) => `<option>${esc(s.name)}</option>`).join("")}</select></label></div>
+        <dl class="small stack" style="gap:4px;margin:0">
+          <div class="between muted"><dt>Items (${c.items})</dt><dd class="num" style="margin:0">${inr2.format(c.gross)}</dd></div>
+          ${c.discount ? `<div class="between" style="color:var(--success)"><dt>Discount</dt><dd class="num" style="margin:0">− ${inr2.format(c.discount)}</dd></div>` : ""}
+          <div class="between muted"><dt>GST included${Object.keys(c.taxByRate).length > 1 ? " (5% + 18%)" : ""}</dt><dd class="num" style="margin:0">${inr2.format(c.tax)}</dd></div>
+          ${c.roundOff ? `<div class="between muted"><dt>Round off</dt><dd class="num" style="margin:0">${inr2.format(c.roundOff)}</dd></div>` : ""}
+          ${advance ? `<div class="between" style="color:var(--success)"><dt>Advance paid</dt><dd class="num" style="margin:0">− ${inr.format(advance)}</dd></div>` : ""}
+          <div class="between" style="align-items:flex-end;margin-top:4px"><dt style="font-weight:700;font-size:16px">To pay</dt><dd class="total-big num" style="margin:0">${inr.format(toPay)}</dd></div>
+        </dl>
+        <div class="row" style="flex-wrap:nowrap"><button class="btn btn-ghost icon-btn" data-act="clear" aria-label="Clear bill" ${state.cart.lines.length ? "" : "disabled"}>${ic("x")}</button><button class="btn btn-primary btn-lg" style="flex:1" data-act="pay" ${state.cart.lines.length && !state.cart.lines.some((l) => findV(l.vid).p.atCounter && !l.price) ? "" : "disabled"}>Pay ${inr.format(toPay)}</button></div>
+      </div>
+    </aside>
+  </div>`;
+};
+
+function addToCart(vid) {
+  const { p, v } = findV(vid);
+  const inCart = state.cart.lines.filter((l) => l.vid === vid).reduce((s, l) => s + l.qty, 0);
+  if (tracks(p) && available(v) - inCart <= 0) return toast(`${p.name} ${vLabel(v)} is out of stock`);
+  const ex = state.cart.lines.find((l) => l.vid === vid && !l.disc && l.price == null);
+  if (ex && !p.atCounter) ex.qty++;
+  else state.cart.lines.push({ vid, qty: 1, disc: "", price: p.atCounter ? null : null });
+  toast(`Added ${p.name}${vLabel(v) ? " · " + vLabel(v) : ""}`);
+  render();
+  if (p.atCounter) openLineEditor(state.cart.lines.length - 1);
+  else setTimeout(() => $("#pos-search")?.focus(), 0);
+}
+function pickProduct(pid) {
+  const p = DATA.products.find((x) => x.id === pid);
+  if (p.variants.length === 1) return addToCart(p.variants[0].id);
+  openModal(p.name, `<p class="muted small" style="margin:-8px 0 14px">Choose size and colour</p><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">${p.variants.map((v) => {
+    const s = stockStatus(p, v);
+    return `<button class="prod" style="min-height:96px" data-act="addv" data-id="${v.id}" ${s === "OUT" ? "disabled style='opacity:.45;min-height:96px'" : ""}><b>${v.colour ? `<i style="display:inline-block;width:12px;height:12px;border-radius:9px;background:${SWATCH[v.colour]};margin-right:6px;border:1px solid rgba(0,0,0,.15)"></i>` : ""}${esc(vLabel(v))}</b><span class="num small">${inr.format(v.price)}</span>${stockPill(s, available(v))}</button>`;
+  }).join("")}</div>`);
+}
+function openLineEditor(i) {
+  const l = state.cart.lines[i]; const { p, v } = findV(l.vid);
+  openModal(p.name, `<div class="stack">
+    <p class="muted small" style="margin-top:-8px">${esc(vLabel(v) || p.cat)}</p>
+    <label><span class="lbl">Price per piece (₹)</span><input class="input num" id="le-price" inputmode="decimal" value="${l.price ?? v.price}" /></label>
+    <label><span class="lbl">Discount on this item</span><input class="input" id="le-disc" placeholder="10% or 200" value="${esc(l.disc)}" /></label>
+    <div class="row">${["5%", "10%", "15%", "20%"].map((d) => `<button class="chip" data-act="quickdisc" data-v="${d}">${d}</button>`).join("")}</div>
+    <div class="row" style="margin-top:6px"><button class="btn btn-danger" data-act="rmline" data-i="${i}">Remove</button><button class="btn btn-primary" style="flex:1" data-act="saveline" data-i="${i}">Done</button></div></div>`);
+}
+
+let pendingPay = null;
+function openPay() {
+  const c = calcCart(state.cart.lines, state.cart.billDisc);
+  const order = state.cart.orderId ? DATA.orders.find((o) => o.id === state.cart.orderId) : null;
+  const due = Math.max(0, c.payable - (order?.advance ?? 0));
+  const discPct = c.gross ? (c.discount / c.gross) * 100 : 0;
+  if (state.role === "CASHIER" && discPct > 10 && !state.approved) {
+    pendingPay = true;
+    return openModal("Manager approval", `<p class="muted" style="margin-top:-8px">Discount is ${discPct.toFixed(1)}% — above the cashier limit of 10%.</p>
+      <div class="row" style="margin:14px 0">${["Rahul Verma", "Anita Sharma"].map((n, i) => `<span class="chip ${i === 0 ? "on" : ""}">${esc(n)}</span>`).join("")}</div>
+      <label><span class="lbl">Manager PIN <span class="muted">(demo PIN 1234)</span></span><input class="input num" id="appr-pin" inputmode="numeric" maxlength="6" type="password" style="font-size:22px;letter-spacing:.4em;text-align:center" /></label>
+      <p id="appr-err" class="small" style="color:var(--danger);min-height:20px;margin-top:6px"></p>
+      <button class="btn btn-primary btn-lg" style="width:100%" data-act="approve">Approve</button>`);
+  }
+  pendingPay = null;
+  openModal("Payment", `<p class="total-big num" style="margin-top:-6px">${inr.format(due)}</p>
+    <div class="pay-methods" style="margin:14px 0" role="tablist">${[["CASH", "Cash", "wallet"], ["UPI", "UPI", "sparkle"], ["CARD", "Card", "bill"], ["BANK", "Bank", "store"], ["CREDIT", "Credit", "users"]].map(([m, l, i], k) => `<button role="tab" data-act="paymethod" data-m="${m}" class="${k === 0 ? "on" : ""}">${ic(i, 'width="20" height="20"')}${l}</button>`).join("")}</div>
+    <div id="pay-panel"></div>`, () => renderPayPanel("CASH", due));
+}
+function renderPayPanel(m, due) {
+  const panel = $("#pay-panel"); if (!panel) return;
+  document.querySelectorAll("[data-act=paymethod]").forEach((b) => b.classList.toggle("on", b.dataset.m === m));
+  const quick = [...new Set([due, Math.ceil(due / 100) * 100, Math.ceil(due / 500) * 500, Math.ceil(due / 2000) * 2000])];
+  const cust = state.cart.customer;
+  panel.innerHTML = m === "CASH" ? `<label><span class="lbl">Cash received (₹)</span><input class="input num" id="cash-in" inputmode="decimal" value="${due}" style="font-size:22px;height:56px" /></label>
+      <div class="row" style="margin-top:8px">${quick.map((v) => `<button class="chip" data-act="cashq" data-v="${v}">${inr.format(v)}</button>`).join("")}</div>
+      <p class="num" id="change" style="margin-top:12px;font-weight:700;color:var(--success)"></p>`
+    : m === "UPI" ? `<div class="qr-box"><div id="qr"></div><p class="small">Scan to pay <b class="num">${inr.format(due)}</b> to ${esc(DATA.shop.upi)}</p><p class="xs" style="color:#555">Demo QR — uses a sample UPI ID</p></div>`
+    : m === "CREDIT" ? (cust ? `<p class="demo-banner">${inr.format(due)} will be added to ${esc(custName(cust))}'s khata (dues).</p>` : `<p class="demo-banner" style="background:color-mix(in srgb,var(--warning) 12%,transparent)">Add a customer to the bill to give credit.</p>`)
+    : `<label><span class="lbl">Reference (optional)</span><input class="input" placeholder="${m === "CARD" ? "Last 4 digits" : "UTR number"}" /></label>`;
+  panel.insertAdjacentHTML("beforeend", `<button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" data-act="complete" data-m="${m}" ${m === "CREDIT" && !cust ? "disabled" : ""}>${m === "CREDIT" ? "Save on credit" : "Complete sale"}</button>`);
+  if (m === "CASH") { const upd = () => { const v = parseFloat($("#cash-in").value) || 0; $("#change").textContent = v >= due ? `Return change: ${inr2.format(v - due)}` : `Still due: ${inr2.format(due - v)}`; }; $("#cash-in").addEventListener("input", upd); upd(); }
+  if (m === "UPI" && window.qrcode) { const qr = qrcode(0, "M"); qr.addData(`upi://pay?pa=${DATA.shop.upi}&pn=${encodeURIComponent(DATA.shop.name)}&am=${due.toFixed(2)}&cu=INR`); qr.make(); $("#qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2 }); }
+}
+function completeSale(method) {
+  const c = calcCart(state.cart.lines, state.cart.billDisc);
+  const order = state.cart.orderId ? DATA.orders.find((o) => o.id === state.cart.orderId) : null;
+  c.rows.forEach((r) => { if (tracks(r.p)) r.v.stock -= r.l.qty; });
+  const bill = { no: `DB/2026-27/${String(++billSeq).padStart(5, "0")}`, at: Date.now(), staff: me().id, customer: state.cart.customer, lines: c.rows.map((r) => ({ vid: r.v.id, name: r.p.name, variant: vLabel(r.v), qty: r.l.qty, unit: r.unit, off: r.off, net: r.net, rate: r.rate, taxable: r.taxable, tax: r.tax, hsn: r.p.hsn, cost: r.v.cost, cat: r.p.cat, size: r.v.size })), gross: c.gross, discount: c.discount, tax: c.tax, roundOff: c.roundOff, total: c.payable, method: method === "CREDIT" ? "CREDIT" : method, status: method === "CREDIT" ? "Credit" : "Paid", advance: order?.advance ?? 0, order: order?.no };
+  DATA.bills.push(bill);
+  if (bill.customer) { const cu = DATA.customers.find((x) => x.id === bill.customer); cu.points += Math.floor(bill.total / 100); }
+  if (order) { order.stage = "Delivered"; order.events.unshift({ at: Date.now(), text: `Billed on ${bill.no}` }); }
+  state.cart = { lines: [], billDisc: "", customer: null, orderId: null };
+  state.approved = false;
+  closeModal(); render(); showReceipt(bill);
+}
+
+/* ── Receipt ── */
+function receiptHTML(b, paper = state.template.paper) {
+  const T = state.template;
+  const font = T.font === "mono" ? "var(--font-mono)" : T.font === "serif" ? "var(--font-serif)" : "var(--font-ui)";
+  const cu = b.customer ? DATA.customers.find((c) => c.id === b.customer) : null;
+  const byRate = {}; b.lines.forEach((l) => { byRate[l.rate] = byRate[l.rate] || { taxable: 0, tax: 0 }; byRate[l.rate].taxable += l.taxable; byRate[l.rate].tax += l.tax; });
+  const saved = b.discount + b.lines.reduce((s, l) => { const f = findV(l.vid); return s + (f ? Math.max(0, f.v.mrp - l.unit) * l.qty : 0); }, 0);
+  const head = `<div style="text-align:center"><b style="font-size:1.35em;letter-spacing:.02em">${esc(DATA.shop.name.toUpperCase())}</b><br>${esc(DATA.shop.address)}<br>Ph: ${DATA.shop.phone}${T.gstin ? `<br>GSTIN: ${DATA.shop.gstin}` : ""}</div>`;
+  if (paper === "a4") return `<div class="paper a4" style="font-family:${font}">
+    <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start"><div><b style="font-size:20px">${esc(DATA.shop.name)}</b><br>${esc(DATA.shop.address)}<br>Ph: ${DATA.shop.phone}${T.gstin ? `<br>GSTIN: ${DATA.shop.gstin}` : ""}</div><div style="text-align:right"><b style="font-size:16px;letter-spacing:.1em">TAX INVOICE</b><br>No. <b>${b.no}</b><br>${fmtDate(b.at, { day: "2-digit", month: "short", year: "numeric" })} ${fmtTime(b.at)}</div></div>
+    <div style="display:flex;justify-content:space-between;margin:14px 0;padding:8px 0;border-top:1px solid #ddd;border-bottom:1px solid #ddd"><span>Bill to: <b>${esc(cu?.name ?? "Walk-in customer")}</b>${cu ? ` · ${cu.phone}` : ""}</span><span>Place of supply: Tamil Nadu</span></div>
+    <table><thead><tr><th>#</th><th>Item</th>${T.hsn ? "<th>HSN/SAC</th>" : ""}<th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Disc.</th><th style="text-align:right">Taxable</th><th style="text-align:right">GST</th><th style="text-align:right">Amount</th></tr></thead>
+    <tbody>${b.lines.map((l, i) => `<tr style="border-bottom:1px solid #eee"><td>${i + 1}</td><td>${esc(l.name)}${l.variant ? `<br><span style="color:#666">${esc(l.variant)}</span>` : ""}</td>${T.hsn ? `<td>${l.hsn}</td>` : ""}<td style="text-align:right">${l.qty}</td><td style="text-align:right">${inr2.format(l.unit)}</td><td style="text-align:right">${l.off ? inr2.format(l.off) : "—"}</td><td style="text-align:right">${inr2.format(l.taxable)}</td><td style="text-align:right">${l.rate}%</td><td style="text-align:right">${inr2.format(l.net)}</td></tr>`).join("")}</tbody></table>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px"><table><thead><tr><th>GST</th><th style="text-align:right">Taxable</th><th style="text-align:right">CGST</th><th style="text-align:right">SGST</th></tr></thead><tbody>${Object.entries(byRate).map(([r, v]) => `<tr><td>${r}%</td><td style="text-align:right">${inr2.format(v.taxable)}</td><td style="text-align:right">${inr2.format(v.tax / 2)}</td><td style="text-align:right">${inr2.format(v.tax / 2)}</td></tr>`).join("")}</tbody></table>
+    <div>${[["Total value", b.gross], ["Discount", -b.discount], ["GST", b.tax], ["Round off", b.roundOff]].filter(([, v]) => v).map(([k, v]) => `<div style="display:flex;justify-content:space-between"><span>${k}</span><span>${inr2.format(v)}</span></div>`).join("")}<div style="display:flex;justify-content:space-between;border-top:2px solid #111;border-bottom:2px solid #111;padding:4px 0;margin-top:6px;font-weight:800;font-size:15px"><span>TOTAL</span><span>${inr2.format(b.total)}</span></div>${b.advance ? `<div style="display:flex;justify-content:space-between"><span>Advance (${b.order})</span><span>-${inr2.format(b.advance)}</span></div>` : ""}<div style="display:flex;justify-content:space-between"><span>Paid · ${b.method}</span><span>${inr2.format(b.total - (b.advance || 0))}</span></div></div></div>
+    ${T.saved && saved ? `<p style="text-align:center;font-weight:700;margin-top:14px">You saved ${inr2.format(saved)} today!</p>` : ""}
+    ${T.policy ? `<p style="text-align:center;margin-top:16px;color:#444">Exchange within 7 days with bill. ${esc(T.footer)}</p>` : ""}<p style="text-align:right;margin-top:24px">For ${esc(DATA.shop.name)}</p></div>`;
+  const qrData = (() => { if (!T.qr || !window.qrcode) return ""; const q = qrcode(0, "L"); q.addData(`upi://pay?pa=${DATA.shop.upi}&pn=${encodeURIComponent(DATA.shop.name)}&cu=INR`); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0 }); })();
+  return `<div class="paper ${paper}" style="font-family:${font}">${head}<div class="dash"></div><div style="text-align:center;font-weight:700">TAX INVOICE</div><div class="dash"></div>
+    <div style="display:flex;justify-content:space-between"><span>${b.no.split("/").pop()}</span><span>${fmtDate(b.at, { day: "2-digit", month: "short" })} ${fmtTime(b.at)}</span></div>${cu ? `<div>Customer: ${esc(cu.name)}</div>` : ""}<div class="dash"></div>
+    ${b.lines.map((l) => `<div style="margin-bottom:4px"><b>${esc(l.name)}</b>${l.variant ? ` (${esc(l.variant)})` : ""}<div style="display:flex;justify-content:space-between"><span>${l.qty} × ${inr2.format(l.unit)}</span><span>${inr2.format(l.unit * l.qty)}</span></div>${l.off ? `<div style="display:flex;justify-content:space-between"><span>&nbsp;Discount</span><span>-${inr2.format(l.off)}</span></div>` : ""}</div>`).join("")}
+    <div class="dash"></div>${Object.entries(byRate).map(([r, v]) => `<div style="display:flex;justify-content:space-between"><span>CGST+SGST ${r}%</span><span>${inr2.format(v.tax)}</span></div>`).join("")}${b.roundOff ? `<div style="display:flex;justify-content:space-between"><span>Round off</span><span>${inr2.format(b.roundOff)}</span></div>` : ""}
+    <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.3em;border-top:1px solid #111;border-bottom:1px solid #111;margin:4px 0;padding:2px 0"><span>TOTAL</span><span>${inr2.format(b.total)}</span></div>
+    ${b.advance ? `<div style="display:flex;justify-content:space-between"><span>Advance ${b.order}</span><span>-${inr2.format(b.advance)}</span></div>` : ""}<div style="display:flex;justify-content:space-between"><span>Paid · ${b.method}</span><span>${inr2.format(b.total - (b.advance || 0))}</span></div>
+    ${T.saved && saved ? `<p style="text-align:center;font-weight:700;margin-top:6px">You saved ${inr2.format(saved)}!</p>` : ""}${qrData ? `<div style="display:flex;justify-content:center;margin-top:8px"><div style="width:72px">${qrData}</div></div><p style="text-align:center">Pay dues / feedback via UPI</p>` : ""}
+    <div class="dash"></div>${T.policy ? `<p style="text-align:center">Exchange within 7 days with bill.</p>` : ""}<p style="text-align:center;font-weight:700">${esc(T.footer)}</p></div>`;
+}
+function showReceipt(b) {
+  const cu = b.customer ? DATA.customers.find((c) => c.id === b.customer) : null;
+  const text = `*${DATA.shop.name}*\nBill ${b.no}\n${b.lines.map((l) => `${l.qty} × ${l.name} — ${inr2.format(l.net)}`).join("\n")}\n*Total: ${inr2.format(b.total)}*\n${state.template.footer}`;
+  openModal(`Bill ${b.no}`, `<div class="between" style="flex-wrap:wrap;margin:-6px 0 14px">${pill("success", b.status, "check")}<div class="seg" role="radiogroup" aria-label="Paper">${[["t58", "58 mm"], ["t80", "80 mm"], ["a4", "A4"]].map(([v, l]) => `<button role="radio" aria-checked="${state.template.paper === v}" class="${state.template.paper === v ? "on" : ""}" data-act="paper" data-v="${v}" data-bill="${b.no}">${l}</button>`).join("")}</div></div>
+    <div style="background:var(--surface-2);border-radius:20px;padding:16px;overflow-x:auto">${receiptHTML(b)}</div>
+    <div class="row" style="margin-top:14px"><a class="btn btn-outline" href="https://wa.me/${cu ? "91" + cu.phone : ""}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">${ic("wa")} Send on WhatsApp</a><button class="btn btn-ghost" data-act="toastprint">${ic("print")} Print</button><button class="btn btn-primary" style="margin-left:auto" data-act="closenew">New bill</button></div>`, null, true);
+}
+
+/* ── Bills ── */
+V.bills = () => {
+  const ranges = { today: today0.getTime(), "7d": today0.getTime() - 6 * DAY, "30d": today0.getTime() - 29 * DAY };
+  const list = DATA.bills.filter((b) => b.at >= ranges[state.billsRange]).slice().reverse();
+  const net = list.filter(live).reduce((s, b) => s + b.total, 0);
+  return `<div class="page-head"><div><h1>Bills & returns</h1><p class="muted"><span class="num">${list.length}</span> bills · <b class="num" style="color:var(--fg)">${inr.format(net)}</b></p></div>
+    <div class="seg">${[["today", "Today"], ["7d", "7 days"], ["30d", "30 days"]].map(([k, l]) => `<button class="${state.billsRange === k ? "on" : ""}" data-act="billsrange" data-v="${k}">${l}</button>`).join("")}</div></div>
+    <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Bill</th><th>Time</th><th>Customer</th><th>Items</th><th>Paid by</th><th>Status</th><th class="r">Total</th></tr></thead><tbody>
+    ${list.slice(0, 80).map((b) => `<tr class="click" data-act="bill" data-no="${b.no}"><td class="mono small" style="font-weight:600">${b.no}</td><td class="small muted">${fmtDate(b.at)} ${fmtTime(b.at)}</td><td>${esc(custName(b.customer))}</td><td class="num">${b.lines.reduce((s, l) => s + l.qty, 0)}</td><td class="small">${b.method}</td><td>${pill(b.status === "Paid" ? "success" : b.status === "Cancelled" ? "danger" : b.status === "Credit" ? "warning" : "info", b.status)}</td><td class="r num" style="font-weight:700;${b.status === "Cancelled" ? "text-decoration:line-through;color:var(--muted)" : ""}">${inr.format(b.total)}</td></tr>`).join("")}
+    </tbody></table></div>${list.length ? "" : `<p class="empty">No bills yet in this range.</p>`}</section>`;
+};
+function billActions(b) {
+  return `<div class="row" style="margin-top:12px">${b.status !== "Cancelled" ? `<button class="btn btn-outline" data-act="returnbill" data-no="${b.no}">Return 1 item</button><button class="btn btn-danger" data-act="cancelbill" data-no="${b.no}">Cancel bill</button>` : ""}</div>`;
+}
+
+/* ── Orders & jobs ── */
+V.orders = () => {
+  const tailor = state.role === "TAILOR";
+  const kind = tailor ? "JOB" : state.orderKind;
+  const flow = (kind === "JOB" ? JOB_FLOW : ORDER_FLOW).filter((s) => s !== "Delivered");
+  const list = DATA.orders.filter((o) => o.kind === kind && o.stage !== "Delivered" && o.stage !== "Cancelled" && (!tailor || o.tailor === "s5"));
+  return `<div class="page-head"><div><h1>${tailor ? "My jobs" : "Orders & Jobs"}</h1><p class="muted">${list.length} open · stages update the customer by WhatsApp</p></div>
+    <div class="row">${tailor ? "" : `<div class="seg">${[["JOB", "Alteration & stitching"], ["ORDER", "Customer orders"]].map(([k, l]) => `<button class="${kind === k ? "on" : ""}" data-act="okind" data-v="${k}">${l}</button>`).join("")}</div><button class="btn btn-primary" data-act="newjob">${ic("plus")} New ${kind === "JOB" ? "job" : "order"}</button>`}</div></div>
+    <div class="board" role="region" aria-label="Board" tabindex="0">${flow.map((s) => { const col = list.filter((o) => o.stage === s); return `<section class="col" aria-label="${s}"><h3>${s}<span class="num muted">${col.length}</span></h3>${col.map(orderCard).join("") || `<p class="xs muted" style="text-align:center;padding:18px 0">Empty</p>`}</section>`; }).join("")}</div>`;
+};
+function orderCard(o) {
+  const flow = o.kind === "JOB" ? JOB_FLOW : ORDER_FLOW;
+  const next = flow[flow.indexOf(o.stage) + 1];
+  const late = o.due < today0.getTime();
+  const todayDue = !late && o.due < today0.getTime() + DAY;
+  return `<article class="ocard lift"><button style="all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px" data-act="order" data-id="${o.id}">
+    <span class="between"><span class="mono small" style="font-weight:700">${o.no}</span>${o.tailor ? avatar(DATA.staff.find((s) => s.id === o.tailor).name, "sm") : ""}</span>
+    <b>${esc(custName(o.customer))}</b><span class="small muted">${o.items.map((i) => (i.qty > 1 ? i.qty + "× " : "") + i.name).join(", ")}</span>
+    <span class="xs" style="font-weight:700;color:${late ? "var(--danger)" : todayDue ? "var(--warning)" : "var(--muted)"}">${late ? "⚠ Overdue · " : todayDue ? "Due today · " : "Due "}${fmtDate(o.due)}</span></button>
+    ${next && next !== "Delivered" ? `<button class="btn btn-ghost btn-sm" style="background:var(--surface-2);border-radius:12px" data-act="nextstage" data-id="${o.id}">→ ${next}</button>` : next === "Delivered" && state.role !== "TAILOR" ? `<button class="btn btn-primary btn-sm" data-act="billorder" data-id="${o.id}">Create bill · ${inr.format(o.estimate - o.advance)}</button>` : ""}</article>`;
+}
+function openOrder(id) {
+  const o = DATA.orders.find((x) => x.id === id);
+  const flow = o.kind === "JOB" ? JOB_FLOW : ORDER_FLOW; const at = flow.indexOf(o.stage);
+  const cu = DATA.customers.find((c) => c.id === o.customer);
+  const msg = o.stage === "Ready" ? `Hello ${cu.name.split(" ")[0]}, your ${o.kind === "JOB" ? "stitching" : "order"} ${o.no} is ready for pickup at ${DATA.shop.name}. Balance: ${inr.format(o.estimate - o.advance)}.` : `Hello ${cu.name.split(" ")[0]}, update on ${o.no}: ${o.stage}. Expected by ${fmtDate(o.due)}. — ${DATA.shop.name}`;
+  openModal(`${o.no} · ${cu.name}`, `
+    <div class="stepper" style="margin:-4px 0 16px">${flow.map((s, i) => `<span class="${i < at ? "done" : i === at ? "now" : ""}">${i < at ? "✓ " : ""}${s}</span>`).join("")}</div>
+    <div class="grid g2" style="gap:12px">
+      <div class="card" style="box-shadow:none;padding:16px"><p class="lbl">Work</p>${o.items.map((i) => `<div class="between small"><span>${i.qty > 1 ? i.qty + " × " : ""}${esc(i.name)}${i.note ? `<br><i class="muted">${esc(i.note)}</i>` : ""}</span><b class="num">${inr.format(i.price * i.qty)}</b></div>`).join("")}<hr class="div"><div class="between small"><span>Advance</span><span class="num">− ${inr.format(o.advance)}</span></div><div class="between"><b>Balance</b><b class="num">${inr.format(o.estimate - o.advance)}</b></div>
+        <p class="small muted" style="margin-top:10px">Due ${fmtDate(o.due, { weekday: "short", day: "numeric", month: "short" })}${o.trial ? ` · trial ${fmtDate(o.trial)}` : ""}${o.tailor ? ` · ${DATA.staff.find((s) => s.id === o.tailor).name}` : ""}${o.delivery ? `<br>Delivery: ${esc(o.delivery)}` : ""}</p></div>
+      <div class="card" style="box-shadow:none;padding:16px"><p class="lbl">Measurements ${o.measurement ? `· ${o.measurement.label} (inches)` : ""}</p>${o.measurement ? `<div class="grid g2" style="gap:4px 14px">${Object.entries(o.measurement.values).map(([k, v]) => `<div class="between small" style="border-bottom:1px dashed var(--border)"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div>${o.design ? `<p class="small" style="margin-top:10px"><b>Design:</b> ${esc(o.design)}</p>` : ""}` : `<p class="small muted">Not needed for this ${o.kind === "JOB" ? "job" : "order"}.</p>`}</div>
+    </div>
+    <div style="margin-top:14px"><p class="lbl">Job slip</p><div style="display:flex;gap:12px;flex-wrap:wrap;background:var(--surface-2);border-radius:18px;padding:12px">${["Customer copy", "Workshop copy"].map((t) => `<div class="paper t58" style="font-family:var(--font-mono)"><div style="text-align:center;font-size:9px;letter-spacing:.15em">${t.toUpperCase()}</div><div style="text-align:center;font-weight:700">${esc(DATA.shop.name)}</div><svg class="bc" data-code="${o.no}" style="width:100%;height:48px"></svg><div>${esc(cu.name)} · ${cu.phone}</div><div><b>Due: ${fmtDate(o.due, { weekday: "short", day: "numeric", month: "short" })}</b></div></div>`).join("")}</div></div>
+    <div class="row" style="margin-top:16px">
+      ${at < flow.length - 2 ? `<button class="btn btn-primary" data-act="nextstage" data-id="${o.id}" data-modal="1">→ Move to ${flow[at + 1]}</button>` : ""}
+      ${(o.stage === "Ready" || o.stage === "Out for delivery") && state.role !== "TAILOR" ? `<button class="btn btn-primary" data-act="billorder" data-id="${o.id}">Create bill · ${inr.format(o.estimate - o.advance)}</button>` : ""}
+      <a class="btn btn-outline" target="_blank" rel="noopener" href="https://wa.me/91${cu.phone}?text=${encodeURIComponent(msg)}">${ic("wa")} WhatsApp update</a>
+      <button class="btn btn-ghost" data-act="toastprint">${ic("print")} Print slip</button></div>
+    <p class="lbl" style="margin-top:16px">History</p>${o.events.map((e) => `<p class="small"><b>${esc(e.text)}</b> <span class="muted">· ${fmtDate(e.at)} ${fmtTime(e.at)}</span></p>`).join("")}`, () => drawBarcodes(), true);
+}
+function drawBarcodes(root = document) {
+  if (!window.JsBarcode) return;
+  root.querySelectorAll("svg.bc").forEach((el) => { try { JsBarcode(el, el.dataset.code, { format: /^\d{13}$/.test(el.dataset.code) ? "EAN13" : "CODE128", height: 36, fontSize: 11, margin: 0, width: 1.3, background: "transparent", font: "monospace" }); } catch (e) { /* invalid code */ } });
+}
+
+/* ── Customers ── */
+V.customers = () => {
+  const rows = DATA.customers.map((c) => { const bills = DATA.bills.filter((b) => b.customer === c.id && live(b)); return { c, bills, spend: sumNet(bills), last: bills.length ? bills[bills.length - 1].at : null, due: bills.filter((b) => b.status === "Credit").reduce((s, b) => s + b.total, 0) }; }).sort((a, b) => b.spend - a.spend);
+  return `<div class="page-head"><div><h1>Customers</h1><p class="muted">${rows.length} customers · loyalty: 1 point per ₹100</p></div><button class="btn btn-primary" data-act="toast" data-msg="New customer form opens here — name, mobile, birthday, notes">${ic("plus")} Add customer</button></div>
+    <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Customer</th><th>Mobile</th><th>Tier</th><th class="r">Visits</th><th class="r">Points</th><th>Last visit</th><th class="r">Total spent</th></tr></thead><tbody>
+    ${rows.map(({ c, bills, spend, last, due }) => `<tr class="click" data-act="cust" data-id="${c.id}"><td><span class="row" style="flex-wrap:nowrap">${avatar(c.name, "sm")}<b>${esc(c.name)}</b>${due ? pill("warning", "Due " + inr.format(due)) : ""}${c.birthday ? pill("primary", "Birthday", "gift") : ""}</span></td><td class="num small">${c.phone}</td><td>${pill(c.tier === "Gold" ? "warning" : c.tier === "Silver" ? "info" : "neutral", c.tier)}</td><td class="r num">${bills.length}</td><td class="r num">${c.points}</td><td class="small muted">${last ? fmtDate(last) : "—"}</td><td class="r num" style="font-weight:700">${inr.format(spend)}</td></tr>`).join("")}
+    </tbody></table></div></section>`;
+};
+function openCustomer(id) {
+  const c = DATA.customers.find((x) => x.id === id);
+  const bills = DATA.bills.filter((b) => b.customer === id).slice().reverse();
+  const orders = DATA.orders.filter((o) => o.customer === id);
+  openModal(c.name, `<div class="grid g3" style="gap:10px;margin-top:-6px">${[["Total spent", inr.format(sumNet(bills.filter(live)))], ["Loyalty points", c.points + " pts"], ["Tier", c.tier]].map(([k, v]) => `<div class="card" style="padding:14px;box-shadow:none"><p class="xs muted">${k}</p><p class="num" style="font-size:20px;font-weight:800">${v}</p></div>`).join("")}</div>
+    <p class="lbl" style="margin-top:16px">Measurements</p>${c.measurements.length ? c.measurements.map((m) => `<div class="card" style="padding:14px;box-shadow:none"><div class="between"><b>${m.label}</b><span class="xs muted">${fmtDate(m.date, { day: "numeric", month: "short", year: "numeric" })}</span></div><div class="grid g3" style="gap:4px 14px;margin-top:8px">${Object.entries(m.values).map(([k, v]) => `<div class="between small"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div></div>`).join("") : `<p class="small muted">No measurements yet — taken with the first stitching job.</p>`}
+    <p class="lbl" style="margin-top:16px">Orders & jobs</p>${orders.map((o) => `<div class="list-row"><span class="mono small" style="font-weight:600">${o.no}</span><span style="flex:1" class="small muted">Due ${fmtDate(o.due)}</span>${pill(STAGE_TONE[o.stage], o.stage)}</div>`).join("") || `<p class="small muted">None.</p>`}
+    <p class="lbl" style="margin-top:16px">Recent bills</p>${bills.slice(0, 6).map((b) => `<div class="list-row"><span class="mono small">${b.no}</span><span class="small muted" style="flex:1">${fmtDate(b.at)}</span><b class="num">${inr.format(b.total)}</b></div>`).join("") || `<p class="small muted">No bills yet.</p>`}
+    <div class="row" style="margin-top:14px"><a class="btn btn-outline" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(`Hello ${c.name.split(" ")[0]}! New festive arrivals are in at ${DATA.shop.name}. You have ${c.points} loyalty points to use.`)}">${ic("wa")} Send offer on WhatsApp</a></div>`);
+}
+
+/* ── Products ── */
+V.products = () => {
+  const q = state.prodQuery.toLowerCase();
+  const list = DATA.products.filter((p) => !q || (p.name + p.cat).toLowerCase().includes(q));
+  return `<div class="page-head"><div><h1>Products & Services</h1><p class="muted">${DATA.products.length} items · goods, services, rentals and other charges</p></div>
+    <div class="row"><button class="btn btn-ghost" data-go="labels">${ic("tag")} Labels</button><button class="btn btn-outline" data-act="toast" data-msg="Upload Excel/CSV → preview with row errors → import">Import Excel</button><button class="btn btn-primary" data-act="newproduct">${ic("plus")} Add product</button></div></div>
+    <section class="card"><input class="input" id="prod-q" placeholder="Search name or category" value="${esc(state.prodQuery)}" data-input="prodQuery" style="margin-bottom:12px" />
+    <div class="scroll-x"><table class="tbl"><thead><tr><th>Product</th><th>Type</th><th>Category</th><th class="r">Variants</th><th class="r">Price</th><th>GST</th><th>Stock</th></tr></thead><tbody>
+    ${list.map((p) => { const prices = p.variants.map((v) => v.price); const min = Math.min(...prices), max = Math.max(...prices); const stock = p.variants.reduce((s, v) => s + Math.max(0, available(v)), 0);
+      return `<tr><td><span class="row" style="flex-wrap:nowrap"><span class="avatar sm" style="background:var(--primary-soft);color:var(--primary);border-radius:12px">${esc(p.name.slice(0, 2).toUpperCase())}</span><b>${esc(p.name)}</b></span></td><td class="small">${p.type === "GOODS" ? "Goods" : p.type === "SERVICE" ? "Service" : "Other charge"}</td><td class="small muted">${esc(p.cat)}</td><td class="r num">${p.variants.length}</td><td class="r num">${p.atCounter ? "At counter" : min === max ? inr.format(min) : `${inr.format(min)}–${inr.format(max)}`}</td><td class="small">${p.slab ? "5% / 18%*" : p.gst + "%"}</td><td>${productPill(p, stock)}</td></tr>`; }).join("")}
+    </tbody></table></div><p class="xs muted" style="margin-top:10px">* Garment rule: 5% up to ₹2,500 per piece, 18% above — applied automatically at billing.</p></section>`;
+};
+const NP = { sizes: new Set(["S", "M", "L"]), colours: new Set(["Maroon"]) };
+function openNewProduct() {
+  const sizes = ["XS", "S", "M", "L", "XL", "XXL", "Free size"], cols = ["Black", "White", "Red", "Maroon", "Pink", "Mustard", "Teal", "Navy", "Gold"];
+  const draw = () => {
+    const combos = []; for (const s of NP.sizes) for (const c of NP.colours) combos.push(`${s} / ${c}`);
+    $("#np-matrix").innerHTML = `<p class="small" style="font-weight:600">${combos.length} variants — each gets its own barcode & stock</p><div class="row" style="margin-top:8px">${combos.map((c) => `<span class="pill t-primary">${c}</span>`).join("")}</div>`;
+    document.querySelectorAll("[data-act=npchip]").forEach((b) => b.classList.toggle("on", NP[b.dataset.k].has(b.dataset.v)));
+  };
+  openModal("Add product", `<div class="stack">
+    <div class="seg"><button class="on">Goods</button><button>Service</button><button>Rental</button><button>Other charge</button></div>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Name</span><input class="input" id="np-name" value="Mirror-work Kurti" /></label><label><span class="lbl">Selling price (₹)</span><input class="input num" id="np-price" value="1199" inputmode="decimal" /></label></div>
+    <div><span class="lbl">Sizes</span><div class="row">${sizes.map((s) => `<button class="chip" data-act="npchip" data-k="sizes" data-v="${s}">${s}</button>`).join("")}</div></div>
+    <div><span class="lbl">Colours</span><div class="row">${cols.map((c) => `<button class="chip" data-act="npchip" data-k="colours" data-v="${c}"><span class="sw" style="background:${SWATCH[c]}"></span>${c}</button>`).join("")}</div></div>
+    <div id="np-matrix" class="card" style="box-shadow:none;padding:14px"></div>
+    <button class="btn btn-primary btn-lg" data-act="saveproduct">Save product</button></div>`, draw);
+  window.__npDraw = draw;
+}
+
+/* ── Inventory ── */
+V.inventory = () => {
+  const rows = []; DATA.products.filter(tracks).forEach((p) => p.variants.forEach((v) => rows.push({ p, v, s: stockStatus(p, v) })));
+  const counts = { IN: 0, LOW: 0, OUT: 0 }; rows.forEach((r) => counts[r.s]++);
+  const value = rows.reduce((s, r) => s + Math.max(0, r.v.stock) * r.v.cost, 0);
+  const shown = rows.filter((r) => !state.invFilter || r.s === state.invFilter);
+  return `<div class="page-head"><div><h1>Inventory</h1><p class="muted">Stock for every size and colour</p></div></div>
+    <div class="grid g4">${[["IN", "In stock", "success", "check"], ["LOW", "Low stock", "warning", "alert"], ["OUT", "Out of stock", "danger", "x"]].map(([k, l, t, i]) => `<button class="card kpi lift" style="min-height:120px;text-align:left;${state.invFilter === k ? "outline:2px solid var(--primary)" : ""}" data-act="invf" data-v="${k}"><span style="color:var(--${t});font-weight:700" class="row">${ic(i, 'width="16" height="16"')} ${l}</span><span class="val num">${counts[k]}</span><span class="xs muted">variants</span></button>`).join("")}
+      <div class="card kpi hero" style="min-height:120px"><span style="font-weight:600">Stock value (cost)</span><span class="val num" style="font-size:30px">${inr.format(value)}</span><span class="xs" style="opacity:.8">Owner only</span></div></div>
+    <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Product</th><th>Variant</th><th>SKU</th><th class="r">On hand</th><th class="r">Reserved</th><th>Status</th><th></th></tr></thead><tbody>
+    ${shown.map(({ p, v, s }) => `<tr><td><b>${esc(p.name)}</b></td><td class="small">${v.colour ? `<span style="display:inline-block;width:10px;height:10px;border-radius:9px;background:${SWATCH[v.colour]};margin-right:6px"></span>` : ""}${esc(vLabel(v))}</td><td class="mono xs muted">${v.sku}</td><td class="r num" style="font-weight:700">${v.stock}</td><td class="r num muted">${v.reserved || "—"}</td><td>${stockPill(s, available(v))}</td><td><button class="btn btn-outline btn-sm" data-act="adjust" data-id="${v.id}">Adjust</button></td></tr>`).join("")}
+    </tbody></table></div></section>`;
+};
+function openAdjust(vid) {
+  const { p, v } = findV(vid);
+  openModal("Adjust stock", `<p class="muted" style="margin-top:-8px">${esc(p.name)} — ${esc(vLabel(v))} · <span class="num">${v.stock}</span> on hand</p>
+    <div class="seg" style="margin:14px 0" id="adj-kind">${["Stock in", "Stock out", "Damaged", "Set count"].map((k, i) => `<button class="${i === 0 ? "on" : ""}" data-act="adjkind" data-v="${k}">${k}</button>`).join("")}</div>
+    <label><span class="lbl">Quantity</span><input class="input num" id="adj-qty" inputmode="numeric" value="5" style="font-size:20px" /></label>
+    <label style="display:block;margin-top:10px"><span class="lbl">Reason</span><input class="input" id="adj-reason" value="New purchase" /></label>
+    <button class="btn btn-primary btn-lg" style="width:100%;margin-top:14px" data-act="saveadjust" data-id="${vid}">Save adjustment</button>`);
+}
+
+/* ── Labels ── */
+V.labels = () => {
+  const vs = []; DATA.products.filter(tracks).slice(0, 6).forEach((p) => p.variants.slice(0, 2).forEach((v) => vs.push({ p, v })));
+  return `<div class="page-head"><div><h1>Barcode labels</h1><p class="muted">50 × 25 mm rolls, 38 × 25 mm rolls or A4 sticker sheets</p></div><button class="btn btn-primary" data-act="toastprint">${ic("print")} Print ${vs.length} labels</button></div>
+    <section class="card"><div class="row" style="margin-bottom:14px"><div class="seg"><button class="on">50 × 25 mm</button><button>38 × 25 mm</button><button>A4 · 3 × 8</button></div><span class="small muted">Show: shop name · size/colour · price · MRP</span></div>
+    <div class="label-sheet">${vs.map(({ p, v }) => `<div class="label"><b style="font-size:9px;letter-spacing:.08em">${esc(DATA.shop.name.toUpperCase())}</b><span>${esc(p.name)} · ${esc(vLabel(v))}</span><svg class="bc" data-code="${v.barcode}"></svg><b style="font-size:11px">${inr.format(v.price)} ${v.mrp > v.price ? `<s style="font-weight:400;color:#666">${inr.format(v.mrp)}</s>` : ""}</b></div>`).join("")}</div></section>`;
+};
+
+/* ── Reports (Phase 5 preview) ── */
+const preview = (phase) => `<p class="demo-banner">${ic("sparkle", 'width="16" height="16"')} <b>Preview</b> — part of ${phase}. Shown with sample data so you can see how it will work.</p>`;
+V.reports = () => {
+  const n = state.reportRange, from = today0.getTime() - (n - 1) * DAY, now = Date.now() + 1;
+  const bills = billsBetween(from, now), prevBills = billsBetween(from - n * DAY, from);
+  const net = sumNet(bills), prev = sumNet(prevBills);
+  const lines = bills.flatMap((b) => b.lines);
+  const profit = lines.reduce((s, l) => s + (l.taxable - l.cost * l.qty), 0);
+  const group = (key) => { const m = {}; lines.forEach((l) => (m[key(l)] = (m[key(l)] || 0) + l.net)); return Object.entries(m).sort((a, b) => b[1] - a[1]); };
+  const byCat = group((l) => l.cat), bySize = group((l) => l.size || "No size").slice(0, 6);
+  const byPay = {}; bills.forEach((b) => (byPay[b.method] = (byPay[b.method] || 0) + b.total));
+  const byStaff = {}; bills.forEach((b) => { const s = DATA.staff.find((x) => x.id === b.staff)?.name ?? "—"; byStaff[s] = byStaff[s] || { n: 0, v: 0 }; byStaff[s].n++; byStaff[s].v += b.total; });
+  const gst = {}; lines.forEach((l) => { const k = `${l.hsn}|${l.rate}`; gst[k] = gst[k] || { hsn: l.hsn, rate: l.rate, qty: 0, taxable: 0, tax: 0 }; gst[k].qty += l.qty; gst[k].taxable += l.taxable; gst[k].tax += l.tax; });
+  const hbars = (rows) => { const max = rows[0]?.[1] || 1; return `<div class="stack">${rows.map(([k, v], i) => `<div><div class="between small"><span style="font-weight:600">${esc(k)}</span><span class="num muted">${inr.format(v)}</span></div><div style="height:9px;border-radius:9px;background:var(--surface-2);margin-top:5px;overflow:hidden"><div class="hbar" style="height:100%;width:${(v / max) * 100}%;background:var(--primary);border-radius:9px;animation-delay:${i * 60}ms"></div></div></div>`).join("")}</div>`; };
+  const days = Array.from({ length: n }, (_, i) => { const d = from + i * DAY; return sumNet(billsBetween(d, d + DAY)); });
+  const max = Math.max(...days) * 1.1 || 1, W = 640, H = 160;
+  const area = days.map((v, i) => `${i ? "L" : "M"}${(i / (n - 1)) * W},${H - (v / max) * (H - 10)}`).join(" ");
+  return `${preview("Phase 5 (Reports)")}
+    <div class="page-head"><div><h1>Reports</h1><p class="muted">Sales, GST, stock, staff and profit · exports to Excel & PDF</p></div>
+    <div class="row"><div class="seg">${[7, 30].map((d) => `<button class="${n === d ? "on" : ""}" data-act="rrange" data-v="${d}">${d} days</button>`).join("")}</div><button class="btn btn-outline" data-act="toast" data-msg="Excel export is created in the app — sample only here">Export Excel</button><button class="btn btn-ghost" data-act="toast" data-msg="PDF export is created in the app — sample only here">PDF</button></div></div>
+    <div class="grid g4">${[["Net sales", net, prev, true], ["Bills", bills.length, prevBills.length], ["Gross profit", Math.round(profit), null, true], ["GST collected", Math.round(lines.reduce((s, l) => s + l.tax, 0)), null, true]].map(([l, v, p, m], i) => `<div class="card kpi lift ${i === 0 ? "hero" : ""}" style="min-height:130px"><span style="font-weight:600">${l}</span><span class="val num" style="font-size:30px" data-count="${v}" data-fmt="${m ? "money" : ""}">${m ? inr.format(v) : v}</span>${p != null ? `<span class="delta" style="${i === 0 ? "color:rgba(255,255,255,.85)" : "color:var(--muted)"}"><b>${v >= p ? "▲" : "▼"} ${Math.abs(Math.round(((v - p) / (p || 1)) * 100))}%</b> vs previous ${n} days</span>` : `<span class="xs" style="opacity:.75">${i === 2 ? "Owner only" : "CGST + SGST"}</span>`}</div>`).join("")}</div>
+    <section class="card"><div class="card-title"><h2>Daily sales</h2></div><div class="scroll-x"><svg viewBox="0 0 ${W} ${H + 4}" width="100%" style="min-width:480px" role="img" aria-label="Daily sales trend"><defs><linearGradient id="ar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--primary)" stop-opacity=".35"/><stop offset="1" stop-color="var(--primary)" stop-opacity="0"/></linearGradient></defs><path d="${area} L${W},${H} L0,${H} Z" fill="url(#ar)"/><path class="draw" d="${area}" fill="none" stroke="var(--primary)" stroke-width="2.5"/></svg></div></section>
+    <div class="grid g3"><section class="card"><div class="card-title"><h2>By category</h2></div>${hbars(byCat)}</section><section class="card"><div class="card-title"><h2>By size</h2></div>${hbars(bySize)}</section>
+    <section class="card"><div class="card-title"><h2>By payment</h2></div>${hbars(Object.entries(byPay).sort((a, b) => b[1] - a[1]))}</section></div>
+    <div class="grid g2"><section class="card"><div class="card-title"><h2>Staff performance</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Staff</th><th class="r">Bills</th><th class="r">Sales</th><th class="r">Commission</th></tr></thead><tbody>${Object.entries(byStaff).map(([s, v]) => { const st = DATA.staff.find((x) => x.name === s); return `<tr><td><span class="row" style="flex-wrap:nowrap">${avatar(s, "sm")}${esc(s)}</span></td><td class="r num">${v.n}</td><td class="r num">${inr.format(v.v)}</td><td class="r num">${inr.format(Math.round((v.v * (st?.commission || 0)) / 100))}</td></tr>`; }).join("")}</tbody></table></div></section>
+    <section class="card"><div class="card-title"><h2>GST · HSN summary</h2><span class="pill t-info">GSTR-1 ready</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>HSN/SAC</th><th>Rate</th><th class="r">Qty</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th></tr></thead><tbody>${Object.values(gst).sort((a, b) => b.taxable - a.taxable).map((g) => `<tr><td class="mono small">${g.hsn}</td><td>${g.rate}%</td><td class="r num">${g.qty}</td><td class="r num">${inr.format(Math.round(g.taxable))}</td><td class="r num">${inr.format(Math.round(g.tax / 2))}</td><td class="r num">${inr.format(Math.round(g.tax / 2))}</td></tr>`).join("")}</tbody></table></div></section></div>`;
+};
+
+/* ── Purchases (Phase 6 preview) ── */
+const PO_TONE = { Draft: "neutral", Sent: "info", "Partly received": "warning", Received: "success", Billed: "primary" };
+V.purchases = () => `${preview("Phase 6 (Purchases & accounts)")}
+  <div class="page-head"><div><h1>Purchases</h1><p class="muted">Suppliers, purchase orders and what you owe</p></div><button class="btn btn-primary" data-act="toast" data-msg="New PO: pick supplier → add items from low-stock suggestions → send on WhatsApp">${ic("plus")} New purchase order</button></div>
+  <div class="grid g4">${DATA.suppliers.map((s) => `<div class="card lift"><p style="font-weight:700">${esc(s.name)}</p><p class="small muted">${esc(s.city)} · ${s.phone}</p><p class="num" style="margin-top:10px;font-size:22px;font-weight:800;color:${s.due ? "var(--warning)" : "var(--success)"}">${s.due ? inr.format(s.due) : "Settled"}</p><p class="xs muted">${s.due ? "payable" : "nothing due"}</p></div>`).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Purchase orders</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>PO</th><th>Supplier</th><th>Items</th><th>Expected</th><th>Status</th><th class="r">Value</th><th></th></tr></thead><tbody>
+  ${DATA.pos.map((p) => `<tr><td class="mono small" style="font-weight:600">${p.no}</td><td>${esc(DATA.suppliers.find((s) => s.id === p.supplier).name)}</td><td class="small">${esc(p.items)}</td><td class="small muted">${fmtDate(today0.getTime() + p.eta * DAY)}</td><td>${pill(PO_TONE[p.status], p.status)}</td><td class="r num">${inr.format(p.value)}</td><td>${["Sent", "Partly received"].includes(p.status) ? `<button class="btn btn-outline btn-sm" data-act="receivepo" data-no="${p.no}">Receive</button>` : ""}</td></tr>`).join("")}
+  </tbody></table></div></section>`;
+
+/* ── Accounts (Phase 6 preview) ── */
+V.accounts = () => {
+  const todayBills = billsBetween(today0.getTime(), Date.now() + 1);
+  const cashIn = todayBills.filter((b) => b.method === "CASH").reduce((s, b) => s + b.total, 0);
+  const cashOut = DATA.expenses.filter((e) => e.at >= today0.getTime() && e.method === "CASH").reduce((s, e) => s + e.amount, 0);
+  const month = billsBetween(monthStart, Date.now() + 1); const lines = month.flatMap((b) => b.lines);
+  const revenue = lines.reduce((s, l) => s + l.taxable, 0), cogs = lines.reduce((s, l) => s + l.cost * l.qty, 0), exp = DATA.expenses.filter((e) => e.at >= monthStart).reduce((s, e) => s + e.amount, 0);
+  return `${preview("Phase 6 (Purchases & accounts)")}
+  <div class="page-head"><div><h1>Cash & accounts</h1><p class="muted">Drawer, expenses and monthly profit & loss</p></div><button class="btn btn-primary" data-act="toast" data-msg="Expense form: category, amount, paid by, photo of receipt">${ic("plus")} Add expense</button></div>
+  <div class="grid g3"><section class="card"><div class="card-title"><h2>Cash drawer · today</h2></div><dl class="stack" style="gap:6px;margin:0">${[["Opening cash", 5000], ["Cash sales", cashIn], ["Cash expenses", -cashOut]].map(([k, v]) => `<div class="between"><dt class="muted">${k}</dt><dd class="num" style="margin:0">${inr.format(v)}</dd></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);padding-top:8px"><dt style="font-weight:700">Expected in drawer</dt><dd class="num" style="margin:0;font-weight:800;font-size:20px">${inr.format(5000 + cashIn - cashOut)}</dd></div></dl><button class="btn btn-outline" style="margin-top:14px;width:100%" data-act="toast" data-msg="Close shift: count cash → over/short is recorded → Z report prints">Close shift & print Z report</button></section>
+  <section class="card"><div class="card-title"><h2>Profit & loss · month</h2></div><dl class="stack" style="gap:6px;margin:0">${[["Sales (before GST)", revenue], ["Cost of goods", -cogs], ["Gross profit", revenue - cogs], ["Expenses", -exp]].map(([k, v]) => `<div class="between"><dt class="muted">${k}</dt><dd class="num" style="margin:0">${inr.format(Math.round(v))}</dd></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);padding-top:8px"><dt style="font-weight:700">Net profit</dt><dd class="num" style="margin:0;font-weight:800;font-size:20px;color:var(--success)">${inr.format(Math.round(revenue - cogs - exp))}</dd></div></dl></section>
+  <section class="card"><div class="card-title"><h2>Dues</h2></div><div class="between"><span class="muted">Customers owe you</span><b class="num">${inr.format(DATA.bills.filter((b) => b.status === "Credit").reduce((s, b) => s + b.total, 0))}</b></div><div class="between" style="margin-top:8px"><span class="muted">You owe suppliers</span><b class="num">${inr.format(DATA.suppliers.reduce((s, x) => s + x.due, 0))}</b></div><button class="btn btn-ghost" style="margin-top:14px" data-act="toast" data-msg="Tally / accountant export comes with the app">Export for accountant</button></section></div>
+  <section class="card"><div class="card-title"><h2>Expenses</h2></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Paid by</th><th>Mode</th><th class="r">Amount</th></tr></thead><tbody>${DATA.expenses.map((e) => `<tr><td class="small muted">${fmtDate(e.at)}</td><td>${esc(e.cat)}</td><td class="small">${esc(e.by)}</td><td class="small">${e.method}</td><td class="r num">${inr.format(e.amount)}</td></tr>`).join("")}</tbody></table></div></section>`;
+};
+
+/* ── Rentals, offers, appointments (Phase 7 preview) ── */
+const RENT_TONE = { "Out on rent": "primary", Overdue: "danger", Booked: "info", Returned: "neutral" };
+V.rentals = () => `${preview("Phase 7 (Rentals, loyalty & offers)")}
+  <div class="page-head"><div><h1>Rentals</h1><p class="muted">Bridal wear and jewellery on rent · deposits and late fees</p></div><button class="btn btn-primary" data-act="toast" data-msg="New booking: item → dates (no double-booking) → deposit">${ic("plus")} New booking</button></div>
+  <section class="card"><div class="scroll-x"><table class="tbl"><thead><tr><th>Item</th><th>Customer</th><th>Dates</th><th>Status</th><th class="r">Rent</th><th class="r">Deposit</th><th></th></tr></thead><tbody>
+  ${DATA.rentals.map((r, i) => `<tr><td><b>${esc(r.item)}</b></td><td>${esc(r.customer)}</td><td class="small muted">${fmtDate(today0.getTime() + r.from * DAY)} → ${fmtDate(today0.getTime() + r.to * DAY)}</td><td>${pill(RENT_TONE[r.status], r.status === "Overdue" ? `Overdue · late fee ${inr.format(500 * Math.abs(r.to))}` : r.status)}</td><td class="r num">${inr.format(r.fee)}</td><td class="r num">${inr.format(r.deposit)}</td><td>${["Out on rent", "Overdue"].includes(r.status) ? `<button class="btn btn-outline btn-sm" data-act="rentreturn" data-i="${i}">Mark returned</button>` : ""}</td></tr>`).join("")}
+  </tbody></table></div></section>`;
+V.offers = () => `${preview("Phase 7 (Rentals, loyalty & offers)")}
+  <div class="page-head"><div><h1>Offers & loyalty</h1><p class="muted">Discount rules, coupons, gift cards and loyalty tiers</p></div><button class="btn btn-primary" data-act="toast" data-msg="New offer: % or ₹, category/brand/customer group, dates">${ic("plus")} New offer</button></div>
+  <div class="grid g4">${DATA.offers.map((o) => `<div class="card lift"><div class="between">${pill(o.active ? "success" : "neutral", o.active ? "Active" : "Ended")}<span class="xs muted">${o.until > 0 ? `${o.until} days left` : "ended"}</span></div><p style="font-weight:700;margin-top:10px">${esc(o.name)}</p><p class="small muted">${esc(o.rule)}</p><p class="small" style="margin-top:8px">Used <b class="num">${o.used}</b> times</p></div>`).join("")}</div>
+  <div class="grid g3"><section class="card"><div class="card-title"><h2>Coupons</h2></div>${DATA.coupons.map((c) => `<div class="list-row"><span class="mono" style="font-weight:700">${c.code}</span><span class="small muted" style="flex:1">${esc(c.value)}</span><span class="xs num">${c.uses}</span></div>`).join("")}</section>
+  <section class="card"><div class="card-title"><h2>Loyalty tiers</h2></div>${[["Classic", "0–150 pts", "1 pt per ₹100"], ["Silver", "150+ pts", "+5% birthday offer"], ["Gold", "400+ pts", "Free fall & pico, early access"]].map(([t, r, b]) => `<div class="list-row">${pill(t === "Gold" ? "warning" : t === "Silver" ? "info" : "neutral", t)}<span class="small" style="flex:1">${r}<br><span class="muted xs">${b}</span></span><b class="num">${DATA.customers.filter((c) => c.tier === t).length}</b></div>`).join("")}</section>
+  <section class="card"><div class="card-title"><h2>Gift cards</h2></div>${DATA.giftCards.map((g) => `<div class="list-row"><span class="mono small" style="font-weight:700">${g.code}</span><span class="small muted" style="flex:1">expires in ${g.expires} days</span><b class="num">${inr.format(g.balance)}</b></div>`).join("")}<button class="btn btn-outline" style="margin-top:10px;width:100%" data-act="toast" data-msg="Sell a gift card at billing — it works as a payment method">Sell gift card</button></section></div>`;
+V.appts = () => `${preview("Phase 7 (Appointments)")}
+  <div class="page-head"><div><h1>Appointments</h1><p class="muted">Fittings, measurements, bridal consultations · reminders on WhatsApp</p></div><button class="btn btn-primary" data-act="toast" data-msg="Book: customer → service → staff → time slot">${ic("plus")} Book</button></div>
+  <section class="card"><div class="card-title"><h2>Today</h2><span class="muted small">${fmtDate(Date.now(), { weekday: "long", day: "numeric", month: "long" })}</span></div>
+  ${DATA.appts.filter((a) => state.role !== "TAILOR" || a.staff === "Lakshmi Devi").map((a) => `<div class="list-row"><span class="mono" style="font-weight:700;width:56px">${a.time}</span>${avatar(a.customer, "sm")}<span style="flex:1;min-width:0"><b>${esc(a.customer)}</b><br><span class="small muted">${esc(a.type)} · ${esc(a.staff)}</span></span>${pill(a.status === "Done" ? "neutral" : a.status === "Checked in" ? "success" : a.status === "Confirmed" ? "info" : "warning", a.status)}</div>`).join("")}</section>`;
+
+/* ── Team ── */
+const PERMS = [["Billing", [1, 1, 1, 0, 0, 0]], ["Discount above limit", [1, 1, 0, 0, 0, 0]], ["Returns & cancel", [1, 1, 0, 0, 0, 0]], ["Products & stock", [1, 1, 0, 1, 0, 0]], ["Orders & jobs", [1, 1, 1, 0, 0, 0]], ["Update own jobs", [1, 1, 0, 0, 1, 0]], ["Reports", [1, 1, 0, 0, 0, 1]], ["Profit & cost price", [1, 0, 0, 0, 0, 1]], ["Team & settings", [1, 0, 0, 0, 0, 0]]];
+V.team = () => {
+  const month = billsBetween(monthStart, Date.now() + 1);
+  return `<div class="page-head"><div><h1>Team & roles</h1><p class="muted">PIN switching at the counter · every action logged</p></div><button class="btn btn-primary" data-act="toast" data-msg="Add staff: name, role, 4–6 digit PIN, optional email login">${ic("plus")} Add staff</button></div>
+  <div class="grid g3">${DATA.staff.map((s) => { const sales = sumNet(month.filter((b) => b.staff === s.id)); return `<div class="card lift"><div class="row" style="flex-wrap:nowrap">${avatar(s.name)}<span style="flex:1;min-width:0"><b>${esc(s.name)}</b><br><span class="small muted">${esc(s.role)}</span></span>${s.inAt ? pill("success", "In " + s.inAt) : pill("neutral", "Off today")}</div><div class="between small" style="margin-top:14px"><span class="muted">Sales this month</span><b class="num">${inr.format(sales)}</b></div><div class="between small"><span class="muted">Commission ${s.commission}%</span><b class="num">${inr.format(Math.round((sales * s.commission) / 100))}</b></div></div>`; }).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Permissions</h2><span class="small muted">Editable per shop</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Can…</th>${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"].map((r) => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${PERMS.map(([p, v]) => `<tr><td>${p}</td>${v.map((x) => `<td style="text-align:center;color:${x ? "var(--success)" : "var(--border)"}">${x ? ic("check", 'width="18" height="18" aria-label="Yes"') : "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`;
+};
+
+/* ── Settings ── */
+V.settings = () => {
+  const tabs = [["appearance", "Appearance"], ["receipt", "Bill templates"], ["printers", "Printers"], ["stores", "Stores & offline"]];
+  const T = state.template;
+  const sampleBill = DATA.bills[DATA.bills.length - 1];
+  const body = {
+    appearance: `<div class="card-title"><h2>Theme</h2></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))">${Object.entries(SKINS).map(([k, s]) => `<button class="card lift" style="padding:12px;text-align:left;${state.skin === k ? "outline:3px solid var(--primary);outline-offset:-1px" : ""}" data-act="skin" data-v="${k}" aria-pressed="${state.skin === k}"><span style="display:flex;height:54px;border-radius:12px;overflow:hidden">${s.sw.map((c) => `<span style="flex:1;background:${c}"></span>`).join("")}</span><b style="display:block;margin-top:8px">${s.name}</b></button>`).join("")}</div>
+      <div class="card-title" style="margin-top:20px"><h2>Mode</h2></div><div class="seg">${[["light", "Light"], ["dark", "Dark"], ["", "Auto"]].map(([v, l]) => `<button class="${(document.documentElement.dataset.theme || "") === v ? "on" : ""}" data-act="mode" data-v="${v}">${l}</button>`).join("")}</div><p class="small muted" style="margin-top:10px">Each staff member keeps their own theme.</p>`,
+    receipt: `<div class="grid g2"><div class="stack"><div><span class="lbl">Paper</span><div class="seg">${[["t58", "58 mm"], ["t80", "80 mm"], ["a4", "A4 / A5"]].map(([v, l]) => `<button class="${T.paper === v ? "on" : ""}" data-act="tpl" data-k="paper" data-v="${v}">${l}</button>`).join("")}</div></div>
+      <div><span class="lbl">Font</span><div class="seg">${[["mono", "Receipt mono"], ["sans", "Modern sans"], ["serif", "Elegant serif"]].map(([v, l]) => `<button class="${T.font === v ? "on" : ""}" data-act="tpl" data-k="font" data-v="${v}">${l}</button>`).join("")}</div></div>
+      <div><span class="lbl">Show on bill</span>${[["gstin", "GSTIN"], ["hsn", "HSN codes (A4)"], ["saved", "“You saved” line"], ["qr", "UPI QR"], ["policy", "Return policy"]].map(([k, l]) => `<label class="row" style="min-height:40px"><input type="checkbox" id="tpl-${k}" data-act="tplcheck" data-k="${k}" ${T[k] ? "checked" : ""} style="width:20px;height:20px;accent-color:var(--primary)" /> ${l}</label>`).join("")}</div>
+      <label><span class="lbl">Thank-you line</span><input class="input" id="tpl-footer" value="${esc(T.footer)}" data-input="footer" /></label></div>
+      <div style="background:var(--surface-2);border-radius:20px;padding:16px;overflow-x:auto" id="tpl-preview">${receiptHTML(sampleBill)}</div></div>`,
+    printers: `${[["Counter printer", "80 mm thermal · USB", "Connected", "success"], ["Label printer", "50 × 25 mm · Bluetooth", "Connected", "success"], ["Office printer", "A4 · Wi-Fi", "Offline", "neutral"]].map(([n, d, s, t]) => `<div class="list-row">${ic("print", 'width="22" height="22"')}<span style="flex:1"><b>${n}</b><br><span class="small muted">${d}</span></span>${pill(t, s)}<button class="btn btn-ghost btn-sm" data-act="toast" data-msg="Test page sent to ${n}">Test print</button></div>`).join("")}<p class="small muted" style="margin-top:12px">Cash drawer opens automatically on cash sales (ESC/POS).</p>`,
+    stores: `${preview("Phase 8 (Multi-store & offline)")}<div class="grid g2" style="margin-top:14px">${DATA.stores.map((s, i) => `<div class="card" style="box-shadow:none"><div class="between"><b>${esc(DATA.shop.name)} · ${esc(s)}</b>${pill(i ? "info" : "success", i ? "Branch" : "Main")}</div><p class="small muted">Shared catalogue · own stock and cash drawer</p><button class="btn btn-ghost btn-sm" style="margin-top:8px" data-act="toast" data-msg="Stock transfer created: Requested → Dispatched → Received">Transfer stock</button></div>`).join("")}</div>
+      <div class="list-row" style="margin-top:12px"><span class="live-dot" style="background:var(--success)"></span><span style="flex:1"><b>Online</b> · all bills synced</span><span class="small muted">If the internet drops, billing continues and syncs later.</span></div>`,
+  }[state.settingsTab];
+  return `<div class="page-head"><h1>Settings</h1></div><div class="seg">${tabs.map(([k, l]) => `<button class="${state.settingsTab === k ? "on" : ""}" data-act="stab" data-v="${k}">${l}</button>`).join("")}</div><section class="card">${body}</section>`;
+};
+
+/* ── AuraPOS plans + vendor console (Phase 9 preview) ── */
+V.vendor = () => `${preview("Phase 9 (Selling AuraPOS)")}
+  <div class="page-head"><div><h1>AuraPOS plans</h1><p class="muted">Draft pricing for shops that subscribe · 14-day free trial</p></div></div>
+  <div class="grid g4">${[["Starter", "₹799", "1 store · 2 users", ["Billing & receipts", "Products & stock", "Customers"]], ["Growth", "₹1,499", "1 store · 5 users", ["Everything in Starter", "Orders & stitching jobs", "Reports & GST", "WhatsApp sharing"]], ["Pro", "₹2,999", "3 stores · 15 users", ["Everything in Growth", "Rentals & loyalty", "Purchases & accounts", "Stock transfers"]], ["Enterprise", "Custom", "Unlimited", ["Your own brand", "Custom domain", "Priority support"]]].map(([n, p, l, f], i) => `<div class="card lift ${i === 1 ? "kpi hero" : ""}" style="${i === 1 ? "min-height:0" : ""}"><p style="font-weight:700">${n}${i === 1 ? ' <span class="pill" style="border-color:rgba(255,255,255,.5);color:#fff">Most popular</span>' : ""}</p><p style="font-size:34px;font-weight:800;letter-spacing:-.03em" class="num">${p}<span style="font-size:14px;font-weight:500;opacity:.75">${p === "Custom" ? "" : " / month"}</span></p><p class="small" style="opacity:.8">${l}</p><ul style="padding-left:18px;margin:12px 0 0;line-height:1.9" class="small">${f.map((x) => `<li>${x}</li>`).join("")}</ul></div>`).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Vendor console · your AuraPOS business</h2><span class="small muted">Sample shops</span></div>
+  <div class="grid g4" style="margin-bottom:16px">${[["Active shops", "42"], ["On trial", "11"], ["Monthly revenue", "₹61,458"], ["Trial → paid", "38%"]].map(([k, v]) => `<div class="card" style="box-shadow:none;padding:14px"><p class="xs muted">${k}</p><p class="num" style="font-size:24px;font-weight:800">${v}</p></div>`).join("")}</div>
+  <div class="scroll-x"><table class="tbl"><thead><tr><th>Shop</th><th>City</th><th>Plan</th><th>Status</th><th class="r">Bills this month</th></tr></thead><tbody>${[["Sample Silks", "Coimbatore", "Pro", "Active", 1840], ["Sample Kurti Corner", "Pune", "Growth", "Active", 960], ["Sample Bridal Studio", "Jaipur", "Growth", "Trial · 6 days left", 212], ["Sample Ethnic Hub", "Kochi", "Starter", "Payment due", 401]].map(([s, c, p, st, b]) => `<tr><td><b>${s}</b></td><td class="small muted">${c}</td><td>${p}</td><td>${pill(st.startsWith("Active") ? "success" : st.startsWith("Trial") ? "info" : "warning", st)}</td><td class="r num">${b.toLocaleString("en-IN")}</td></tr>`).join("")}</tbody></table></div></section>`;
+
+/* ───────────── Router, modal, toast ───────────── */
+function render() {
+  if (!can(state.route)) state.route = "dashboard";
+  renderSidebar();
+  $("#view").innerHTML = V[state.route]();
+  $("#aura").hidden = state.route !== "dashboard";
+  if (state.route === "dashboard") afterDashboard(); else clearInterval(clockTimer);
+  if (state.route === "reports") countUp();
+  drawBarcodes($("#view"));
+}
+function go(route) {
+  state.route = route;
+  try { history.replaceState(null, "", "#" + route); } catch (e) { /* sandboxed */ }
+  closeMenu(); render(); window.scrollTo({ top: 0, behavior: "smooth" });
+  $("#view").focus?.({ preventScroll: true });
+}
+const modal = $("#modal");
+function openModal(title, html, onMount, wide = false) {
+  modal.classList.toggle("wide", wide);
+  $("#modal-body").innerHTML = `<div class="modal-head"><h2 id="modal-title" style="font-size:22px">${esc(title)}</h2><button class="btn btn-ghost icon-btn" data-act="close" aria-label="Close">${ic("x")}</button></div>${html}`;
+  if (!modal.open) modal.showModal();
+  onMount?.();
+  drawBarcodes(modal);
+}
+function closeModal() { if (modal.open) modal.close(); }
+modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+function closeMenu() { $("#sidebar").classList.remove("open"); $("#scrim").className = ""; }
+
+/* ───────────── Actions ───────────── */
+const A = {
+  menu: () => { $("#sidebar").classList.add("open"); $("#scrim").className = "scrim"; },
+  close: closeModal,
+  toast: (d) => toast(d.msg),
+  toastprint: () => toast("Sent to the counter printer (demo)"),
+  pick: (d) => pickProduct(d.id),
+  addv: (d) => { closeModal(); addToCart(d.id); },
+  qty: (d) => { const l = state.cart.lines[+d.i]; const { p, v } = findV(l.vid); const next = l.qty + +d.d; if (next <= 0) state.cart.lines.splice(+d.i, 1); else if (tracks(p) && +d.d > 0 && available(v) - state.cart.lines.filter((x) => x.vid === l.vid).reduce((s, x) => s + x.qty, 0) <= 0) return toast("No more stock"); else l.qty = next; render(); },
+  editline: (d) => openLineEditor(+d.i),
+  quickdisc: (d) => ($("#le-disc").value = d.v),
+  saveline: (d) => { const l = state.cart.lines[+d.i]; const { v } = findV(l.vid); const price = parseFloat($("#le-price").value); l.price = isFinite(price) && price !== v.price ? price : null; l.disc = $("#le-disc").value.trim(); closeModal(); render(); },
+  rmline: (d) => { state.cart.lines.splice(+d.i, 1); closeModal(); render(); },
+  clear: () => { state.cart = { lines: [], billDisc: "", customer: null, orderId: null }; state.approved = false; render(); },
+  customer: () => openModal("Customer", `<input class="input" id="cust-q" placeholder="Mobile number or name" autocomplete="off" /><div id="cust-res" style="margin-top:10px">${DATA.customers.slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone} · ${c.points} pts</span></span></button>`).join("")}</div>`, () => {
+    $("#cust-q").focus();
+    $("#cust-q").addEventListener("input", (e) => { const q = e.target.value.toLowerCase(); $("#cust-res").innerHTML = DATA.customers.filter((c) => (c.name + c.phone).toLowerCase().includes(q)).slice(0, 6).map((c) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="setcust" data-id="${c.id}">${avatar(c.name, "sm")}<span><b>${esc(c.name)}</b><br><span class="small muted num">${c.phone}</span></span></button>`).join("") || `<p class="small muted">No match — the app lets you add a new customer here.</p>`; });
+  }),
+  setcust: (d) => { state.cart.customer = d.id; closeModal(); render(); },
+  pay: openPay,
+  approve: () => { if ($("#appr-pin").value === "1234") { state.approved = true; toast("Approved by Rahul Verma"); openPay(); } else $("#appr-err").textContent = "Wrong PIN. Try 1234 in this demo."; },
+  paymethod: (d) => { const c = calcCart(state.cart.lines, state.cart.billDisc); const o = state.cart.orderId ? DATA.orders.find((x) => x.id === state.cart.orderId) : null; renderPayPanel(d.m, Math.max(0, c.payable - (o?.advance ?? 0))); },
+  cashq: (d) => { $("#cash-in").value = d.v; $("#cash-in").dispatchEvent(new Event("input")); },
+  complete: (d) => completeSale(d.m),
+  paper: (d) => { state.template.paper = d.v; showReceipt(DATA.bills.find((b) => b.no === d.bill)); },
+  closenew: () => { closeModal(); go("billing"); setTimeout(() => $("#pos-search")?.focus(), 50); },
+  billsrange: (d) => { state.billsRange = d.v; render(); },
+  bill: (d) => { const b = DATA.bills.find((x) => x.no === d.no); showReceipt(b); $("#modal-body").insertAdjacentHTML("beforeend", billActions(b)); },
+  returnbill: (d) => { const b = DATA.bills.find((x) => x.no === d.no); const l = b.lines[0]; const f = findV(l.vid); if (f && tracks(f.p)) f.v.stock += 1; b.status = "Part returned"; closeModal(); render(); toast(`Returned 1 × ${l.name} · refund ${inr2.format(l.net / l.qty)} · stock added back`); },
+  cancelbill: (d) => { const b = DATA.bills.find((x) => x.no === d.no); b.lines.forEach((l) => { const f = findV(l.vid); if (f && tracks(f.p)) f.v.stock += l.qty; }); b.status = "Cancelled"; closeModal(); render(); toast(`${b.no} cancelled · stock returned · payment reversed`); },
+  okind: (d) => { state.orderKind = d.v; render(); },
+  order: (d) => openOrder(d.id),
+  nextstage: (d) => { const o = DATA.orders.find((x) => x.id === d.id); const flow = o.kind === "JOB" ? JOB_FLOW : ORDER_FLOW; o.stage = flow[flow.indexOf(o.stage) + 1]; o.events.unshift({ at: Date.now(), text: `Moved to ${o.stage} by ${me().name}` }); toast(`${o.no} → ${o.stage}${o.stage === "Ready" ? " · WhatsApp message ready to send" : ""}`); render(); if (d.modal) openOrder(o.id); },
+  billorder: (d) => { const o = DATA.orders.find((x) => x.id === d.id); state.cart = { lines: o.items.map((i) => ({ vid: i.vid, qty: i.qty, disc: "", price: i.price !== findV(i.vid).v.price ? i.price : null })), billDisc: "", customer: o.customer, orderId: o.id }; closeModal(); go("billing"); toast(`Billing ${o.no} · advance ${inr.format(o.advance)} deducted`); },
+  newjob: () => openModal("New stitching job", `<div class="stack"><div class="grid g2" style="gap:10px"><label><span class="lbl">Customer</span><select class="input" id="nj-c">${DATA.customers.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></label><label><span class="lbl">Service</span><select class="input" id="nj-s"><option>Blouse Stitching</option><option>Alteration</option><option>Fall & Pico</option></select></label></div>
+    <span class="lbl">Measurements · Blouse (inches)</span><div class="grid g3" style="gap:8px">${["Bust", "Waist", "Shoulder", "Armhole", "Sleeve length", "Blouse length"].map((f, i) => `<label><span class="xs muted">${f}</span><input class="input num" value="${[34, 30, 14, 16, 10, 14.5][i]}" /></label>`).join("")}</div>
+    <div class="grid g2" style="gap:10px"><label><span class="lbl">Due date</span><input class="input" type="date" id="nj-due" value="${dayKey(Date.now() + 4 * DAY)}" /></label><label><span class="lbl">Advance (₹)</span><input class="input num" id="nj-adv" value="300" /></label></div>
+    <button class="btn btn-primary btn-lg" data-act="savejob">Create job & print slip</button></div>`),
+  savejob: () => { const n = DATA.orders.filter((o) => o.kind === "JOB").length + 1; const s = $("#nj-s").value; const v = svc(s); const o = ord("JOB", n, DATA.customers.findIndex((c) => c.id === $("#nj-c").value), "Measured", Math.max(0, Math.round((new Date($("#nj-due").value) - today0) / DAY)), [{ vid: v.id, name: s, qty: 1, price: v.price || 250, note: "" }], +$("#nj-adv").value || 0, { measurement: { label: "Blouse", values: { Bust: 34, Waist: 30, Shoulder: 14, "Blouse length": 14.5 } } }); o.estimate = o.items[0].price; o.events = [{ at: Date.now(), text: `Created by ${me().name}` }]; DATA.orders.push(o); state.orderKind = "JOB"; closeModal(); go("orders"); openOrder(o.id); toast(`${o.no} created`); },
+  cust: (d) => openCustomer(d.id),
+  newproduct: openNewProduct,
+  npchip: (d) => { const s = NP[d.k]; s.has(d.v) ? s.delete(d.v) : s.add(d.v); window.__npDraw?.(); },
+  saveproduct: () => { const name = $("#np-name").value.trim() || "New product"; const price = parseFloat($("#np-price").value) || 999; const p = product(name, "Kurtis", "GOODS", "6204", price, Math.round(price * 1.25), Math.round(price * 0.48), [...NP.sizes], [...NP.colours], st(2, 6)); DATA.products.unshift(p); closeModal(); render(); toast(`${name} added with ${p.variants.length} variants and barcodes`); },
+  invf: (d) => { state.invFilter = state.invFilter === d.v ? "" : d.v; render(); },
+  adjust: (d) => openAdjust(d.id),
+  adjkind: (d) => document.querySelectorAll("[data-act=adjkind]").forEach((b) => b.classList.toggle("on", b.dataset.v === d.v)),
+  saveadjust: (d) => { const { p, v } = findV(d.id); const kind = $("[data-act=adjkind].on").dataset.v; const q = Math.max(0, parseInt($("#adj-qty").value) || 0); if (kind === "Stock in") v.stock += q; else if (kind === "Set count") v.stock = q; else if (q > available(v)) return toast(`Only ${available(v)} available`); else v.stock -= q; closeModal(); render(); toast(`${p.name} ${vLabel(v)}: ${kind.toLowerCase()} saved · now ${v.stock}`); },
+  rrange: (d) => { state.reportRange = +d.v; render(); },
+  receivepo: (d) => { const po = DATA.pos.find((x) => x.no === d.no); po.status = "Received"; DATA.products[2].variants.forEach((v) => (v.stock += 6)); render(); toast(`${po.no} received · stock updated · supplier bill recorded`); },
+  rentreturn: (d) => { const r = DATA.rentals[+d.i]; const late = r.status === "Overdue" ? 500 * Math.abs(r.to) : 0; r.status = "Returned"; render(); toast(`Returned · deposit ${inr.format(r.deposit - late)} refunded${late ? ` after ${inr.format(late)} late fee` : ""}`); },
+  stab: (d) => { state.settingsTab = d.v; render(); },
+  skin: (d) => { state.skin = d.v; applySkin(); render(); toast(`${SKINS[d.v].name} theme applied`); },
+  mode: (d) => { if (d.v) document.documentElement.dataset.theme = d.v; else delete document.documentElement.dataset.theme; applySkin(); render(); },
+  tpl: (d) => { state.template[d.k] = d.v; render(); },
+  tplcheck: (d, el) => { state.template[d.k] = el.checked; $("#tpl-preview").innerHTML = receiptHTML(DATA.bills[DATA.bills.length - 1]); },
+};
+document.addEventListener("click", (e) => {
+  const nav = e.target.closest("[data-route]");
+  if (nav) { e.preventDefault(); return go(nav.dataset.route); }
+  const g = e.target.closest("[data-go]");
+  if (g) { closeModal(); return go(g.dataset.go); }
+  const a = e.target.closest("[data-act]");
+  if (a && A[a.dataset.act]) { if (a.tagName !== "INPUT") e.preventDefault(); A[a.dataset.act](a.dataset, a); }
+});
+$("#scrim").addEventListener("click", closeMenu);
+document.addEventListener("input", (e) => {
+  const k = e.target.dataset.input; if (!k) return;
+  if (k === "role") { state.role = e.target.value; state.cart.orderId = null; render(); return toast(`Viewing as ${e.target.options[e.target.selectedIndex].text} — menu and permissions change`); }
+  if (k === "store") { state.store = DATA.stores[e.target.selectedIndex]; render(); return toast(`Switched to ${state.store}`); }
+  if (k === "footer") { state.template.footer = e.target.value; $("#tpl-preview").innerHTML = receiptHTML(DATA.bills[DATA.bills.length - 1]); return; }
+  if (k === "billDisc") { state.cart.billDisc = e.target.value; rerenderKeepFocus("#billdisc"); return; }
+  if (k === "posQuery") { state.posQuery = e.target.value; rerenderKeepFocus("#pos-search"); return; }
+  if (k === "prodQuery") { state.prodQuery = e.target.value; rerenderKeepFocus("#prod-q"); }
+});
+function rerenderKeepFocus(sel) { const el = $(sel); const pos = el?.selectionStart; render(); const n = $(sel); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) { /* number inputs */ } } }
+document.addEventListener("keydown", (e) => {
+  if (e.target.id === "pos-search" && e.key === "Enter") {
+    const code = e.target.value.trim().toLowerCase();
+    for (const p of DATA.products) for (const v of p.variants) if (v.barcode === code || v.sku.toLowerCase() === code) { state.posQuery = ""; return addToCart(v.id); }
+    const only = DATA.products.filter((p) => p.name.toLowerCase().includes(code));
+    if (only.length === 1) pickProduct(only[0].id);
+  }
+  if (state.route === "billing" && e.key === "F2") { e.preventDefault(); $("#pos-search")?.focus(); }
+  if (state.route === "billing" && e.key === "F8" && state.cart.lines.length) { e.preventDefault(); openPay(); }
+});
+$("#global-search").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const q = e.target.value.trim().toLowerCase(); if (!q) return;
+  const c = DATA.customers.find((x) => (x.name + x.phone).toLowerCase().includes(q));
+  const b = DATA.bills.find((x) => x.no.toLowerCase().includes(q));
+  if (b) return showReceipt(b);
+  if (c && can("customers")) return openCustomer(c.id);
+  state.posQuery = q; go(can("billing") ? "billing" : "dashboard");
+});
+
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (V[h] && h !== state.route) { closeModal(); go(h); } });
+
+/* ───────────── Boot ───────────── */
+(function boot() {
+  const h = (location.hash || "").slice(1);
+  if (V[h]) state.route = h;
+  applySkin();
+  render();
+})();
+</script>
