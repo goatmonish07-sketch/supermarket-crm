@@ -23,3 +23,6 @@ dist/
 .vercel
 .wrangler
 .dev.vars
+
+# cloudflare / opennext
+.open-next
