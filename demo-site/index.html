@@ -299,6 +299,68 @@ button.cal-cell:hover { border-color: color-mix(in srgb, var(--primary) 45%, tra
   .cal-head span { font-size: 10px; letter-spacing: 0; }
 }
 
+
+/* ── Design studio ── */
+.ds-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.ds-meta { margin-bottom: 12px; }
+.ds-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.ds-stage.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ds-view { border-radius: 20px; overflow: hidden; background-color: #f7f5ef; background-image: radial-gradient(#dcd8cc 1px, transparent 1px); background-size: 18px 18px; border: 1px solid var(--border); }
+.ds-stage:not(.two) .ds-view { max-width: 640px; margin: 0 auto; width: 100%; }
+.ds-svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+.ds-svg.tool-hand { touch-action: auto; }
+.ds-svg.tool-pen, .ds-svg.tool-marker, .ds-svg.tool-arrow { cursor: crosshair; }
+.ds-svg.tool-text { cursor: text; }
+.ds-svg.tool-eraser { cursor: cell; }
+.ds-svg [data-ink] { pointer-events: visiblePainted; }
+.ds-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.ds-tools .seg button { display: inline-flex; align-items: center; gap: 6px; }
+.ds-sec { border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); padding: 12px 0; }
+.ds-sec:first-child { border-top: 0; padding-top: 0; }
+.ds-sec summary { cursor: pointer; font-weight: 700; font-size: 15px; min-height: 32px; display: flex; align-items: center; list-style: none; margin-bottom: 8px; }
+.ds-sec summary::-webkit-details-marker { display: none; }
+.ds-sec summary::after { content: "+"; margin-left: auto; color: var(--muted); font-size: 18px; }
+.ds-sec[open] summary::after { content: "−"; }
+.ds-sec .chip { min-height: 36px; padding: 0 12px; }
+.ds-sec .chip svg { margin-left: -4px; }
+.swatch { width: 32px; height: 32px; border-radius: 999px; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--border); padding: 0; position: relative; overflow: hidden; }
+.swatch.sm { width: 28px; height: 28px; }
+.swatch.on { box-shadow: 0 0 0 2px var(--fg); }
+.swatch.custom { display: inline-block; background: conic-gradient(#e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6, #e74c3c); cursor: pointer; }
+.swatch.custom input { position: absolute; inset: -8px; width: 48px; height: 48px; opacity: 0; cursor: pointer; }
+.range { width: 100%; accent-color: var(--primary); min-height: 32px; }
+.ds-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.ds-thumb { position: relative; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: var(--surface); }
+.ds-thumb.on { outline: 2px solid var(--primary); }
+.ds-thumb-img { display: block; width: 100%; border: 0; padding: 4px; background: #f7f5ef; }
+.ds-thumb-img svg { display: block; width: 100%; height: auto; }
+.ds-del { position: absolute; top: 4px; right: 4px; min-height: 32px; width: 32px; padding: 0; background: color-mix(in srgb, var(--surface) 85%, transparent); }
+.ds-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; margin-top: 10px; border: 1px solid var(--border); border-radius: 14px; background: #f7f5ef; padding: 4px; }
+.ds-mini svg { width: 100%; height: auto; display: block; }
+.ds-tiny { width: 64px; height: 52px; flex: none; border-radius: 10px; background: #f7f5ef; overflow: hidden; }
+.ds-tiny svg { width: 100%; height: 100%; }
+.sheet-wrap { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+body.present .sidebar, body.present .topbar, body.present #aura { display: none; }
+body.present .app { grid-template-columns: minmax(0, 1fr); }
+body.present .ds-view { max-width: none; }
+@media (max-width: 1180px) { .ds-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 700px) { .ds-stage.two { grid-template-columns: minmax(0, 1fr); } .tool-l { display: none; } }
+
+/* ── Team & workshop ── */
+.avatar.xs { width: 26px; height: 26px; font-size: 10px; }
+.skill { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); }
+.load { height: 8px; border-radius: 9px; background: var(--surface-2); overflow: hidden; margin-top: 6px; }
+.load i { display: block; height: 100%; border-radius: 9px; transition: width 0.4s; }
+.job-chip { min-height: 30px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+.job-chip:hover { border-color: var(--primary); }
+.job-chip.late { border-color: color-mix(in srgb, var(--danger) 55%, transparent); color: var(--danger); }
+.flow { display: flex; align-items: stretch; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.flow-step { flex: 1 0 128px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 12px; border-radius: 18px; border: 1px solid var(--border); background: var(--surface-2); transition: border-color 0.15s, transform 0.15s; }
+.flow-step:hover { border-color: var(--primary); transform: translateY(-2px); }
+.flow-n { font-size: 26px; font-weight: 800; line-height: 1.1; color: var(--primary); }
+.flow-arrow { align-self: center; color: var(--muted); font-size: 22px; flex: none; }
+.count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; padding: 0 8px; margin-left: 6px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: 13px; font-weight: 700; vertical-align: middle; }
+
 /* ── Dialog & toast ── */
 dialog.modal { width: min(640px, calc(100vw - 24px)); max-height: 90dvh; border: 0; padding: 0; border-radius: 28px; background: var(--surface); color: var(--fg); box-shadow: 0 30px 80px -20px rgba(0,0,0,0.5); }
 dialog.modal.wide { width: min(940px, calc(100vw - 24px)); }
@@ -351,7 +413,7 @@ dialog.modal::backdrop { background: rgba(8, 12, 10, 0.5); backdrop-filter: blur
         <label for="role" class="xs muted lbl-role">Viewing as</label>
         <select id="role" data-input="role" aria-label="Viewing as role">
           <option value="OWNER">Owner</option>
-          <option value="CASHIER">Cashier</option>
+          <option value="CASHIER">Front desk</option>
           <option value="TAILOR">Tailor</option>
         </select>
       </div>
@@ -417,6 +479,7 @@ const I = {
   store: '<path d="M3 9 4.5 4h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/>',
   up: '<path d="m6 15 6-6 6 6"/>',
   down: '<path d="m6 9 6 6 6-6"/>',
+  pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
   upload: '<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>',
@@ -426,6 +489,10 @@ const ic = (name, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="c
 const pill = (tone, text, icon) => `<span class="pill t-${tone}">${icon ? ic(icon) : ""}${esc(text)}</span>`;
 
 /* ───────────── Sample data (all fictional) ───────────── */
+/* Every WhatsApp button in the demo opens this number, so test messages never reach a stranger.
+   In the real app each message goes to the customer's own mobile. */
+const WA_DEMO = "9787470555";
+const waLink = (text) => `https://wa.me/91${WA_DEMO}?text=${encodeURIComponent(text)}`;
 const SWATCH = { Black: "#1f1f1f", White: "#f7f7f2", Red: "#c0392b", Maroon: "#7b1e2b", Pink: "#e889a8", Peach: "#f4b494", Mustard: "#d4a017", Green: "#2e8b57", Teal: "#14808a", Blue: "#2f6fbf", Navy: "#1f2f5a", Lavender: "#b7a6d9", Beige: "#d9c7a7", Gold: "#c9a23f", Ivory: "#efe6cf" };
 let barcodeSeq = 0, vidSeq = 0;
 function product(name, cat, type, hsn, price, mrp, cost, sizes, colours, stockFn, extra = {}) {
@@ -437,15 +504,17 @@ function product(name, cat, type, hsn, price, mrp, cost, sizes, colours, stockFn
 }
 const st = (a, b) => () => Math.floor(a + R() * (b - a + 1));
 const DATA = {
-  shop: { name: "Demo Boutique", branch: "MG Road", address: "12 MG Road, Chennai 600001", phone: "98765 43210", gstin: "33ABCDE1234F1Z5", upi: "demoboutique@okbank" },
+  shop: { name: "Demo Boutique", branch: "MG Road", address: "12 MG Road, Chennai 600001", phone: "97874 70555", gstin: "33ABCDE1234F1Z5", upi: "demoboutique@okbank" },
   stores: ["MG Road", "Anna Nagar"],
   staff: [
-    { id: "s1", name: "Anita Sharma", role: "Owner", pin: "1234", inAt: "09:41", commission: 0 },
-    { id: "s2", name: "Rahul Verma", role: "Manager", pin: "1234", inAt: "09:55", commission: 1.5 },
-    { id: "s3", name: "Kavya Nair", role: "Cashier", pin: "1111", inAt: "10:02", commission: 1 },
-    { id: "s4", name: "Imran Khan", role: "Stock staff", pin: "2222", inAt: "10:15", commission: 0 },
-    { id: "s5", name: "Lakshmi Devi", role: "Tailor", pin: "3333", inAt: "10:05", commission: 4 },
-    { id: "s6", name: "Farah Ali", role: "Accountant", pin: "4444", inAt: null, commission: 0 },
+    { id: "s1", name: "Anita Sharma", role: "Owner", pin: "1234", inAt: "09:41", commission: 0, skills: ["Bridal design", "Consultations", "Pricing"], pay: { type: "owner" } },
+    { id: "s2", name: "Rahul Verma", role: "Master tailor", pin: "5678", inAt: "09:55", commission: 0, skills: ["Measurements", "Pattern cutting", "Blouse", "Lehenga"], pay: { type: "salary", amount: 28000 }, paid: 28000, cap: 10 },
+    { id: "s3", name: "Kavya Nair", role: "Front desk", pin: "1111", inAt: "10:02", commission: 1, skills: ["Orders", "Measurements", "Billing", "Trials"], pay: { type: "salary", amount: 16000 }, paid: 16000 },
+    { id: "s4", name: "Imran Khan", role: "Tailor", pin: "2222", inAt: "10:15", commission: 0, skills: ["Kurti", "Salwar", "Alterations"], pay: { type: "piece" }, work: { kurti: 14, salwar: 6, alter: 22 }, paid: 3000, onTime: 93, cap: 5 },
+    { id: "s5", name: "Lakshmi Devi", role: "Tailor", pin: "3333", inAt: "10:05", commission: 0, skills: ["Blouse", "Princess cut", "Bridal"], pay: { type: "piece" }, work: { blouse: 12, blousecut: 9, lining: 15 }, paid: 4000, onTime: 96, cap: 5 },
+    { id: "s6", name: "Farah Ali", role: "Aari artisan", pin: "4444", inAt: null, commission: 0, skills: ["Aari", "Zardosi", "Mirror work", "Hand embroidery"], pay: { type: "piece" }, work: { aari: 5, border: 7 }, paid: 2000, onTime: 89, cap: 3 },
+    { id: "s7", name: "Suresh Kumar", role: "Tailor", pin: "5555", inAt: "10:20", commission: 0, skills: ["Blouse", "Lehenga", "Padding"], pay: { type: "piece" }, work: { blouse: 8, lehenga: 2, lining: 6 }, paid: 2500, onTime: 91, cap: 5 },
+    { id: "s8", name: "Ravi Shankar", role: "Finishing", pin: "6666", inAt: "10:30", commission: 0, skills: ["Hooks & kaaj", "Fall & pico", "Ironing"], pay: { type: "piece" }, work: { pico: 38, finish: 46 }, paid: 1200, onTime: 98, cap: 12 },
   ],
   products: [
     product("Anarkali Kurti", "Kurtis", "GOODS", "6204", 1499, 1999, 720, ["S", "M", "L", "XL"], ["Maroon", "Teal"], st(0, 7)),
@@ -486,7 +555,7 @@ const DATA = {
   coupons: [
     { code: "WELCOME10", value: "10% off first bill", uses: "38 / 200", status: "Active" },
     { code: "DIWALI500", value: "₹500 off above ₹5,000", uses: "12 / 100", status: "Active" },
-    { code: "STAFF20", value: "20% staff discount", uses: "7 / ∞", status: "Manager only" },
+    { code: "STAFF20", value: "20% staff discount", uses: "7 / ∞", status: "Owner only" },
   ],
   giftCards: [{ code: "GC-7Q2M-4K9D", balance: 2000, expires: 210 }, { code: "GC-9HX1-PL3A", balance: 750, expires: 64 }],
   expenses: [],
@@ -554,7 +623,7 @@ for (let d = 44; d >= 0; d--) {
   const count = isToday ? 9 : 6 + Math.floor(R() * 9) + (dow === 0 || dow === 6 ? 5 : 0);
   for (let i = 0; i < count; i++) {
     const hour = 10.5 + (isToday ? (i / count) * Math.max(0.5, new Date().getHours() - 10.5) : R() * 10);
-    DATA.bills.push(makeBill(base + hour * 3600000, pick(["s2", "s3", "s3", "s1"])));
+    DATA.bills.push(makeBill(base + hour * 3600000, pick(["s3", "s3", "s3", "s1"])));
   }
 }
 DATA.bills.sort((a, b) => a.at - b.at);
@@ -567,19 +636,28 @@ const JOB_FLOW = ["Received", "Measured", "Cutting", "Stitching", "Trial", "Read
 const ORDER_FLOW = ["Confirmed", "Awaiting stock", "In alteration", "Ready", "Out for delivery", "Delivered"];
 const STAGE_TONE = { Received: "neutral", Measured: "info", Cutting: "info", Stitching: "primary", Trial: "warning", Ready: "success", Delivered: "neutral", Confirmed: "info", "Awaiting stock": "warning", "In alteration": "primary", "Out for delivery": "primary", Cancelled: "danger" };
 const svc = (name) => DATA.products.find((p) => p.name === name).variants[0];
-const ord = (kind, n, ci, stage, dueIn, items, advance, extra = {}) => ({ id: "o" + n, no: `${kind === "JOB" ? "JOB" : "ORD"}-${String(n).padStart(4, "0")}`, kind, stage, customer: DATA.customers[ci].id, due: today0.getTime() + dueIn * DAY + 18 * 3600000, trial: kind === "JOB" ? today0.getTime() + (dueIn - 1) * DAY : null, items, advance, tailor: kind === "JOB" ? "s5" : null, hold: false, events: [{ at: Date.now() - 3 * DAY, text: "Created" }], ...extra });
+const ord = (kind, n, ci, stage, dueIn, items, advance, extra = {}) => ({ id: (kind === "JOB" ? "j" : "o") + n, no: `${kind === "JOB" ? "JOB" : "ORD"}-${String(n).padStart(4, "0")}`, kind, stage, customer: DATA.customers[ci].id, due: today0.getTime() + dueIn * DAY + 18 * 3600000, trial: kind === "JOB" ? today0.getTime() + (dueIn - 1) * DAY : null, items, advance, tailor: kind === "JOB" ? "s5" : null, hold: false, events: [{ at: Date.now() - 3 * DAY, text: "Created" }], ...extra });
 DATA.orders = [
   ord("JOB", 1, 1, "Stitching", 1, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 2, price: 650, note: "Princess cut, padded" }], 500, { measurement: DATA.customers[1].measurements[0], design: "Boat neck, elbow sleeves, back hooks" }),
   ord("JOB", 2, 2, "Trial", 0, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 750, note: "Heavy work blouse" }], 300, { measurement: { label: "Blouse", values: { Bust: 36, Waist: 31, "Blouse length": 15 } } }),
   ord("JOB", 3, 4, "Received", 4, [{ vid: svc("Alteration").id, name: "Alteration", qty: 1, price: 250, note: "Shorten sleeves 1 inch" }], 0),
   ord("JOB", 4, 6, "Cutting", 3, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "" }], 650),
   ord("JOB", 5, 8, "Ready", -1, [{ vid: svc("Fall & Pico").id, name: "Fall & Pico", qty: 3, price: 150, note: "" }], 0),
-  ord("JOB", 6, 10, "Measured", 6, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "Bridal blouse" }], 1000),
+  ord("JOB", 6, 10, "Stitching", 6, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "Bridal blouse" }], 1000),
   ord("ORDER", 1, 3, "Awaiting stock", 5, [{ vid: DATA.products[3].variants[0].id, name: "Banarasi Silk Saree — Red", qty: 1, price: 8499 }], 2000),
   ord("ORDER", 2, 5, "Confirmed", 2, [{ vid: DATA.products[11].variants[1].id, name: "Linen Co-ord Set — S / Navy", qty: 1, price: 2499 }], 500),
   ord("ORDER", 3, 7, "Out for delivery", 0, [{ vid: DATA.products[6].variants[0].id, name: "Bridal Lehenga Set — S / Red", qty: 1, price: 32999 }], 15000, { delivery: "14 Lake View Rd, Adyar" }),
   ord("ORDER", 4, 9, "Ready", 1, [{ vid: DATA.products[0].variants[2].id, name: "Anarkali Kurti — M / Maroon", qty: 2, price: 1499 }], 1000),
+  ord("JOB", 7, 11, "Received", 9, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 2, price: 850, note: "Katori cut, lined" }], 800),
+  ord("JOB", 8, 12, "Measured", 12, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 2400, note: "Bridal blouse, Aari work on sleeves" }], 1500),
+  ord("JOB", 9, 13, "Cutting", 16, [{ vid: svc("Alteration").id, name: "Alteration", qty: 3, price: 250, note: "Take in side seams" }], 0),
+  ord("JOB", 10, 0, "Received", 21, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 1, price: 650, note: "Simple cotton blouse" }], 300),
+  ord("ORDER", 5, 3, "Awaiting stock", 14, [{ vid: DATA.products[4].variants[0].id, name: "Kanjivaram Silk Saree — Maroon", qty: 1, price: 14999 }], 5000),
+  ord("JOB", 11, 5, "Received", 38, [{ vid: svc("Blouse Stitching").id, name: "Blouse Stitching", qty: 3, price: 900, note: "Wedding set — princess cut, padded" }], 1500),
 ];
+/* Spread stitching across the workshop: three tailors and one Aari artisan. */
+const SEED_TAILOR = { j1: "s5", j2: "s5", j3: "s4", j4: "s7", j5: "s4", j6: "s5", j7: "s7", j8: "s5", j9: "s4", j10: "s7", j11: "s7" };
+DATA.orders.forEach((o) => { if (o.kind !== "JOB") return; o.tailor = SEED_TAILOR[o.id] ?? "s5"; if (["j2", "j6", "j8"].includes(o.id)) o.artisan = "s6"; });
 DATA.orders.forEach((o) => (o.estimate = o.items.reduce((s, i) => s + i.price * i.qty, 0)));
 
 /* ── Rentals, purchases, money, appointments ── */
@@ -608,11 +686,11 @@ DATA.pos = [
 DATA.pos.forEach((po) => (po.pid = DATA.products.find((p) => po.items.startsWith(p.name))?.id ?? ""));
 DATA.expenses = [
   { at: Date.now() - 1 * 3600000, cat: "Tea & snacks", amount: 180, by: "Kavya Nair", method: "CASH" },
-  { at: Date.now() - 26 * 3600000, cat: "Courier", amount: 420, by: "Imran Khan", method: "UPI" },
+  { at: Date.now() - 26 * 3600000, cat: "Courier", amount: 420, by: "Kavya Nair", method: "UPI" },
   { at: Date.now() - 3 * DAY, cat: "Electricity", amount: 6850, by: "Anita Sharma", method: "BANK" },
   { at: Date.now() - 5 * DAY, cat: "Tailor wages", amount: 9500, by: "Anita Sharma", method: "BANK" },
   { at: Date.now() - 8 * DAY, cat: "Shop rent", amount: 45000, by: "Anita Sharma", method: "BANK" },
-  { at: Date.now() - 9 * DAY, cat: "Packaging", amount: 1600, by: "Imran Khan", method: "CASH" },
+  { at: Date.now() - 9 * DAY, cat: "Packaging", amount: 1600, by: "Kavya Nair", method: "CASH" },
 ];
 DATA.shifts = [];
 /* Appointments across the month, so the calendar has real content. */
@@ -646,7 +724,7 @@ const state = {
   invFilter: "", prodQuery: "", labelSel: new Set(),
   calMonth: new Date(today0.getFullYear(), today0.getMonth(), 1), calDay: dayKey(today0), apptRange: "today",
   notifPrefs: { job: { on: true, channel: "app" }, due: { on: true, channel: "app" }, appt: { on: true, channel: "whatsapp" }, stock: { on: true, channel: "app" }, sales: { on: true, channel: "email" }, birthday: { on: false, channel: "app" }, dues: { on: true, channel: "app" } },
-  readNotifs: [], profile: null,
+  readNotifs: [], profile: null, dueRange: "today",
 };
 DATA.extraNotifs = [];
 const NAV = [
@@ -655,6 +733,7 @@ const NAV = [
     ["billing", "Billing", "bill", ["OWNER", "CASHIER"]],
     ["bills", "Bills & returns", "history", ["OWNER", "CASHIER"]],
     ["orders", "Orders & Jobs", "scissors", ["OWNER", "CASHIER", "TAILOR"], "orders"],
+    ["design", "Design studio", "pen", ["OWNER", "CASHIER", "TAILOR"], null, "New"],
     ["calendar", "Calendar", "cal", ["OWNER", "CASHIER", "TAILOR"]],
     ["appts", "Appointments", "clock", ["OWNER", "CASHIER", "TAILOR"], "appts"],
     ["rentals", "Rentals", "rental", ["OWNER", "CASHIER"]],
@@ -719,6 +798,9 @@ const sumNet = (bills) => bills.reduce((s, b) => s + b.total, 0);
 const itemsOf = (bills) => bills.reduce((s, b) => s + b.lines.reduce((t, l) => t + l.qty, 0), 0);
 const monthStart = new Date(today0.getFullYear(), today0.getMonth(), 1).getTime();
 const TARGET = 2500000;
+const DUE_RANGES = { today: "Today", week: "This week", month: "This month" };
+/* End of the range: tomorrow 00:00, next Monday 00:00 (weeks run Mon–Sun), or the 1st of next month. */
+const dueEnd = (r) => (r === "today" ? today0.getTime() + DAY : r === "week" ? today0.getTime() + (7 - ((today0.getDay() + 6) % 7)) * DAY : new Date(today0.getFullYear(), today0.getMonth() + 1, 1).getTime());
 
 function countUp(root = document) {
   root.querySelectorAll("[data-count]").forEach((el) => {
@@ -756,7 +838,8 @@ V.dashboard = () => {
   const month = sumNet(billsBetween(monthStart, now + 1));
   const pct = Math.min(100, Math.round((month / TARGET) * 100));
   const arcLen = Math.PI * 80;
-  const due = DATA.orders.filter((o) => !["Delivered", "Cancelled"].includes(o.stage) && o.due < today0.getTime() + DAY && (state.role !== "TAILOR" || o.tailor === "s5"));
+  const dueAll = DATA.orders.filter((o) => !["Delivered", "Cancelled"].includes(o.stage) && o.due < dueEnd(state.dueRange) && (state.role !== "TAILOR" || o.tailor === "s5")).sort((a, b) => a.due - b.due);
+  const due = dueAll.slice(0, 6);
   const low = []; DATA.products.forEach((p) => p.variants.forEach((v) => { const s = stockStatus(p, v); if (s === "LOW" || s === "OUT") low.push({ p, v, s }); }));
   const top = {}; billsBetween(monthStart, now + 1).forEach((b) => b.lines.forEach((l) => (top[l.name] = (top[l.name] || 0) + l.net)));
   const topList = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -805,8 +888,9 @@ V.dashboard = () => {
 
   <div class="grid g3">
     <section class="card rise lift" style="animation-delay:320ms">
-      <div class="card-title"><h2>Due today</h2><button class="btn btn-ghost btn-sm" data-go="orders">All</button></div>
-      ${due.length ? due.map((o) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="order" data-id="${o.id}">${ic(o.kind === "JOB" ? "scissors" : "orders", 'width="20" height="20" style="color:var(--muted);flex:none"')}<span style="flex:1;min-width:0"><span class="mono small" style="font-weight:600">${o.no}</span> · ${esc(custName(o.customer))}${o.due < today0.getTime() ? `<br><span class="xs" style="color:var(--danger);font-weight:700">Overdue</span>` : ""}</span>${pill(STAGE_TONE[o.stage], o.stage)}</button>`).join("") : `<p class="empty">Nothing due. All caught up.</p>`}
+      <div class="card-title"><h2>Due ${DUE_RANGES[state.dueRange].toLowerCase()} <span class="count-pill num">${dueAll.length}</span></h2><button class="btn btn-ghost btn-sm" data-go="orders">All</button></div>
+      <div class="seg" style="margin:-2px 0 8px" role="group" aria-label="Due within">${Object.entries(DUE_RANGES).map(([k, l]) => `<button class="${state.dueRange === k ? "on" : ""}" data-act="duerange" data-v="${k}" aria-pressed="${state.dueRange === k}">${l}</button>`).join("")}</div>
+      ${due.length ? due.map((o) => { const late = o.due < today0.getTime(); return `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="order" data-id="${o.id}">${ic(o.kind === "JOB" ? "scissors" : "orders", 'width="20" height="20" style="color:var(--muted);flex:none"')}<span style="flex:1;min-width:0"><span class="mono small" style="font-weight:600">${o.no}</span> · ${esc(custName(o.customer))}<br><span class="xs" style="font-weight:700;color:${late ? "var(--danger)" : "var(--muted)"}">${late ? `Overdue · ${fmtDate(o.due)}` : state.dueRange === "today" ? `By ${fmtTime(o.due)}` : dayLabel(o.due)}</span></span>${pill(STAGE_TONE[o.stage], o.stage)}</button>`; }).join("") + (dueAll.length > due.length ? `<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" data-go="orders">+${dueAll.length - due.length} more</button>` : "") : `<p class="empty">Nothing due ${DUE_RANGES[state.dueRange].toLowerCase()}. All caught up.</p>`}
     </section>
     <section class="card rise lift" style="animation-delay:380ms">
       <div class="card-title"><h2>Low stock</h2>${state.role === "OWNER" ? `<button class="btn btn-ghost btn-sm" data-go="inventory">Inventory</button>` : ""}</div>
@@ -928,9 +1012,9 @@ function openPay() {
   const discPct = c.gross ? (c.discount / c.gross) * 100 : 0;
   if (state.role === "CASHIER" && discPct > 10 && !state.approved) {
     pendingPay = true;
-    return openModal("Manager approval", `<p class="muted" style="margin-top:-8px">Discount is ${discPct.toFixed(1)}% — above the cashier limit of 10%.</p>
-      <div class="row" style="margin:14px 0">${["Rahul Verma", "Anita Sharma"].map((n, i) => `<span class="chip ${i === 0 ? "on" : ""}">${esc(n)}</span>`).join("")}</div>
-      <label><span class="lbl">Manager PIN <span class="muted">(demo PIN 1234)</span></span><input class="input num" id="appr-pin" inputmode="numeric" maxlength="6" type="password" style="font-size:22px;letter-spacing:.4em;text-align:center" /></label>
+    return openModal("Owner approval", `<p class="muted" style="margin-top:-8px">Discount is ${discPct.toFixed(1)}% — above the front desk limit of 10%.</p>
+      <div class="row" style="margin:14px 0"><span class="chip on">${esc(DATA.staff[0].name)} · Owner</span></div>
+      <label><span class="lbl">Owner PIN <span class="muted">(demo PIN 1234)</span></span><input class="input num" id="appr-pin" inputmode="numeric" maxlength="6" type="password" style="font-size:22px;letter-spacing:.4em;text-align:center" /></label>
       <p id="appr-err" class="small" style="color:var(--danger);min-height:20px;margin-top:6px"></p>
       <button class="btn btn-primary btn-lg" style="width:100%" data-act="approve">Approve</button>`);
   }
@@ -999,7 +1083,7 @@ function showReceipt(b) {
   const text = `*${DATA.shop.name}*\nBill ${b.no}\n${b.lines.map((l) => `${l.qty} × ${l.name} — ${inr2.format(l.net)}`).join("\n")}\n*Total: ${inr2.format(b.total)}*\n${state.template.footer}`;
   openModal(`Bill ${b.no}`, `<div class="between" style="flex-wrap:wrap;margin:-6px 0 14px">${pill("success", b.status, "check")}<div class="seg" role="radiogroup" aria-label="Paper">${[["t58", "58 mm"], ["t80", "80 mm"], ["a4", "A4"]].map(([v, l]) => `<button role="radio" aria-checked="${state.template.paper === v}" class="${state.template.paper === v ? "on" : ""}" data-act="paper" data-v="${v}" data-bill="${b.no}">${l}</button>`).join("")}</div></div>
     <div style="background:var(--surface-2);border-radius:20px;padding:16px;overflow-x:auto">${receiptHTML(b)}</div>
-    <div class="row" style="margin-top:14px"><a class="btn btn-outline" href="https://wa.me/${cu ? "91" + cu.phone : ""}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">${ic("wa")} Send on WhatsApp</a><button class="btn btn-ghost" data-act="toastprint">${ic("print")} Print</button><button class="btn btn-primary" style="margin-left:auto" data-act="closenew">New bill</button></div>`, null, true);
+    <div class="row" style="margin-top:14px"><a class="btn btn-outline" href="${waLink(text)}" target="_blank" rel="noopener">${ic("wa")} Send on WhatsApp</a><button class="btn btn-ghost" data-act="toastprint">${ic("print")} Print</button><button class="btn btn-primary" style="margin-left:auto" data-act="closenew">New bill</button></div>`, null, true);
 }
 
 /* ── Bills ── */
@@ -1048,13 +1132,13 @@ function openOrder(id) {
     <div class="grid g2" style="gap:12px">
       <div class="card" style="box-shadow:none;padding:16px"><p class="lbl">Work</p>${o.items.map((i) => `<div class="between small"><span>${i.qty > 1 ? i.qty + " × " : ""}${esc(i.name)}${i.note ? `<br><i class="muted">${esc(i.note)}</i>` : ""}</span><b class="num">${inr.format(i.price * i.qty)}</b></div>`).join("")}<hr class="div"><div class="between small"><span>Advance</span><span class="num">− ${inr.format(o.advance)}</span></div><div class="between"><b>Balance</b><b class="num">${inr.format(o.estimate - o.advance)}</b></div>
         <p class="small muted" style="margin-top:10px">Due ${fmtDate(o.due, { weekday: "short", day: "numeric", month: "short" })}${o.trial ? ` · trial ${fmtDate(o.trial)}` : ""}${o.tailor ? ` · ${DATA.staff.find((s) => s.id === o.tailor).name}` : ""}${o.delivery ? `<br>Delivery: ${esc(o.delivery)}` : ""}</p></div>
-      <div class="card" style="box-shadow:none;padding:16px"><p class="lbl">Measurements ${o.measurement ? `· ${o.measurement.label} (inches)` : ""}</p>${o.measurement ? `<div class="grid g2" style="gap:4px 14px">${Object.entries(o.measurement.values).map(([k, v]) => `<div class="between small" style="border-bottom:1px dashed var(--border)"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div>${o.design ? `<p class="small" style="margin-top:10px"><b>Design:</b> ${esc(o.design)}</p>` : ""}` : `<p class="small muted">Not needed for this ${o.kind === "JOB" ? "job" : "order"}.</p>`}</div>
+      <div class="card" style="box-shadow:none;padding:16px"><p class="lbl">Measurements ${o.measurement ? `· ${o.measurement.label} (inches)` : ""}</p>${o.measurement ? `<div class="grid g2" style="gap:4px 14px">${Object.entries(o.measurement.values).map(([k, v]) => `<div class="between small" style="border-bottom:1px dashed var(--border)"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div>${o.design ? `<p class="small" style="margin-top:10px"><b>Design:</b> ${esc(o.design)}</p>` : ""}${(() => { const dz = o.designId && DATA.designs.find((x) => x.id === o.designId); return dz ? `<button class="ds-mini" data-act="dopen" data-id="${dz.id}" aria-label="Open design ${esc(dz.name)}">${blouseSVG(dz.cfg, "front", dz.ink.front, { label: false })}${blouseSVG(dz.cfg, "back", dz.ink.back, { label: false })}</button><p class="xs muted">Tap to open in Design studio</p>` : ""; })()}` : `<p class="small muted">Not needed for this ${o.kind === "JOB" ? "job" : "order"}.</p>`}</div>
     </div>
     <div style="margin-top:14px"><p class="lbl">Job slip</p><div style="display:flex;gap:12px;flex-wrap:wrap;background:var(--surface-2);border-radius:18px;padding:12px">${["Customer copy", "Workshop copy"].map((t) => `<div class="paper t58" style="font-family:var(--font-mono)"><div style="text-align:center;font-size:9px;letter-spacing:.15em">${t.toUpperCase()}</div><div style="text-align:center;font-weight:700">${esc(DATA.shop.name)}</div><svg class="bc" data-code="${o.no}" style="width:100%;height:48px"></svg><div>${esc(cu.name)} · ${cu.phone}</div><div><b>Due: ${fmtDate(o.due, { weekday: "short", day: "numeric", month: "short" })}</b></div></div>`).join("")}</div></div>
     <div class="row" style="margin-top:16px">
       ${at < flow.length - 2 ? `<button class="btn btn-primary" data-act="nextstage" data-id="${o.id}" data-modal="1">→ Move to ${flow[at + 1]}</button>` : ""}
       ${(o.stage === "Ready" || o.stage === "Out for delivery") && state.role !== "TAILOR" ? `<button class="btn btn-primary" data-act="billorder" data-id="${o.id}">Create bill · ${inr.format(o.estimate - o.advance)}</button>` : ""}
-      <a class="btn btn-outline" target="_blank" rel="noopener" href="https://wa.me/91${cu.phone}?text=${encodeURIComponent(msg)}">${ic("wa")} WhatsApp update</a>
+      <a class="btn btn-outline" target="_blank" rel="noopener" href="${waLink(msg)}">${ic("wa")} WhatsApp update</a>
       <button class="btn btn-ghost" data-act="toastprint">${ic("print")} Print slip</button></div>
     <p class="lbl" style="margin-top:16px">History</p>${o.events.map((e) => `<p class="small"><b>${esc(e.text)}</b> <span class="muted">· ${fmtDate(e.at)} ${fmtTime(e.at)}</span></p>`).join("")}`, () => drawBarcodes(), true);
 }
@@ -1077,9 +1161,10 @@ function openCustomer(id) {
   const orders = DATA.orders.filter((o) => o.customer === id);
   openModal(c.name, `<div class="grid g3" style="gap:10px;margin-top:-6px">${[["Total spent", inr.format(sumNet(bills.filter(live)))], ["Loyalty points", c.points + " pts"], ["Tier", c.tier]].map(([k, v]) => `<div class="card" style="padding:14px;box-shadow:none"><p class="xs muted">${k}</p><p class="num" style="font-size:20px;font-weight:800">${v}</p></div>`).join("")}</div>
     <p class="lbl" style="margin-top:16px">Measurements</p>${c.measurements.length ? c.measurements.map((m) => `<div class="card" style="padding:14px;box-shadow:none"><div class="between"><b>${m.label}</b><span class="xs muted">${fmtDate(m.date, { day: "numeric", month: "short", year: "numeric" })}</span></div><div class="grid g3" style="gap:4px 14px;margin-top:8px">${Object.entries(m.values).map(([k, v]) => `<div class="between small"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div></div>`).join("") : `<p class="small muted">No measurements yet — taken with the first stitching job.</p>`}
+    <div class="between" style="margin-top:16px"><p class="lbl" style="margin:0">Blouse designs</p><button class="btn btn-ghost btn-sm" data-act="dfor" data-id="${c.id}">${ic("pen")} New design</button></div>${DATA.designs.filter((x) => x.customer === id).map((x) => `<button class="list-row" style="width:100%;border:0;background:none;text-align:left" data-act="dopen" data-id="${x.id}"><span class="ds-tiny">${blouseSVG(x.cfg, "front", x.ink.front, { label: false })}</span><span style="flex:1"><b>${esc(x.name)}</b><br><span class="xs muted">${fmtDate(x.at)}${x.job ? " · " + x.job : ""}</span></span></button>`).join("") || `<p class="small muted">None yet.</p>`}
     <p class="lbl" style="margin-top:16px">Orders & jobs</p>${orders.map((o) => `<div class="list-row"><span class="mono small" style="font-weight:600">${o.no}</span><span style="flex:1" class="small muted">Due ${fmtDate(o.due)}</span>${pill(STAGE_TONE[o.stage], o.stage)}</div>`).join("") || `<p class="small muted">None.</p>`}
     <p class="lbl" style="margin-top:16px">Recent bills</p>${bills.slice(0, 6).map((b) => `<div class="list-row"><span class="mono small">${b.no}</span><span class="small muted" style="flex:1">${fmtDate(b.at)}</span><b class="num">${inr.format(b.total)}</b></div>`).join("") || `<p class="small muted">No bills yet.</p>`}
-    <div class="row" style="margin-top:14px"><a class="btn btn-outline" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(`Hello ${c.name.split(" ")[0]}! New festive arrivals are in at ${DATA.shop.name}. You have ${c.points} loyalty points to use.`)}">${ic("wa")} Send offer on WhatsApp</a></div>`);
+    <div class="row" style="margin-top:14px"><a class="btn btn-outline" target="_blank" rel="noopener" href="${waLink(`Hello ${c.name.split(" ")[0]}! New festive arrivals are in at ${DATA.shop.name}. You have ${c.points} loyalty points to use.`)}">${ic("wa")} Send offer on WhatsApp</a></div>`);
 }
 
 /* ── Products ── */
@@ -1266,7 +1351,7 @@ V.appts = () => {
       ${arr.map((a) => { const c = DATA.customers.find((x) => x.id === a.customer); const next = NEXT_APPT[a.status]; const open = ["Booked", "Confirmed", "Checked in"].includes(a.status);
         const msg = `Hello ${c.name.split(" ")[0]}, reminder: your ${a.type.toLowerCase()} at ${DATA.shop.name} is on ${fmtDate(a.at, { weekday: "short", day: "numeric", month: "short" })} at ${fmtTime(a.at)}. Reply to reschedule.`;
         return `<div class="appt-row"><span class="mono" style="font-weight:700;width:58px">${fmtTime(a.at)}</span>${avatar(c.name, "sm")}<span style="flex:1;min-width:160px"><b>${esc(c.name)}</b><br><span class="small muted">${esc(a.type)} · ${a.dur} min · ${esc(staffName(a.staff))}${a.notes ? ` · ${esc(a.notes)}` : ""}</span></span>${apptPill(a.status)}
-          <span class="row" style="gap:6px">${next ? `<button class="btn btn-primary btn-sm" data-act="apptset" data-id="${a.id}" data-v="${next[0]}">${next[1]}</button>` : ""}${open ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}" aria-label="Send WhatsApp reminder to ${esc(c.name)}">${ic("wa")}</a>${a.status !== "Checked in" ? `<button class="btn btn-ghost btn-sm" data-act="apptset" data-id="${a.id}" data-v="No-show">No-show</button>` : ""}<button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-act="apptset" data-id="${a.id}" data-v="Cancelled">Cancel</button>` : ""}</span></div>`; }).join("")}</section>`).join("") : `<section class="card"><p class="empty">No appointments here.${state.role !== "TAILOR" ? `<br><button class="btn btn-outline btn-sm" style="margin-top:10px" data-act="book">Book one</button>` : ""}</p></section>`}`;
+          <span class="row" style="gap:6px">${next ? `<button class="btn btn-primary btn-sm" data-act="apptset" data-id="${a.id}" data-v="${next[0]}">${next[1]}</button>` : ""}${open ? `<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="${waLink(msg)}" aria-label="Send WhatsApp reminder to ${esc(c.name)}">${ic("wa")}</a>${a.status !== "Checked in" ? `<button class="btn btn-ghost btn-sm" data-act="apptset" data-id="${a.id}" data-v="No-show">No-show</button>` : ""}<button class="btn btn-ghost btn-sm" style="color:var(--danger)" data-act="apptset" data-id="${a.id}" data-v="Cancelled">Cancel</button>` : ""}</span></div>`; }).join("")}</section>`).join("") : `<section class="card"><p class="empty">No appointments here.${state.role !== "TAILOR" ? `<br><button class="btn btn-outline btn-sm" style="margin-top:10px" data-act="book">Book one</button>` : ""}</p></section>`}`;
 };
 function openBooking(dateKey) {
   const date = dateKey && dateKey >= dayKey(today0) ? dateKey : dayKey(today0);
@@ -1275,7 +1360,7 @@ function openBooking(dateKey) {
     <div id="bk-existing"><label class="lbl" for="bk-cust">Customer</label><select class="input" id="bk-cust">${DATA.customers.map((c) => `<option value="${c.id}">${esc(c.name)} · ${c.phone}</option>`).join("")}</select></div>
     <div id="bk-new" class="grid g2" style="gap:10px" hidden><label><span class="lbl">Name</span><input class="input" id="bk-name" autocomplete="off" /></label><label><span class="lbl">Mobile</span><input class="input num" id="bk-phone" inputmode="tel" maxlength="10" /></label></div>
     <div class="grid g2" style="gap:10px"><label><span class="lbl">Service</span><select class="input" id="bk-type">${Object.entries(APPT_TYPES).map(([t, d]) => `<option value="${t}">${t} · ${d} min</option>`).join("")}</select></label>
-    <label><span class="lbl">With</span><select class="input" id="bk-staff">${DATA.staff.filter((s) => ["Owner", "Manager", "Tailor"].includes(s.role)).map((s) => `<option value="${s.id}">${esc(s.name)} · ${s.role}</option>`).join("")}</select></label></div>
+    <label><span class="lbl">With</span><select class="input" id="bk-staff">${DATA.staff.filter((s) => ["Owner", "Master tailor", "Front desk", "Tailor"].includes(s.role)).map((s) => `<option value="${s.id}">${esc(s.name)} · ${s.role}</option>`).join("")}</select></label></div>
     <div class="grid g2" style="gap:10px"><label><span class="lbl">Date</span><input class="input" type="date" id="bk-date" min="${dayKey(today0)}" value="${date}" /></label>
     <label><span class="lbl">Time</span><select class="input" id="bk-time">${SLOTS.map((h) => `<option value="${h}" ${h === 11 ? "selected" : ""}>${slotLabel(h)}</option>`).join("")}</select></label></div>
     <label><span class="lbl">Notes (optional)</span><input class="input" id="bk-notes" placeholder="e.g. bring reference photos" /></label>
@@ -1310,7 +1395,7 @@ function saveBooking() {
   state.calDay = dayKey(at);
   render();
   openModal("Appointment booked", `<div class="stack"><p>${pill("warning", "Booked")} <b>${esc(c.name)}</b> · ${esc(type)}</p><p class="muted">${dayLabel(at)}, ${fmtDate(at, { day: "numeric", month: "long" })} at ${fmtTime(at)} · ${esc(staffName(staff))}</p>
-    <div class="row"><a class="btn btn-primary" target="_blank" rel="noopener" href="https://wa.me/91${c.phone}?text=${encodeURIComponent(msg)}">${ic("wa")} Send confirmation on WhatsApp</a><button class="btn btn-ghost" data-act="close">Done</button></div></div>`);
+    <div class="row"><a class="btn btn-primary" target="_blank" rel="noopener" href="${waLink(msg)}">${ic("wa")} Send confirmation on WhatsApp</a><button class="btn btn-ghost" data-act="close">Done</button></div></div>`);
 }
 
 /* ── Rentals ── */
@@ -1398,14 +1483,129 @@ V.offers = () => `<div class="page-head"><div><h1>Offers & loyalty</h1><p class=
     <div class="row" style="margin-top:12px;flex-wrap:nowrap"><input class="input" id="gc-check" placeholder="Gift card code" aria-label="Gift card code" /><button class="btn btn-outline" data-act="gccheck">Check</button></div><p id="gc-res" class="small" style="min-height:20px;margin-top:6px"></p>
     <button class="btn btn-primary" style="width:100%" data-act="gcsell">Sell gift card</button></section></div>`;
 
-/* ── Team ── */
-const PERMS = [["Billing", [1, 1, 1, 0, 0, 0]], ["Discount above limit", [1, 1, 0, 0, 0, 0]], ["Returns & cancel", [1, 1, 0, 0, 0, 0]], ["Products & stock", [1, 1, 0, 1, 0, 0]], ["Orders & jobs", [1, 1, 1, 0, 0, 0]], ["Update own jobs", [1, 1, 0, 0, 1, 0]], ["Reports", [1, 1, 0, 0, 0, 1]], ["Profit & cost price", [1, 0, 0, 0, 0, 1]], ["Team & settings", [1, 0, 0, 0, 0, 0]]];
-V.team = () => {
-  const month = billsBetween(monthStart, Date.now() + 1);
-  return `<div class="page-head"><div><h1>Team & roles</h1><p class="muted">PIN switching at the counter · every action logged</p></div><button class="btn btn-primary" data-act="newstaff">${ic("plus")} Add staff</button></div>
-  <div class="grid g3">${DATA.staff.map((s) => { const sales = sumNet(month.filter((b) => b.staff === s.id)); return `<div class="card lift"><div class="row" style="flex-wrap:nowrap">${avatar(s.name)}<span style="flex:1;min-width:0"><b>${esc(s.name)}</b><br><span class="small muted">${esc(s.role)}</span></span>${s.inAt ? pill("success", "In " + s.inAt) : pill("neutral", "Off")}</div><div class="between small" style="margin-top:14px"><span class="muted">Sales this month</span><b class="num">${inr.format(sales)}</b></div><div class="between small"><span class="muted">Commission ${s.commission}%</span><b class="num">${inr.format(Math.round((sales * s.commission) / 100))}</b></div><button class="btn ${s.inAt ? "btn-ghost" : "btn-outline"} btn-sm" style="margin-top:10px;width:100%" data-act="clock" data-id="${s.id}">${s.inAt ? "Clock out" : "Clock in"}</button></div>`; }).join("")}</div>
-  <section class="card"><div class="card-title"><h2>Permissions</h2><span class="small muted">Editable per shop</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Can…</th>${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"].map((r) => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${PERMS.map(([p, v], pi) => `<tr><td>${p}</td>${v.map((x, ri) => `<td style="text-align:center"><button class="perm ${x ? "on" : ""}" data-act="perm" data-p="${pi}" data-r="${ri}" ${ri === 0 ? "disabled" : ""} aria-pressed="${!!x}" aria-label="${p}: ${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"][ri]}">${x ? ic("check", 'width="16" height="16"') : ""}</button></td>`).join("")}</tr>`).join("")}</tbody></table></div><p class="xs muted" style="margin-top:8px">Tap a box to change a role's access. The owner always has full access.</p></section>`;
+/* ── Team: run like a stitching workshop — stations, workload, piece-rate wages ── */
+const ROLE_INFO = {
+  Owner: { station: "Design & pricing", load: "Jobs in the workshop" },
+  "Master tailor": { station: "Measure & cut", load: "To measure & cut" },
+  "Front desk": { station: "Orders, trials & hand-over", load: "Ready to hand over" },
+  Tailor: { station: "Stitching", load: "Jobs in hand" },
+  "Aari artisan": { station: "Aari & embroidery", load: "Work in hand" },
+  Finishing: { station: "Hooks, hemming & ironing", load: "At trial & finishing" },
 };
+const ROLE_COLS = Object.keys(ROLE_INFO);
+const PERMS = [
+  ["Take measurements", [1, 1, 1, 0, 0, 0]],
+  ["Create jobs & designs", [1, 1, 1, 0, 0, 0]],
+  ["Assign work to tailors", [1, 1, 0, 0, 0, 0]],
+  ["Cut fabric", [1, 1, 0, 0, 0, 0]],
+  ["Move their jobs to the next stage", [1, 1, 1, 1, 1, 1]],
+  ["See customer phone numbers", [1, 1, 1, 0, 0, 0]],
+  ["Billing, advance & delivery", [1, 0, 1, 0, 0, 0]],
+  ["Discounts & returns", [1, 0, 0, 0, 0, 0]],
+  ["Fabric & stock", [1, 1, 1, 0, 0, 0]],
+  ["Piece rates & wages", [1, 0, 0, 0, 0, 0]],
+  ["Reports & profit", [1, 0, 0, 0, 0, 0]],
+  ["Team & settings", [1, 0, 0, 0, 0, 0]],
+];
+DATA.pieceRates = [
+  { id: "blouse", name: "Blouse — simple", rate: 220 },
+  { id: "blousecut", name: "Blouse — princess / katori cut", rate: 320 },
+  { id: "lining", name: "Lining or padding (add-on)", rate: 40 },
+  { id: "salwar", name: "Salwar kameez", rate: 300 },
+  { id: "kurti", name: "Kurti", rate: 180 },
+  { id: "lehenga", name: "Lehenga", rate: 900 },
+  { id: "alter", name: "Alteration", rate: 60 },
+  { id: "pico", name: "Fall & pico", rate: 30 },
+  { id: "aari", name: "Aari work — per blouse", rate: 700 },
+  { id: "border", name: "Zari or mirror border", rate: 180 },
+  { id: "finish", name: "Hooks, kaaj & ironing", rate: 25 },
+];
+const rateOf = (id) => DATA.pieceRates.find((r) => r.id === id)?.rate ?? 0;
+const earned = (s) => (s.pay?.type === "piece" ? Object.entries(s.work || {}).reduce((t, [k, q]) => t + rateOf(k) * q, 0) : s.pay?.type === "salary" ? s.pay.amount : 0);
+const wageDue = (s) => Math.max(0, earned(s) - (s.paid || 0));
+const piecesDone = (s) => Object.entries(s.work || {}).filter(([k]) => k !== "lining").reduce((t, [, q]) => t + q, 0);
+const openJobList = () => DATA.orders.filter((o) => o.kind === "JOB" && !["Ready", "Delivered", "Cancelled"].includes(o.stage));
+function stationJobs(s) {
+  const open = openJobList();
+  switch (s.role) {
+    case "Tailor": return open.filter((o) => o.tailor === s.id);
+    case "Aari artisan": return open.filter((o) => o.artisan === s.id);
+    case "Master tailor": return open.filter((o) => ["Received", "Measured", "Cutting"].includes(o.stage));
+    case "Finishing": return open.filter((o) => o.stage === "Trial");
+    case "Front desk": return DATA.orders.filter((o) => o.stage === "Ready");
+    default: return open;
+  }
+}
+/* A job reaching Ready adds its pieces to the tailor's, artisan's and finisher's wages. */
+function creditJob(o) {
+  const add = (s, k, q) => { if (!s || s.pay?.type !== "piece") return; s.work = s.work || {}; s.work[k] = (s.work[k] || 0) + q; };
+  const t = DATA.staff.find((s) => s.id === o.tailor), a = DATA.staff.find((s) => s.id === o.artisan), f = DATA.staff.find((s) => s.role === "Finishing");
+  o.items.forEach((i) => {
+    const txt = `${i.note || ""} ${o.design || ""}`;
+    const k = i.name === "Alteration" ? "alter" : i.name === "Fall & Pico" ? "pico" : i.name === "Saree Draping" ? null : /princess|katori/i.test(txt) ? "blousecut" : "blouse";
+    if (!k) return;
+    if (k === "pico") return add(f, "pico", i.qty);
+    add(t, k, i.qty);
+    if (k.startsWith("blouse") && /lined|lining|padd/i.test(txt)) add(t, "lining", i.qty);
+    if (a) add(a, /aari|zardosi|heavy|bridal/i.test(txt) ? "aari" : "border", i.qty);
+    add(f, "finish", i.qty);
+  });
+}
+function memberCard(s) {
+  const jobs = stationJobs(s), cap = s.cap || 0, load = cap ? Math.min(100, Math.round((jobs.length / cap) * 100)) : 0;
+  const tone = load >= 100 ? "danger" : load >= 70 ? "warning" : "success";
+  const assignable = ["Tailor", "Aari artisan"].includes(s.role);
+  return `<div class="card lift member">
+    <div class="row" style="flex-wrap:nowrap">${avatar(s.name)}<span style="flex:1;min-width:0"><b>${esc(s.name)}</b><br><span class="small muted">${esc(s.role)} · ${esc(ROLE_INFO[s.role]?.station ?? "")}</span></span>${s.inAt ? pill("success", "In " + s.inAt) : pill("neutral", "Off")}</div>
+    ${s.skills?.length ? `<div class="row" style="gap:4px;margin-top:10px">${s.skills.map((k) => `<span class="skill">${esc(k)}</span>`).join("")}</div>` : ""}
+    <div class="between small" style="margin-top:12px"><span class="muted">${ROLE_INFO[s.role]?.load ?? "Jobs"}</span><b class="num">${jobs.length}${cap ? ` / ${cap}` : ""}</b></div>
+    ${cap ? `<div class="load" role="img" aria-label="${jobs.length} of ${cap} jobs"><i style="width:${Math.max(4, load)}%;background:var(--${tone})"></i></div><p class="xs" style="color:var(--${tone});margin-top:4px;font-weight:600">${jobs.length >= cap ? "Full — give new work to someone else" : `Room for ${cap - jobs.length} more`}</p>` : ""}
+    ${jobs.length ? `<div class="row" style="gap:4px;margin-top:8px">${jobs.slice(0, 4).map((o) => `<button class="job-chip ${o.due < today0.getTime() + DAY ? "late" : ""}" data-act="order" data-id="${o.id}" title="${esc(custName(o.customer))} · due ${dayLabel(o.due)}">${o.no}</button>`).join("")}${jobs.length > 4 ? `<span class="xs muted">+${jobs.length - 4} more</span>` : ""}</div>` : ""}
+    ${s.pay?.type === "piece" ? `<div class="between small" style="margin-top:10px"><span class="muted">Pieces this month</span><b class="num">${piecesDone(s)}</b></div><div class="between small"><span class="muted">Delivered on time</span><b class="num">${s.onTime ?? 100}%</b></div>` : s.role === "Owner" ? `<div class="between small" style="margin-top:10px"><span class="muted">Designs this month</span><b class="num">${DATA.designs.filter((d) => d.at >= monthStart).length}</b></div>` : ""}
+    <div class="row" style="margin-top:12px;gap:6px">${assignable ? `<button class="btn btn-outline btn-sm" data-act="assign" data-id="${s.id}">${ic("scissors")} Assign work</button>` : ""}<button class="btn btn-ghost btn-sm" data-act="clock" data-id="${s.id}">${s.inAt ? "Clock out" : "Clock in"}</button></div>
+  </div>`;
+}
+V.team = () => {
+  const open = openJobList(), weekEnd = dueEnd("week");
+  const wagesDue = DATA.staff.reduce((t, s) => t + wageDue(s), 0);
+  const stations = [
+    ["Measure", ["Master tailor", "Front desk"], open.filter((o) => o.stage === "Received")],
+    ["Cut", ["Master tailor"], open.filter((o) => ["Measured", "Cutting"].includes(o.stage))],
+    ["Stitch", ["Tailor"], open.filter((o) => o.stage === "Stitching")],
+    ["Aari & work", ["Aari artisan"], open.filter((o) => o.artisan && ["Cutting", "Stitching"].includes(o.stage))],
+    ["Trial & finish", ["Owner", "Finishing"], open.filter((o) => o.stage === "Trial")],
+    ["Hand over", ["Front desk"], DATA.orders.filter((o) => o.kind === "JOB" && o.stage === "Ready")],
+  ];
+  const paid = DATA.staff.filter((s) => s.pay && s.pay.type !== "owner");
+  return `<div class="page-head"><div><h1>Team & workshop</h1><p class="muted">Who measures, cuts, stitches and finishes · piece-rate wages · PIN switching at the counter</p></div><div class="row"><button class="btn btn-outline" data-act="rates">${ic("wallet")} Piece rates</button><button class="btn btn-primary" data-act="newstaff">${ic("plus")} Add team member</button></div></div>
+  <div class="grid g4">${[["In today", `${DATA.staff.filter((s) => s.inAt).length} of ${DATA.staff.length}`, "success"], ["Jobs in the workshop", open.length, "primary"], ["Due this week", open.filter((o) => o.due < weekEnd).length, "warning"], ["Wages due", inr.format(wagesDue), "info"]].map(([l, v, t]) => `<div class="card lift"><p class="small" style="color:var(--${t});font-weight:700">${l}</p><p class="num" style="font-size:30px;font-weight:800">${v}</p></div>`).join("")}</div>
+  <section class="card"><div class="card-title"><h2>Workshop flow</h2><span class="small muted">Jobs waiting at each station right now</span></div>
+    <div class="flow">${stations.map(([name, roles, jobs]) => `<button class="flow-step" data-go="orders"><span class="flow-n num">${jobs.length}</span><b>${name}</b><span class="xs muted">${roles.join(" · ")}</span><span class="row" style="gap:3px;margin-top:6px">${DATA.staff.filter((s) => roles.includes(s.role)).map((s) => avatar(s.name, "xs")).join("")}</span></button>`).join(`<span class="flow-arrow" aria-hidden="true">›</span>`)}</div></section>
+  <div class="grid g3">${DATA.staff.map(memberCard).join("")}</div>
+  <div class="grid g21">
+    <section class="card"><div class="card-title"><h2>Wages · ${fmtDate(today0, { month: "long" })}</h2><span class="small muted">Piece rate or monthly salary</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Name</th><th>Paid by</th><th class="r">Earned</th><th class="r">Paid</th><th class="r">Due</th><th></th></tr></thead><tbody>
+      ${paid.map((s) => { const due = wageDue(s); return `<tr><td><span class="row" style="flex-wrap:nowrap">${avatar(s.name, "sm")}<span><b>${esc(s.name)}</b><br><span class="xs muted">${esc(s.role)}</span></span></span></td><td class="small">${s.pay.type === "piece" ? `Piece rate · ${piecesDone(s)} pcs` : "Salary"}</td><td class="r num">${inr.format(earned(s))}</td><td class="r num muted">${inr.format(s.paid || 0)}</td><td class="r num" style="font-weight:700;color:${due ? "var(--warning)" : "var(--success)"}">${due ? inr.format(due) : "—"}</td><td>${due ? `<button class="btn btn-outline btn-sm" data-act="paywage" data-id="${s.id}">Pay</button>` : pill("success", "Paid", "check")}</td></tr>`; }).join("")}
+    </tbody></table></div></section>
+    <section class="card"><div class="card-title"><h2>Piece rates</h2><button class="btn btn-ghost btn-sm" data-act="rates">Edit</button></div>${DATA.pieceRates.map((r) => `<div class="between small" style="padding:6px 2px;border-bottom:1px dashed var(--border)"><span>${esc(r.name)}</span><b class="num">${inr.format(r.rate)}</b></div>`).join("")}<p class="xs muted" style="margin-top:10px">When a job is marked Ready, its pieces are added to the tailor's, artisan's and finisher's wages automatically.</p></section>
+  </div>
+  <section class="card"><div class="card-title"><h2>Permissions</h2><span class="small muted">Tap a box to change what each role can do</span></div><div class="scroll-x"><table class="tbl"><thead><tr><th>Can…</th>${ROLE_COLS.map((r) => `<th style="text-align:center">${r}</th>`).join("")}</tr></thead><tbody>${PERMS.map(([p, v], pi) => `<tr><td>${p}</td>${v.map((x, ri) => `<td style="text-align:center"><button class="perm ${x ? "on" : ""}" data-act="perm" data-p="${pi}" data-r="${ri}" ${ri === 0 ? "disabled" : ""} aria-pressed="${!!x}" aria-label="${p}: ${ROLE_COLS[ri]}">${x ? ic("check", 'width="16" height="16"') : ""}</button></td>`).join("")}</tr>`).join("")}</tbody></table></div><p class="xs muted" style="margin-top:8px">The owner always has full access. Tailors and artisans only see the jobs given to them.</p></section>`;
+};
+function openAssign(sid) {
+  const s = DATA.staff.find((x) => x.id === sid), field = s.role === "Aari artisan" ? "artisan" : "tailor", first = s.name.split(" ")[0];
+  const list = openJobList().sort((a, b) => a.due - b.due), n = stationJobs(s).length;
+  openModal(`Assign work to ${first}`, `<p class="muted" style="margin-top:-8px">${esc(s.role)} · ${n}${s.cap ? ` of ${s.cap}` : ""} in hand${s.skills?.length ? ` · ${esc(s.skills.join(", "))}` : ""}</p>
+    <div class="stack" style="gap:8px;margin-top:12px">${list.map((o) => { const cur = o[field]; return `<div class="list-row" style="border:1px solid var(--border);border-radius:14px;padding:10px 12px"><span style="flex:1;min-width:0"><span class="mono small" style="font-weight:700">${o.no}</span> · ${esc(custName(o.customer))}<br><span class="xs muted">${esc(o.items.map((i) => i.name + (i.note ? " — " + i.note : "")).join(", "))}</span><br><span class="xs">${o.stage} · due ${dayLabel(o.due)} · ${cur ? `with ${esc(staffName(cur))}` : `<b style="color:var(--warning)">not assigned</b>`}</span></span>${cur === sid ? pill("success", "Assigned", "check") : `<button class="btn btn-primary btn-sm" data-act="assignto" data-id="${o.id}" data-s="${sid}">Give to ${esc(first)}</button>`}</div>`; }).join("") || `<p class="empty">No open jobs right now.</p>`}</div>`);
+}
+function openRates() {
+  openModal("Piece rates", `<form id="pr-form" class="stack" novalidate><p class="muted" style="margin-top:-8px">What you pay for each piece of work. Wages are worked out from these rates.</p>
+    <div class="stack" style="gap:6px">${DATA.pieceRates.map((r) => `<label class="between small" style="gap:12px"><span>${esc(r.name)}</span><span class="row" style="gap:4px;flex-wrap:nowrap">₹<input class="input num" style="width:100px;min-height:40px" inputmode="numeric" id="pr-${r.id}" value="${r.rate}" aria-label="${esc(r.name)} rate" /></span></label>`).join("")}</div>
+    <p id="pr-err" role="alert" class="small" style="color:var(--danger);min-height:18px"></p><button class="btn btn-primary btn-lg" type="submit">Save rates</button></form>`, () => {
+    $("#pr-form").addEventListener("submit", (e) => { e.preventDefault();
+      const vals = DATA.pieceRates.map((r) => Number($("#pr-" + r.id).value));
+      if (vals.some((v) => !(Number.isInteger(v) && v >= 0))) return ($("#pr-err").textContent = "Rates must be whole rupees, 0 or more.");
+      DATA.pieceRates.forEach((r, i) => (r.rate = vals[i])); closeModal(); render(); toast("Piece rates saved · wages recalculated"); });
+  });
+}
 
 /* ── Customers: add ── */
 function addCustomer(name, phone) {
@@ -1521,9 +1721,9 @@ function render() {
   saveDemo();
 }
 /* Demo changes stay on this device for the day, so a client can click around and come back. */
-const SAVE_KEY = "aurapos-demo-v2";
+const SAVE_KEY = "aurapos-demo-v3";
 function saveDemo() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ day: dayKey(today0), DATA, PERMS, skin: state.skin, template: state.template, notifPrefs: state.notifPrefs, readNotifs: state.readNotifs.slice(-300) })); } catch (e) { /* storage blocked or full */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ day: dayKey(today0), DATA, PERMS, skin: state.skin, template: state.template, notifPrefs: state.notifPrefs, readNotifs: state.readNotifs.slice(-300), design: state.design })); } catch (e) { /* storage blocked or full */ }
 }
 function loadDemo() {
   try {
@@ -1532,12 +1732,14 @@ function loadDemo() {
     Object.assign(DATA, saved.DATA);
     saved.PERMS?.forEach((row, i) => PERMS[i] && (PERMS[i][1] = row[1]));
     Object.assign(state, { skin: SKINS[saved.skin] ? saved.skin : state.skin, template: { ...state.template, ...saved.template }, notifPrefs: { ...state.notifPrefs, ...saved.notifPrefs }, readNotifs: saved.readNotifs || [] });
+    if (saved.design?.cfg) state.design = { ...newDesign(), ...saved.design, cfg: { ...DESIGN_DEFAULT, ...saved.design.cfg } };
     billSeq = Math.max(billSeq, ...DATA.bills.map((b) => parseInt(b.no.split("/").pop()) || 0));
     DATA.products.forEach((p) => p.variants.forEach((v) => { vidSeq = Math.max(vidSeq, +v.id.slice(1) || 0); barcodeSeq = Math.max(barcodeSeq, +v.barcode.slice(2, 12) || 0); }));
   } catch (e) { /* ignore a broken save */ }
 }
 function go(route) {
   state.route = route;
+  if (route !== "design") document.body.classList.remove("present");
   try { history.replaceState(null, "", "#" + route); } catch (e) { /* sandboxed */ }
   closeMenu(); render(); window.scrollTo({ top: 0, behavior: "smooth" });
   $("#view").focus?.({ preventScroll: true });
@@ -1576,7 +1778,7 @@ const A = {
   }),
   setcust: (d) => { state.cart.customer = d.id; closeModal(); render(); },
   pay: openPay,
-  approve: () => { if ($("#appr-pin").value === "1234") { state.approved = true; toast("Approved by Rahul Verma"); openPay(); } else $("#appr-err").textContent = "Wrong PIN. Try 1234 in this demo."; },
+  approve: () => { if ($("#appr-pin").value === "1234") { state.approved = true; toast(`Approved by ${DATA.staff[0].name}`); openPay(); } else $("#appr-err").textContent = "Wrong PIN. Try 1234 in this demo."; },
   paymethod: (d) => { const c = calcCart(state.cart.lines, state.cart.billDisc); const o = state.cart.orderId ? DATA.orders.find((x) => x.id === state.cart.orderId) : null; renderPayPanel(d.m, Math.max(0, c.payable - (o?.advance ?? 0))); },
   cashq: (d) => { $("#cash-in").value = d.v; $("#cash-in").dispatchEvent(new Event("input")); },
   complete: (d) => completeSale(d.m),
@@ -1588,13 +1790,14 @@ const A = {
   cancelbill: (d) => { const b = DATA.bills.find((x) => x.no === d.no); b.lines.forEach((l) => { const f = findV(l.vid); if (f && tracks(f.p)) f.v.stock += l.qty; }); b.status = "Cancelled"; closeModal(); render(); toast(`${b.no} cancelled · stock returned · payment reversed`); },
   okind: (d) => { state.orderKind = d.v; render(); },
   order: (d) => openOrder(d.id),
-  nextstage: (d) => { const o = DATA.orders.find((x) => x.id === d.id); const flow = o.kind === "JOB" ? JOB_FLOW : ORDER_FLOW; o.stage = flow[flow.indexOf(o.stage) + 1]; o.events.unshift({ at: Date.now(), text: `Moved to ${o.stage} by ${me().name}` }); toast(`${o.no} → ${o.stage}${o.stage === "Ready" ? " · WhatsApp message ready to send" : ""}`); render(); if (d.modal) openOrder(o.id); },
+  nextstage: (d) => { const o = DATA.orders.find((x) => x.id === d.id); const flow = o.kind === "JOB" ? JOB_FLOW : ORDER_FLOW; o.stage = flow[flow.indexOf(o.stage) + 1]; o.events.unshift({ at: Date.now(), text: `Moved to ${o.stage} by ${me().name}` }); const paidNow = o.kind === "JOB" && o.stage === "Ready" && o.tailor; if (paidNow) creditJob(o); toast(`${o.no} → ${o.stage}${o.stage === "Ready" ? " · WhatsApp message ready" : ""}${paidNow ? ` · wages added for ${staffName(o.tailor).split(" ")[0]}` : ""}`); render(); if (d.modal) openOrder(o.id); },
   billorder: (d) => { const o = DATA.orders.find((x) => x.id === d.id); state.cart = { lines: o.items.map((i) => ({ vid: i.vid, qty: i.qty, disc: "", price: i.price !== findV(i.vid).v.price ? i.price : null })), billDisc: "", customer: o.customer, orderId: o.id }; closeModal(); go("billing"); toast(`Billing ${o.no} · advance ${inr.format(o.advance)} deducted`); },
   newjob: () => openModal("New stitching job", `<div class="stack"><div class="grid g2" style="gap:10px"><label><span class="lbl">Customer</span><select class="input" id="nj-c">${DATA.customers.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></label><label><span class="lbl">Service</span><select class="input" id="nj-s"><option>Blouse Stitching</option><option>Alteration</option><option>Fall & Pico</option></select></label></div>
+    <label><span class="lbl">Give to tailor</span><select class="input" id="nj-t">${DATA.staff.filter((s) => s.role === "Tailor").map((s) => `<option value="${s.id}">${esc(s.name)} · ${stationJobs(s).length}${s.cap ? ` of ${s.cap}` : ""} jobs in hand</option>`).join("")}</select></label>
     <span class="lbl">Measurements · Blouse (inches)</span><div class="grid g3" style="gap:8px">${["Bust", "Waist", "Shoulder", "Armhole", "Sleeve length", "Blouse length"].map((f, i) => `<label><span class="xs muted">${f}</span><input class="input num" value="${[34, 30, 14, 16, 10, 14.5][i]}" /></label>`).join("")}</div>
     <div class="grid g2" style="gap:10px"><label><span class="lbl">Due date</span><input class="input" type="date" id="nj-due" value="${dayKey(Date.now() + 4 * DAY)}" /></label><label><span class="lbl">Advance (₹)</span><input class="input num" id="nj-adv" value="300" /></label></div>
     <button class="btn btn-primary btn-lg" data-act="savejob">Create job & print slip</button></div>`),
-  savejob: () => { const n = DATA.orders.filter((o) => o.kind === "JOB").length + 1; const s = $("#nj-s").value; const v = svc(s); const o = ord("JOB", n, DATA.customers.findIndex((c) => c.id === $("#nj-c").value), "Measured", Math.max(0, Math.round((new Date($("#nj-due").value) - today0) / DAY)), [{ vid: v.id, name: s, qty: 1, price: v.price || 250, note: "" }], +$("#nj-adv").value || 0, { measurement: { label: "Blouse", values: { Bust: 34, Waist: 30, Shoulder: 14, "Blouse length": 14.5 } } }); o.estimate = o.items[0].price; o.events = [{ at: Date.now(), text: `Created by ${me().name}` }]; DATA.orders.push(o); state.orderKind = "JOB"; closeModal(); go("orders"); openOrder(o.id); toast(`${o.no} created`); },
+  savejob: () => { const n = DATA.orders.filter((o) => o.kind === "JOB").length + 1; const s = $("#nj-s").value; const v = svc(s); const o = ord("JOB", n, DATA.customers.findIndex((c) => c.id === $("#nj-c").value), "Measured", Math.max(0, Math.round((new Date($("#nj-due").value) - today0) / DAY)), [{ vid: v.id, name: s, qty: 1, price: v.price || 250, note: "" }], +$("#nj-adv").value || 0, { measurement: { label: "Blouse", values: { Bust: 34, Waist: 30, Shoulder: 14, "Blouse length": 14.5 } } }); o.estimate = o.items[0].price; o.tailor = $("#nj-t").value; o.id = "j" + Date.now(); o.events = [{ at: Date.now(), text: `Created by ${me().name} · given to ${staffName(o.tailor)}` }]; DATA.orders.push(o); state.orderKind = "JOB"; closeModal(); go("orders"); openOrder(o.id); toast(`${o.no} created`); },
   cust: (d) => openCustomer(d.id),
   newproduct: openNewProduct,
   npchip: (d) => { const s = NP[d.k]; s.has(d.v) ? s.delete(d.v) : s.add(d.v); window.__npDraw?.(); },
@@ -1757,11 +1960,22 @@ Object.assign(A, {
   gcsell: () => openSimpleForm("Sell gift card", [["amt", "Value (₹)", 'class="input num" inputmode="numeric" value="2000"'], ["to", "For (optional)", 'placeholder="Recipient name"']], "Create gift card", (v) => {
     const amt = parseInt(v.amt); if (!(amt >= 100)) return "Minimum value is ₹100.";
     const g = { code: gcCode(), balance: amt, expires: 365, to: v.to }; DATA.giftCards.unshift(g); closeModal(); render(); toast(`Gift card ${g.code} · ${inr.format(amt)} issued`); }),
-  newstaff: () => openSimpleForm("Add staff", [["name", "Name", 'autocomplete="off"'], ["role", "Role", "", ["Cashier", "Manager", "Stock staff", "Tailor", "Accountant"]], ["pin", "4-digit PIN", 'class="input num" inputmode="numeric" maxlength="4"'], ["com", "Commission %", 'class="input num" inputmode="decimal" value="1"']], "Add staff", (v) => {
+  dfor: (d) => { state.design = newDesign(); closeModal(); go("design"); const sel = $("#ds-cust"); sel.value = d.id; designInput("customer", sel); },
+  duerange: (d) => { state.dueRange = d.v; render(); },
+  newstaff: () => openSimpleForm("Add team member", [["name", "Name", 'autocomplete="off"'], ["role", "Role", "", ROLE_COLS.filter((r) => r !== "Owner")], ["skills", "Skills", 'placeholder="e.g. Blouse, Lehenga, Aari"'], ["paytype", "Paid by", "", ["Piece rate", "Monthly salary"]], ["salary", "Monthly salary (₹) — only if salaried", 'class="input num" inputmode="numeric" placeholder="e.g. 15000"'], ["pin", "4-digit PIN", 'class="input num" inputmode="numeric" maxlength="4"']], "Add to team", (v) => {
     if (v.name.length < 2) return "Enter a name."; if (!/^\d{4}$/.test(v.pin)) return "PIN must be 4 digits.";
-    DATA.staff.push({ id: "s" + Date.now(), name: v.name, role: v.role, pin: v.pin, inAt: null, commission: parseFloat(v.com) || 0 }); closeModal(); render(); toast(`${v.name} added · they sign in with their PIN`); }),
+    const salaried = v.paytype === "Monthly salary", amt = parseInt(v.salary); if (salaried && !(amt > 0)) return "Enter the monthly salary.";
+    DATA.staff.push({ id: "s" + Date.now(), name: v.name, role: v.role, pin: v.pin, inAt: null, commission: 0, skills: v.skills.split(",").map((x) => x.trim()).filter(Boolean), pay: salaried ? { type: "salary", amount: amt } : { type: "piece" }, work: {}, paid: 0, onTime: 100, cap: { Finishing: 12, "Aari artisan": 3, "Master tailor": 8, "Front desk": 0 }[v.role] ?? 5 });
+    closeModal(); render(); toast(`${v.name} added as ${v.role} · signs in with their PIN`); }),
+  assign: (d) => openAssign(d.id),
+  assignto: (d) => { const o = DATA.orders.find((x) => x.id === d.id), st = DATA.staff.find((x) => x.id === d.s), field = st.role === "Aari artisan" ? "artisan" : "tailor"; o[field] = st.id; o.events.unshift({ at: Date.now(), text: `Given to ${st.name} by ${me().name}` }); notify("job", `${o.no} given to ${st.name}`, `${custName(o.customer)} · due ${dayLabel(o.due)}`, "orders"); render(); openAssign(st.id); toast(`${o.no} given to ${st.name}`); },
+  rates: openRates,
+  paywage: (d) => { const st = DATA.staff.find((x) => x.id === d.id), due = wageDue(st); openSimpleForm(`Pay ${st.name}`, [["amt", `Amount (₹) · due ${inr.format(due)}`, `class="input num" inputmode="numeric" value="${due}"`], ["mode", "Paid from", "", ["Cash drawer", "UPI", "Bank transfer"]]], "Record payment", (v) => {
+    const amt = parseInt(v.amt.replace(/[₹,]/g, "")); if (!(amt > 0) || amt > due) return `Enter an amount between ₹1 and ${inr.format(due)}.`;
+    st.paid = (st.paid || 0) + amt; DATA.expenses.push({ at: Date.now(), cat: st.pay.type === "salary" ? "Salary" : "Tailor wages", amount: amt, by: me().name, method: v.mode === "Cash drawer" ? "CASH" : v.mode === "UPI" ? "UPI" : "BANK", note: `${st.name} · ${st.role}` });
+    closeModal(); render(); toast(`Paid ${inr.format(amt)} to ${st.name}${amt < due ? ` · ${inr.format(due - amt)} still due` : " · all paid"}`); }); },
   clock: (d) => { const s = DATA.staff.find((x) => x.id === d.id); s.inAt = s.inAt ? null : fmtTime(Date.now()); render(); toast(`${s.name} clocked ${s.inAt ? "in at " + s.inAt : "out"}`); },
-  perm: (d) => { const row = PERMS[+d.p][1]; row[+d.r] = row[+d.r] ? 0 : 1; render(); toast(`${["Owner", "Manager", "Cashier", "Stock", "Tailor", "Accountant"][+d.r]}: ${PERMS[+d.p][0]} ${row[+d.r] ? "allowed" : "blocked"}`); },
+  perm: (d) => { const row = PERMS[+d.p][1]; row[+d.r] = row[+d.r] ? 0 : 1; render(); toast(`${ROLE_COLS[+d.r]}: ${PERMS[+d.p][0]} ${row[+d.r] ? "allowed" : "blocked"}`); },
   newcust: (d) => openNewCustomer(!!d.attach),
   importprod: openImport,
   impsample: () => showImportPreview(IMPORT_SAMPLE),
@@ -1785,6 +1999,387 @@ Object.assign(A, {
   },
   resetdemo: () => { if (!confirm("Reset the demo? Everything you added will be cleared.")) return; try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage blocked */ } location.hash = ""; location.reload(); },
 });
+/* ── Design studio: parametric blouse sketch + freehand drawing layer ── */
+const FRONT_NECKS = { round: ["Round", 42, 6], sweetheart: ["Sweetheart", 50, 7], v: ["V-neck", 44, 7.5], square: ["Square", 46, 6], u: ["U-neck", 46, 7], boat: ["Boat", 72, 3], high: ["High neck", 30, 1.5], keyhole: ["Keyhole", 38, 6] };
+const BACK_NECKS = { deepu: ["Deep U", 52, 10], deepv: ["Deep V", 50, 10], square: ["Square", 50, 9], round: ["Round", 44, 7], boat: ["Boat", 72, 4], keyhole: ["Keyhole", 38, 9], window: ["Window", 46, 9] };
+const SLEEVES = { none: ["Sleeveless", 0], cap: ["Cap", 3], short: ["Short", 6], elbow: ["Elbow", 10], threeq: ["3/4", 14], full: ["Full", 21], puff: ["Puff", 6], bell: ["Bell", 13] };
+const CUTS = { darts: "Darts", princess: "Princess cut", katori: "Katori" };
+const PATTERNS = { plain: "Plain", polka: "Polka", stripes: "Stripes", checks: "Checks", buta: "Buta", brocade: "Brocade" };
+const TRIMS = { none: "None", piping: "Piping", lace: "Lace", zari: "Zari border", mirror: "Mirror work" };
+const CLOSURES = { back: "Back hooks", front: "Front hooks", dori: "Dori & tassels", zip: "Side zip" };
+const FABRIC_COLOURS = ["#7b1e2b", "#c0392b", "#e889a8", "#f4b494", "#d4a017", "#2e8b57", "#14808a", "#1f2f5a", "#5b3487", "#1f1f1f", "#efe6cf", "#f7f7f2"];
+const TRIM_COLOURS = ["#c9a23f", "#e8d6a0", "#b8bec4", "#1f1f1f", "#f7f7f2", "#c0392b", "#14808a", "#e889a8"];
+const INK_COLOURS = ["#c4443c", "#1f1f1f", "#2f6fbf", "#2e8b57", "#d4a017", "#ffffff"];
+const DESIGN_DEFAULT = { front: "sweetheart", fdepth: 7, back: "deepu", bdepth: 10, sleeve: "elbow", cut: "princess", length: 14.5, closure: "back", fabric: "#7b1e2b", accent: "#c9a23f", pattern: "brocade", trim: "zari", border: "#c9a23f", trimSleeve: true, trimHem: false, lining: true, padding: true };
+const DESIGN_LOOKS = {
+  "Bridal sweetheart": { front: "sweetheart", fdepth: 7, back: "deepu", bdepth: 11, sleeve: "elbow", cut: "princess", fabric: "#7b1e2b", pattern: "brocade", accent: "#c9a23f", trim: "zari", border: "#c9a23f", trimSleeve: true, trimHem: true, closure: "dori", padding: true, lining: true },
+  "Deep back dori": { front: "round", fdepth: 5.5, back: "window", bdepth: 12, sleeve: "short", cut: "katori", fabric: "#14808a", pattern: "buta", accent: "#e8d6a0", trim: "piping", border: "#c9a23f", trimSleeve: true, trimHem: false, closure: "dori", padding: true, lining: true },
+  "Party boat neck": { front: "boat", fdepth: 3, back: "deepv", bdepth: 10, sleeve: "threeq", cut: "princess", fabric: "#1f1f1f", pattern: "polka", accent: "#c9a23f", trim: "mirror", border: "#b8bec4", trimSleeve: true, trimHem: false, closure: "back", padding: false, lining: true },
+  "Daily cotton": { front: "round", fdepth: 6, back: "round", bdepth: 7, sleeve: "elbow", cut: "darts", fabric: "#d4a017", pattern: "stripes", accent: "#f7f7f2", trim: "none", border: "#1f1f1f", trimSleeve: false, trimHem: false, closure: "front", padding: false, lining: false },
+  "Royal high neck": { front: "high", fdepth: 1.5, back: "keyhole", bdepth: 8, sleeve: "full", cut: "princess", fabric: "#1f2f5a", pattern: "brocade", accent: "#c9a23f", trim: "zari", border: "#c9a23f", trimSleeve: true, trimHem: true, closure: "back", padding: true, lining: true },
+  "Puff sleeve crop": { front: "square", fdepth: 5.5, back: "square", bdepth: 8, sleeve: "puff", cut: "katori", fabric: "#e889a8", pattern: "checks", accent: "#f7f7f2", trim: "lace", border: "#f7f7f2", trimSleeve: true, trimHem: false, closure: "zip", padding: false, lining: true, length: 13 },
+};
+const hexRGB = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const shade = (h, f) => "#" + hexRGB(h).map((c) => Math.round(f < 0 ? c * (1 + f) : c + (255 - c) * f).toString(16).padStart(2, "0")).join("");
+const lum = (h) => { const [r, g, b] = hexRGB(h); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
+const f1 = (n) => Math.round(n * 10) / 10;
+
+/* Neckline from the right neck point to the left (s = 1) or left to right (s = -1). */
+function neckSeg(style, nw, d, s = 1) {
+  const x = (k) => f1(200 + s * k), y = (k) => f1(62 + k);
+  switch (style) {
+    case "v": case "deepv": return `L${x(0)},${y(d)} L${x(-nw)},62`;
+    case "square": return `L${x(nw * 0.95)},${y(d)} L${x(-nw * 0.95)},${y(d)} L${x(-nw)},62`;
+    case "u": case "deepu": return `L${x(nw * 0.92)},${y(d * 0.55)} C${x(nw * 0.92)},${y(d * 1.15)} ${x(-nw * 0.92)},${y(d * 1.15)} ${x(-nw * 0.92)},${y(d * 0.55)} L${x(-nw)},62`;
+    case "window": return `L${x(nw * 0.9)},${y(d * 0.3)} L${x(nw * 0.9)},${y(d)} L${x(-nw * 0.9)},${y(d)} L${x(-nw * 0.9)},${y(d * 0.3)} L${x(-nw)},62`;
+    case "sweetheart": return `C${x(nw)},${y(d * 0.9)} ${x(nw * 0.35)},${y(d * 1.15)} ${x(0)},${y(d * 0.8)} C${x(-nw * 0.35)},${y(d * 1.15)} ${x(-nw)},${y(d * 0.9)} ${x(-nw)},62`;
+    case "boat": case "high": return `Q${x(0)},${y(d * 2)} ${x(-nw)},62`;
+    case "keyhole": return `C${x(nw)},${y(Math.min(d, 30) * 1.33)} ${x(-nw)},${y(Math.min(d, 30) * 1.33)} ${x(-nw)},62`;
+    default: return `C${x(nw)},${y(d * 1.33)} ${x(-nw)},${y(d * 1.33)} ${x(-nw)},62`;
+  }
+}
+const keyholeD = (d) => { const top = 62 + Math.min(d, 30), bot = 62 + d; if (bot - top < 14) return ""; const k = bot - top; return `M200,${f1(top - 2)} C${f1(214)},${f1(top + k * 0.35)} ${f1(211)},${f1(bot)} 200,${f1(bot)} C189,${f1(bot)} 186,${f1(top + k * 0.35)} 200,${f1(top - 2)} Z`; };
+
+function sleeveGeom(cfg, side) {
+  const [, len] = SLEEVES[cfg.sleeve]; if (!len) return null;
+  const s = side, ang = { cap: 52, short: 42, puff: 44, elbow: 30, threeq: 22, bell: 24, full: 14 }[cfg.sleeve] * Math.PI / 180;
+  const hem = { cap: 52, short: 62, puff: 60, elbow: 56, threeq: 50, bell: 84, full: 42 }[cfg.sleeve];
+  const T = [200 + s * 95, 80], U = [200 + s * 96, 146];
+  const L = len * 10, dir = [s * Math.sin(ang), Math.cos(ang)], p = [-s * Math.cos(ang), Math.sin(ang)];
+  const O = [T[0] + dir[0] * L, T[1] + dir[1] * L], I = [O[0] + p[0] * hem, O[1] + p[1] * hem];
+  return { T, U, O, I, dir, p, L, ang, s };
+}
+function sleevePath(g, cfg) {
+  const { T, U, O, I, dir, p, s } = g, P = (a) => `${f1(a[0])},${f1(a[1])}`;
+  if (cfg.sleeve === "puff") {
+    const bulge = [T[0] + dir[0] * g.L * 0.5 - p[0] * 22, T[1] + dir[1] * g.L * 0.5 - p[1] * 22];
+    const ib = [U[0] + (I[0] - U[0]) * 0.5 + p[0] * 14, U[1] + (I[1] - U[1]) * 0.5 + p[1] * 14];
+    return `M${P(T)} Q${P(bulge)} ${P(O)} L${P(I)} Q${P(ib)} ${P(U)} C${f1(U[0] - s * 4)},${f1(U[1] - 30)} ${f1(T[0] - s * 8)},${f1(T[1] + 20)} ${P(T)} Z`;
+  }
+  return `M${P(T)} L${P(O)} ${cfg.sleeve === "bell" ? `Q${f1((O[0] + I[0]) / 2 + dir[0] * 10)},${f1((O[1] + I[1]) / 2 + dir[1] * 10)} ${P(I)}` : `L${P(I)}`} L${P(U)} C${f1(U[0] - s * 4)},${f1(U[1] - 30)} ${f1(T[0] - s * 8)},${f1(T[1] + 20)} ${P(T)} Z`;
+}
+function patternDef(id, cfg) {
+  const b = cfg.fabric, a = cfg.accent;
+  const body = {
+    plain: "",
+    polka: `<circle cx="6" cy="6" r="2.2" fill="${a}"/><circle cx="18" cy="18" r="2.2" fill="${a}"/>`,
+    stripes: `<path d="M0 24 L24 0 M-6 6 L6 -6 M18 30 L30 18" stroke="${a}" stroke-width="4"/>`,
+    checks: `<rect width="12" height="24" fill="${a}" opacity=".28"/><rect width="24" height="12" fill="${a}" opacity=".28"/>`,
+    buta: `<path d="M12 5 C17 8 17 15 12 18 C8 20 6 16 9 14 C11 13 12 11 12 5Z" fill="${a}" opacity=".9"/><circle cx="2" cy="22" r="1.4" fill="${a}"/>`,
+    brocade: `<path d="M12 2 L19 12 L12 22 L5 12Z" fill="none" stroke="${a}" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" fill="${a}"/><circle cx="0" cy="0" r="2" fill="${a}"/><circle cx="24" cy="24" r="2" fill="${a}"/><circle cx="24" cy="0" r="2" fill="${a}"/><circle cx="0" cy="24" r="2" fill="${a}"/>`,
+  }[cfg.pattern] || "";
+  return `<pattern id="${id}" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="${b}"/>${body}</pattern>`;
+}
+function trimStroke(d, cfg, w = 1) {
+  const c = cfg.border;
+  switch (cfg.trim) {
+    case "piping": return `<path d="${d}" fill="none" stroke="${c}" stroke-width="${5 * w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    case "zari": return `<path d="${d}" fill="none" stroke="${c}" stroke-width="${8 * w}" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${shade(c, 0.45)}" stroke-width="${2 * w}" stroke-dasharray="5 3"/>`;
+    case "lace": return `<path d="${d}" fill="none" stroke="${c}" stroke-width="${3 * w}"/><path d="${d}" fill="none" stroke="${c}" stroke-width="${8 * w}" stroke-dasharray="0.1 8" stroke-linecap="round"/>`;
+    case "mirror": return `<path d="${d}" fill="none" stroke="${c}" stroke-width="${3 * w}"/><path d="${d}" fill="none" stroke="#eef3f6" stroke-width="${8 * w}" stroke-dasharray="0.1 13" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#8a969e" stroke-width="${3 * w}" stroke-dasharray="0.1 13" stroke-linecap="round"/>`;
+    default: return "";
+  }
+}
+function inkMarkup(strokes) {
+  return strokes.map((st, i) => {
+    if (st.t === "text") return `<text data-ink="${i}" x="${st.x}" y="${st.y}" fill="${st.c}" font-family="Arial, sans-serif" font-weight="700" font-size="${10 + st.w * 2}" style="paint-order:stroke" stroke="${lum(st.c) > 0.6 ? "#000" : "#fff"}" stroke-width="3">${esc(st.text)}</text>`;
+    if (st.t === "arrow") { const [x1, y1, x2, y2] = st.pts, a = Math.atan2(y2 - y1, x2 - x1), h = 8 + st.w * 2; return `<g data-ink="${i}" stroke="${st.c}" stroke-width="${st.w}" stroke-linecap="round" fill="none"><path d="M${x1},${y1} L${x2},${y2} M${f1(x2 - h * Math.cos(a - 0.45))},${f1(y2 - h * Math.sin(a - 0.45))} L${x2},${y2} L${f1(x2 - h * Math.cos(a + 0.45))},${f1(y2 - h * Math.sin(a + 0.45))}"/></g>`; }
+    return `<path data-ink="${i}" d="${smoothPath(st.pts)}" fill="none" stroke="${st.c}" stroke-width="${st.t === "marker" ? st.w * 4 : st.w}" stroke-opacity="${st.t === "marker" ? 0.35 : 1}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }).join("");
+}
+function smoothPath(pts) {
+  if (pts.length < 4) return `M${pts[0]},${pts[1]} L${pts[0] + 0.1},${pts[1]}`;
+  let d = `M${pts[0]},${pts[1]}`;
+  for (let i = 2; i < pts.length - 2; i += 2) d += ` Q${pts[i]},${pts[i + 1]} ${f1((pts[i] + pts[i + 2]) / 2)},${f1((pts[i + 1] + pts[i + 3]) / 2)}`;
+  return d + ` L${pts[pts.length - 2]},${pts[pts.length - 1]}`;
+}
+
+/* One view of the blouse as a self-contained SVG (literal colours only, so it exports cleanly). */
+let svgUid = 0;
+function blouseSVG(cfg, view, ink = [], o = {}) {
+  const u = "b" + ++svgUid, front = view === "front";
+  const [, fw] = FRONT_NECKS[cfg.front], [, bw] = BACK_NECKS[cfg.back];
+  const len = Math.max(12, Math.min(18, +cfg.length || 14.5)), hy = f1(62 + len * 10);
+  const fd = Math.min(cfg.fdepth * 10, hy - 90), bd = Math.min(cfg.bdepth * 10, hy - 80);
+  const me = front ? [cfg.front, fw, fd] : [cfg.back, bw, bd], other = front ? [cfg.back, bw, bd] : [cfg.front, fw, fd];
+  const sw = cfg.sleeve === "none" ? 84 : 95, dip = front ? 14 : 4;
+  const neck = neckSeg(me[0], me[1], me[2]);
+  const hole = me[0] === "keyhole" ? keyholeD(me[2]) : "";
+  const body = `M${200 - me[1]},62 L${200 - sw},80 C${200 - sw + 8},105 ${200 - sw + 9},134 103,146 L112,${hy} Q200,${f1(+hy + dip)} 288,${hy} L297,146 C${200 + sw - 9},134 ${200 + sw - 8},105 ${200 + sw},80 L${200 + me[1]},62 ${neck} Z ${hole}`;
+  const inside = shade(cfg.fabric, lum(cfg.fabric) > 0.75 ? -0.18 : -0.38), line = lum(cfg.fabric) < 0.25 ? "#5b5b5b" : "#2a2a2a";
+  const sl = [-1, 1].map((s) => sleeveGeom(cfg, s)).filter(Boolean);
+  const stitch = `stroke="${shade(cfg.fabric, lum(cfg.fabric) > 0.5 ? -0.45 : 0.45)}" stroke-width="1.2" stroke-dasharray="4 3" fill="none" opacity=".85"`;
+  let seams = "";
+  if (front && cfg.cut === "princess") seams = `<path d="M${200 - sw + 7},112 C150,130 140,160 150,${hy}" ${stitch}/><path d="M${200 + sw - 7},112 C250,130 260,160 250,${hy}" ${stitch}/>`;
+  else if (front && cfg.cut === "katori") seams = `<path d="M106,160 Q150,${f1(Math.max(170, 62 + fd + 40))} 200,${f1(Math.max(158, 62 + fd + 26))} Q250,${f1(Math.max(170, 62 + fd + 40))} 294,160" ${stitch}/><path d="M152,${f1(Math.max(166, 62 + fd + 36))} L150,${hy}" ${stitch}/><path d="M248,${f1(Math.max(166, 62 + fd + 36))} L250,${hy}" ${stitch}/>`;
+  else seams = `<path d="M152,${hy} L156,${f1(Math.max(150, 62 + fd + 24))}" ${stitch}/><path d="M248,${hy} L244,${f1(Math.max(150, 62 + fd + 24))}" ${stitch}/>${front ? `<path d="M296,160 L262,154" ${stitch}/><path d="M104,160 L138,154" ${stitch}/>` : ""}`;
+  const neckBottom = 62 + me[2];
+  let closure = "";
+  if (cfg.closure === "back" && !front) closure = `<path d="M200,${f1(neckBottom + (me[0] === "keyhole" ? 0 : 0))} L200,${hy}" stroke="${line}" stroke-width="1.6"/>${Array.from({ length: 5 }, (_, i) => { const yy = f1(neckBottom + 10 + ((hy - neckBottom - 16) / 4) * i); return `<path d="M196,${yy} h8" stroke="${line}" stroke-width="2"/>`; }).join("")}`;
+  if (cfg.closure === "front" && front) closure = `<path d="M200,${f1(neckBottom)} L200,${f1(+hy + dip * 0.5)}" stroke="${line}" stroke-width="1.6"/>${Array.from({ length: 5 }, (_, i) => `<circle cx="200" cy="${f1(neckBottom + 10 + ((hy - neckBottom - 12) / 4) * i)}" r="2.4" fill="${cfg.border}" stroke="${line}" stroke-width=".8"/>`).join("")}`;
+  if (cfg.closure === "zip" && !front) closure = `<path d="M294,160 L290,${hy}" stroke="${line}" stroke-width="5" stroke-dasharray="1.5 1.5" opacity=".8"/>`;
+  if (cfg.closure === "dori" && !front) { const y0 = f1(Math.min(neckBottom - 4, 62 + me[2] * 0.75)), xs = [200 - me[1] * 0.75, 200 + me[1] * 0.75]; closure = xs.map((x, i) => { const ex = f1(x + (i ? 6 : -6) + (i ? -18 : 18)), ey = f1(+y0 + 70); return `<path d="M${f1(x)},${y0} Q${f1(x + (i ? -6 : 6))},${f1(+y0 + 40)} ${ex},${ey}" stroke="${cfg.border}" stroke-width="2.4" fill="none"/><circle cx="${ex}" cy="${ey}" r="4.5" fill="${cfg.border}" stroke="${line}" stroke-width=".8"/><path d="M${f1(ex - 5)},${f1(+ey + 2)} L${f1(+ex + 5)},${f1(+ey + 2)} L${f1(+ex + 3)},${f1(+ey + 22)} L${f1(ex - 3)},${f1(+ey + 22)} Z" fill="${cfg.border}" stroke="${line}" stroke-width=".8"/>`; }).join(""); }
+  const collar = front && cfg.front === "high" ? `<path d="M${200 - fw},63 L${200 - fw + 3},44 Q200,50 ${200 + fw - 3},44 L${200 + fw},63 Q200,${f1(62 + fd * 2)} ${200 - fw},63 Z" fill="url(#p${u})" stroke="${line}" stroke-width="1.6"/>${trimStroke(`M${200 - fw + 3},44 Q200,50 ${200 + fw - 3},44`, cfg, 0.8)}` : "";
+  const trimNeck = cfg.trim !== "none" ? trimStroke(`M${200 + me[1]},62 ${neck}`, cfg) + (hole ? trimStroke(hole, cfg, 0.6) : "") : "";
+  const trimHem = cfg.trim !== "none" && cfg.trimHem ? trimStroke(`M112,${hy} Q200,${f1(+hy + dip)} 288,${hy}`, cfg) : "";
+  const sleeves = sl.map((g) => `<path d="${sleevePath(g, cfg)}" fill="url(#p${u})" stroke="${line}" stroke-width="1.8" stroke-linejoin="round"/><path d="${sleevePath(g, cfg)}" fill="url(#s${u})"/>${cfg.sleeve === "puff" ? [0.3, 0.5, 0.7].map((k) => `<path d="M${f1(g.T[0] + (g.U[0] - g.T[0]) * k)},${f1(g.T[1] + (g.U[1] - g.T[1]) * k)} l${f1(g.dir[0] * 14)},${f1(g.dir[1] * 14)}" stroke="${line}" stroke-width="1" opacity=".5"/>`).join("") : ""}${cfg.trim !== "none" && cfg.trimSleeve ? trimStroke(`M${f1(g.O[0])},${f1(g.O[1])} L${f1(g.I[0])},${f1(g.I[1])}`, cfg, 0.85) : ""}`).join("");
+  const dims = o.measure ? (() => {
+    const t = (x, y, s, anchor = "middle") => `<text x="${x}" y="${y}" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#3b6cc4" text-anchor="${anchor}">${s}</text>`;
+    const dl = (d) => `<path d="${d}" stroke="#3b6cc4" stroke-width="1.1" fill="none"/>`;
+    const mid = f1((80 + +hy) / 2);
+    return dl(`M376,80 L376,${hy} M371,80 h10 M371,${hy} h10`) + `<text x="390" y="${mid}" transform="rotate(-90 390 ${mid})" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#3b6cc4" text-anchor="middle">Length ${len}"</text>`
+      + dl(`M200,62 L200,${f1(neckBottom)}`) + `<circle cx="200" cy="${f1(neckBottom)}" r="2.5" fill="#3b6cc4"/>` + t(206, f1(62 + me[2] / 2 + 4), `${front ? cfg.fdepth : cfg.bdepth}"`, "start")
+      + (front ? dl(`M103,${f1(+hy + 26)} L297,${f1(+hy + 26)} M103,${f1(+hy + 21)} v10 M297,${f1(+hy + 21)} v10`) + t(200, f1(+hy + 40), o.bust ? `Bust ${o.bust}"` : "Bust") : "")
+      + (sl[1] && front ? (() => { const g = sl[1], mx = g.T[0] + g.dir[0] * g.L * 0.5 + Math.cos(g.ang) * 13, my = g.T[1] + g.dir[1] * g.L * 0.5 - Math.sin(g.ang) * 13; return t(f1(mx), f1(my), `${SLEEVES[cfg.sleeve][1]}"`, "start"); })() : "");
+  })() : "";
+  const H = o.measure ? 330 : 310;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 ${H}" ${o.attrs || ""} role="img" aria-label="${front ? "Front" : "Back"} view of the blouse design">
+  <defs>${patternDef("p" + u, cfg)}<linearGradient id="s${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
+  <clipPath id="c${u}"><path d="M${200 + me[1]},62 ${neck} Z ${hole}"/></clipPath></defs>
+  ${o.bg ? `<rect width="400" height="${H}" fill="${o.bg}"/>` : ""}
+  ${o.label !== false ? `<text x="16" y="24" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#8a8f8b">${front ? "FRONT" : "BACK"}</text>` : ""}
+  <path clip-path="url(#c${u})" d="M0,62 L${200 - other[1]},62 ${neckSeg(other[0], other[1], other[2], -1)} L400,62 L400,330 L0,330 Z" fill="${inside}"/>
+  <path d="${body}" fill="url(#p${u})" fill-rule="evenodd" stroke="${line}" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="${body}" fill="url(#s${u})" fill-rule="evenodd"/>
+  ${seams}${closure}${trimNeck}${trimHem}${collar}${sleeves}
+  ${dims}
+  <g class="ink">${inkMarkup(ink)}</g></svg>`;
+}
+
+function designPrice(cfg) {
+  const base = svc("Blouse Stitching").price || 650, rows = [["Blouse stitching", base]];
+  if (cfg.cut === "princess") rows.push(["Princess cut", 250]); if (cfg.cut === "katori") rows.push(["Katori cut", 200]);
+  if (cfg.lining) rows.push(["Lining", 150]); if (cfg.padding) rows.push(["Padding", 250]);
+  if (["puff", "bell"].includes(cfg.sleeve)) rows.push([`${SLEEVES[cfg.sleeve][0]} sleeves`, 150]); if (cfg.sleeve === "full") rows.push(["Full sleeves", 100]);
+  if (cfg.front === "high") rows.push(["High-neck collar", 200]); if (["keyhole", "window"].includes(cfg.back) || cfg.front === "keyhole") rows.push(["Cut-out neck", 120]);
+  const tr = { piping: 120, lace: 250, zari: 450, mirror: 650 }[cfg.trim];
+  if (tr) rows.push([`${TRIMS[cfg.trim]} · neck${cfg.trimSleeve && cfg.sleeve !== "none" ? " + sleeves" : ""}${cfg.trimHem ? " + hem" : ""}`, Math.round(tr * (1 + (cfg.trimSleeve && cfg.sleeve !== "none" ? 0.5 : 0) + (cfg.trimHem ? 0.4 : 0)))]);
+  if (cfg.closure === "dori") rows.push(["Dori with tassels", 180]); if (cfg.closure === "zip") rows.push(["Side zip", 120]);
+  const days = 4 + (cfg.trim === "mirror" || cfg.trim === "zari" ? 3 : cfg.trim === "lace" ? 1 : 0) + (cfg.cut !== "darts" ? 1 : 0);
+  return { rows, total: rows.reduce((s, r) => s + r[1], 0), days };
+}
+const designSummary = (c) => `${FRONT_NECKS[c.front][0]} front ${c.fdepth}", ${BACK_NECKS[c.back][0].toLowerCase()} back ${c.bdepth}", ${SLEEVES[c.sleeve][0].toLowerCase()}${c.sleeve === "none" ? "" : " sleeves"}, ${CUTS[c.cut].toLowerCase()}, ${PATTERNS[c.pattern].toLowerCase()} fabric${c.trim !== "none" ? `, ${TRIMS[c.trim].toLowerCase()}` : ""}, ${CLOSURES[c.closure].toLowerCase()}${c.lining ? ", lined" : ""}${c.padding ? ", padded" : ""}`;
+const blouseMeasure = (cid) => DATA.customers.find((c) => c.id === cid)?.measurements.find((m) => m.label === "Blouse");
+const newDesign = (customer = "") => ({ id: null, name: "", customer, notes: "", cfg: { ...DESIGN_DEFAULT }, ink: { front: [], back: [] } });
+
+DATA.designs = [
+  { id: "d1", name: "Wedding reception blouse", customer: "c2", notes: "Matching Kanjivaram border on sleeves", at: Date.now() - 6 * DAY, cfg: { ...DESIGN_DEFAULT, ...DESIGN_LOOKS["Bridal sweetheart"], length: 14.5 }, ink: { front: [{ t: "arrow", c: "#c4443c", w: 3, pts: [70, 250, 108, 210] }, { t: "text", c: "#c4443c", w: 3, x: 18, y: 270, text: "Border from saree" }], back: [] } },
+  { id: "d2", name: "Sangeet deep back", customer: "c5", notes: "", at: Date.now() - 2 * DAY, cfg: { ...DESIGN_DEFAULT, ...DESIGN_LOOKS["Deep back dori"] }, ink: { front: [], back: [{ t: "text", c: "#1f1f1f", w: 3, x: 230, y: 40, text: "Tassels in gold" }] } },
+  { id: "d3", name: "Office cotton set", customer: "c9", notes: "Two pieces, same design", at: Date.now() - 1 * DAY, cfg: { ...DESIGN_DEFAULT, ...DESIGN_LOOKS["Daily cotton"] }, ink: { front: [], back: [] } },
+];
+state.design = newDesign();
+state.ds = { view: "both", tool: "hand", color: "#c4443c", size: 3, text: "Add lace here", measure: true, undo: [], redo: [] };
+
+const neckIcon = (style, map) => { const [, nw, d] = map[style]; return `<svg viewBox="130 50 140 ${style.startsWith("deep") || style === "window" ? 110 : 80}" width="44" height="30" aria-hidden="true"><path d="M110,62 L${200 - nw},62 ${neckSeg(style, nw, d * 10, -1)} L290,62" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/></svg>`; };
+const dsOpt = (k, v, label, extra = "") => `<button class="chip ${state.design.cfg[k] === v ? "on" : ""}" data-act="dset" data-k="${k}" data-v="${v}" aria-pressed="${state.design.cfg[k] === v}">${extra}${label}</button>`;
+const dsSwatches = (k, list) => `<div class="row" style="gap:6px">${list.map((c) => `<button class="swatch ${state.design.cfg[k] === c ? "on" : ""}" style="background:${c}" data-act="dset" data-k="${k}" data-v="${c}" aria-label="Colour ${c}"></button>`).join("")}<label class="swatch custom" title="Any colour"><input type="color" value="${state.design.cfg[k]}" data-input="ds-${k}" aria-label="Pick any colour" /></label></div>`;
+const dsToggle = (k, label) => `<label class="between small" style="min-height:40px"><span>${label}</span><button role="switch" aria-checked="${!!state.design.cfg[k]}" class="switch ${state.design.cfg[k] ? "on" : ""}" data-act="dtoggle" data-k="${k}" aria-label="${label}"><i></i></button></label>`;
+const dsRange = (k, label, min, max) => `<label style="display:block;margin-top:10px"><span class="between small"><span class="muted">${label}</span><b class="num" id="dsv-${k}">${state.design.cfg[k]}"</b></span><input type="range" class="range" min="${min}" max="${max}" step="0.5" value="${state.design.cfg[k]}" data-input="ds-${k}" /></label>`;
+
+function designPanel() {
+  const c = state.design.cfg;
+  return `<details class="ds-sec" open><summary>Ready looks</summary><div class="row">${Object.keys(DESIGN_LOOKS).map((n) => `<button class="chip" data-act="dlook" data-v="${n}">${n}</button>`).join("")}</div></details>
+  <details class="ds-sec" open><summary>Front neck</summary><div class="row">${Object.entries(FRONT_NECKS).map(([k, [l]]) => dsOpt("front", k, l, neckIcon(k, FRONT_NECKS))).join("")}</div>${dsRange("fdepth", "Front neck depth", 1, 10)}</details>
+  <details class="ds-sec" open><summary>Back neck & opening</summary><div class="row">${Object.entries(BACK_NECKS).map(([k, [l]]) => dsOpt("back", k, l, neckIcon(k, BACK_NECKS))).join("")}</div>${dsRange("bdepth", "Back neck depth", 3, 14)}
+    <p class="lbl" style="margin-top:12px">Opening</p><div class="row">${Object.entries(CLOSURES).map(([k, l]) => dsOpt("closure", k, l)).join("")}</div></details>
+  <details class="ds-sec" open><summary>Sleeves</summary><div class="row">${Object.entries(SLEEVES).map(([k, [l]]) => dsOpt("sleeve", k, l)).join("")}</div></details>
+  <details class="ds-sec"><summary>Fit & cut</summary><div class="row">${Object.entries(CUTS).map(([k, l]) => dsOpt("cut", k, l)).join("")}</div>${dsRange("length", "Blouse length", 12, 18)}${dsToggle("lining", "Lining")}${dsToggle("padding", "Padding (cups)")}</details>
+  <details class="ds-sec" open><summary>Fabric</summary><p class="lbl">Colour</p>${dsSwatches("fabric", FABRIC_COLOURS)}<p class="lbl" style="margin-top:12px">Print</p><div class="row">${Object.entries(PATTERNS).map(([k, l]) => dsOpt("pattern", k, l)).join("")}</div>${c.pattern !== "plain" ? `<p class="lbl" style="margin-top:12px">Print colour</p>${dsSwatches("accent", TRIM_COLOURS)}` : ""}</details>
+  <details class="ds-sec" open><summary>Work & borders</summary><div class="row">${Object.entries(TRIMS).map(([k, l]) => dsOpt("trim", k, l)).join("")}</div>${c.trim !== "none" ? `<p class="lbl" style="margin-top:12px">Border colour</p>${dsSwatches("border", TRIM_COLOURS)}${c.sleeve !== "none" ? dsToggle("trimSleeve", "Also on sleeve hem") : ""}${dsToggle("trimHem", "Also on blouse hem")}` : ""}</details>`;
+}
+function designStage() {
+  const d = state.design, cfg = d.cfg, m = blouseMeasure(d.customer);
+  const views = state.ds.view === "both" ? ["front", "back"] : [state.ds.view];
+  return views.map((v) => `<div class="ds-view">${blouseSVG(cfg, v, d.ink[v], { measure: state.ds.measure, bust: m?.values.Bust, attrs: `data-view="${v}" class="ds-svg tool-${state.ds.tool}"` })}</div>`).join("");
+}
+function designPriceCard() {
+  const p = designPrice(state.design.cfg);
+  return `<div class="card-title"><h2>Estimate</h2>${pill("info", `Ready in ${p.days}–${p.days + 2} days`)}</div>${p.rows.map(([k, v]) => `<div class="between small" style="padding:3px 0"><span class="muted">${esc(k)}</span><span class="num">${inr.format(v)}</span></div>`).join("")}<div class="between" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px"><b>Total</b><b class="num" style="font-size:22px">${inr.format(p.total)}</b></div>`;
+}
+function designToolbar() {
+  const t = state.ds;
+  const tools = [["hand", "View", "M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5A6.5 6.5 0 0 1 4 17l-1.6-3.2a1.5 1.5 0 0 1 2.6-1.5L8 15"], ["pen", "Pen", "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"], ["marker", "Marker", "M9 11l-6 6v3h3l6-6M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"], ["arrow", "Arrow", "M5 19 19 5M9 5h10v10"], ["text", "Text", "M4 7V4h16v3M9 20h6M12 4v16"], ["eraser", "Eraser", "M20 20H8l-5-5a2 2 0 0 1 0-2.8L13 2.2a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8L12 19"]];
+  return `<div class="ds-tools"><div class="seg" role="toolbar" aria-label="Drawing tools">${tools.map(([k, l, d]) => `<button class="${t.tool === k ? "on" : ""}" data-act="dtool" data-v="${k}" aria-pressed="${t.tool === k}" title="${l}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg><span class="tool-l">${l}</span></button>`).join("")}</div>
+    <div class="row" style="gap:6px">${INK_COLOURS.map((c) => `<button class="swatch sm ${t.color === c ? "on" : ""}" style="background:${c}" data-act="dcolor" data-v="${c}" aria-label="Ink colour ${c}"></button>`).join("")}</div>
+    <div class="seg" aria-label="Line size">${[[2, "Fine"], [3, "Medium"], [6, "Bold"]].map(([s, l]) => `<button class="${t.size === s ? "on" : ""}" data-act="dsize" data-v="${s}" aria-label="${l}"><i style="display:inline-block;width:${s * 2 + 2}px;height:${s * 2 + 2}px;border-radius:9px;background:currentColor"></i></button>`).join("")}</div>
+    ${t.tool === "text" ? `<input class="input" style="max-width:220px;min-height:40px" id="ds-text" value="${esc(t.text)}" data-input="ds-text" aria-label="Note text — tap the design to place it" />` : ""}
+    <span class="row" style="gap:4px;margin-left:auto"><button class="btn btn-ghost btn-sm" data-act="dundo" ${t.undo.length ? "" : "disabled"}>Undo</button><button class="btn btn-ghost btn-sm" data-act="dredo" ${t.redo.length ? "" : "disabled"}>Redo</button><button class="btn btn-ghost btn-sm" data-act="dclear" ${state.design.ink.front.length + state.design.ink.back.length ? "" : "disabled"}>Clear drawing</button></span></div>`;
+}
+V.design = () => {
+  const d = state.design, m = blouseMeasure(d.customer);
+  const mine = DATA.designs.slice().sort((a, b) => b.at - a.at);
+  return `<div class="page-head ds-head"><div><h1>Design studio</h1><p class="muted">Sketch the blouse with your client, draw on it, then turn it into a stitching job.</p></div>
+    <div class="row"><button class="btn btn-ghost" data-act="dnew">${ic("plus")} New</button><button class="btn btn-outline" data-act="dpresent">${ic("sparkle")} ${document.body.classList.contains("present") ? "Exit full screen" : "Show client"}</button><button class="btn btn-outline" data-act="dsheet">${ic("print")} Design sheet</button><button class="btn btn-primary" data-act="dsave">${ic("check")} ${d.id ? "Save changes" : "Save design"}</button></div></div>
+    <div class="ds-layout">
+      <div class="stack" style="gap:16px;min-width:0">
+        <section class="card ds-card">
+          <div class="row ds-meta"><label style="flex:1;min-width:180px"><span class="sr">Design name</span><input class="input" id="ds-name" placeholder="Design name, e.g. Reception blouse" value="${esc(d.name)}" data-input="ds-name" /></label>
+            <label style="flex:1;min-width:180px"><span class="sr">Customer</span><select class="input" id="ds-cust" data-input="ds-customer"><option value="">Choose customer…</option>${DATA.customers.map((c) => `<option value="${c.id}" ${d.customer === c.id ? "selected" : ""}>${esc(c.name)} · ${c.phone}</option>`).join("")}</select></label>
+            <div class="seg">${[["front", "Front"], ["back", "Back"], ["both", "Both"]].map(([k, l]) => `<button class="${state.ds.view === k ? "on" : ""}" data-act="dview" data-v="${k}">${l}</button>`).join("")}</div>
+            <button class="btn btn-ghost btn-sm" data-act="dmeasure" aria-pressed="${state.ds.measure}">${state.ds.measure ? "Hide" : "Show"} sizes</button></div>
+          <div id="ds-stage" class="ds-stage ${state.ds.view === "both" ? "two" : ""}">${designStage()}</div>
+          <div id="ds-toolbar">${designToolbar()}</div>
+          <p class="xs muted" style="margin-top:8px">${state.ds.tool === "hand" ? "Pick Pen, Marker, Arrow or Text to draw on the design — works with a finger, mouse or stylus." : state.ds.tool === "text" ? "Type your note, then tap where it should go." : state.ds.tool === "eraser" ? "Tap or drag over a mark to remove it." : "Draw straight on the front or back view."}</p>
+        </section>
+        ${m ? `<section class="card"><div class="card-title"><h2>${esc(custName(d.customer))}'s measurements</h2><span class="xs muted">Blouse · ${fmtDate(m.date, { day: "numeric", month: "short", year: "numeric" })}</span></div><div class="grid g3" style="gap:4px 18px">${Object.entries(m.values).map(([k, v]) => `<div class="between small" style="border-bottom:1px dashed var(--border);padding:3px 0"><span class="muted">${k}</span><b class="num">${v}"</b></div>`).join("")}</div></section>` : d.customer ? `<section class="card"><p class="small muted">No blouse measurements saved for ${esc(custName(d.customer))} yet — they are taken when the stitching job is created.</p></section>` : ""}
+        <section class="card"><div class="card-title"><h2>Saved designs</h2><span class="small muted">${mine.length}</span></div>
+          ${mine.length ? `<div class="ds-gallery">${mine.map((x) => `<div class="ds-thumb ${x.id === d.id ? "on" : ""}"><button class="ds-thumb-img" data-act="dopen" data-id="${x.id}" aria-label="Open ${esc(x.name)}">${blouseSVG(x.cfg, "front", x.ink.front, { label: false })}</button><div style="padding:8px 10px"><b class="small" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.name || "Untitled")}</b><span class="xs muted">${esc(custName(x.customer))} · ${fmtDate(x.at)}</span>${x.job ? `<br>${pill("primary", x.job)}` : ""}</div><button class="btn btn-ghost btn-sm ds-del" data-act="ddel" data-id="${x.id}" aria-label="Delete ${esc(x.name)}">${ic("x")}</button></div>`).join("")}</div>` : `<p class="empty">No saved designs yet.</p>`}</section>
+      </div>
+      <aside class="stack ds-side" style="gap:16px;min-width:0">
+        <section class="card" id="ds-price">${designPriceCard()}</section>
+        <button class="btn btn-primary btn-lg" data-act="djob">${ic("scissors")} Create stitching job</button>
+        <section class="card ds-panel" id="ds-panel">${designPanel()}</section>
+        <section class="card"><label><span class="lbl">Notes for the tailor</span><textarea class="input" id="ds-notes" data-input="ds-notes" placeholder="e.g. use saree border on sleeves">${esc(d.notes)}</textarea></label></section>
+      </aside>
+    </div>`;
+};
+function refreshDesign(panel = true) {
+  if (state.route !== "design") return;
+  $("#ds-stage").className = `ds-stage ${state.ds.view === "both" ? "two" : ""}`;
+  $("#ds-stage").innerHTML = designStage();
+  $("#ds-price").innerHTML = designPriceCard();
+  if (panel) { const open = [...document.querySelectorAll(".ds-sec")].map((x) => x.open); $("#ds-panel").innerHTML = designPanel(); document.querySelectorAll(".ds-sec").forEach((x, i) => (x.open = open[i] ?? x.open)); }
+  $("#ds-toolbar").innerHTML = designToolbar();
+  saveDemo();
+}
+const inkSnap = () => JSON.stringify(state.design.ink);
+function inkChange(fn) { state.ds.undo.push(inkSnap()); if (state.ds.undo.length > 60) state.ds.undo.shift(); state.ds.redo = []; fn(); }
+
+/* Pointer drawing on the SVG views. */
+let drawing = null;
+function svgPoint(svg, e) { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return [f1(p.x), f1(p.y)]; }
+function eraseAt(e) {
+  for (const [dx, dy] of [[0, 0], [5, 0], [-5, 0], [0, 5], [0, -5]]) {
+    const el = document.elementFromPoint(e.clientX + dx, e.clientY + dy)?.closest?.("[data-ink]");
+    const svg = el?.closest("svg[data-view]");
+    if (el && svg) { const v = svg.dataset.view, i = +el.dataset.ink; inkChange(() => state.design.ink[v].splice(i, 1)); refreshDesign(false); return; }
+  }
+}
+document.addEventListener("pointerdown", (e) => {
+  const svg = e.target.closest?.("svg.ds-svg"); if (!svg || state.ds.tool === "hand") return;
+  e.preventDefault();
+  const v = svg.dataset.view, [x, y] = svgPoint(svg, e), t = state.ds;
+  if (t.tool === "eraser") { drawing = { erase: true }; return eraseAt(e); }
+  if (t.tool === "text") { const text = ($("#ds-text")?.value || t.text).trim(); if (!text) return toast("Type a note first"); inkChange(() => state.design.ink[v].push({ t: "text", c: t.color, w: t.size, x, y, text })); return refreshDesign(false); }
+  const st = { t: t.tool, c: t.color, w: t.size, pts: t.tool === "arrow" ? [x, y, x, y] : [x, y] };
+  const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  el.setAttribute("fill", "none"); el.setAttribute("stroke", st.c); el.setAttribute("stroke-linecap", "round"); el.setAttribute("stroke-linejoin", "round");
+  el.setAttribute("stroke-width", st.t === "marker" ? st.w * 4 : st.w); if (st.t === "marker") el.setAttribute("stroke-opacity", "0.35");
+  svg.querySelector(".ink").appendChild(el);
+  drawing = { svg, v, st, el };
+  try { svg.setPointerCapture(e.pointerId); } catch (err) { /* old browsers */ }
+});
+document.addEventListener("pointermove", (e) => {
+  if (!drawing) return;
+  if (drawing.erase) return e.buttons ? eraseAt(e) : null;
+  const [x, y] = svgPoint(drawing.svg, e), st = drawing.st;
+  if (st.t === "arrow") { st.pts[2] = x; st.pts[3] = y; drawing.el.setAttribute("d", `M${st.pts[0]},${st.pts[1]} L${x},${y}`); return; }
+  const n = st.pts.length; if (Math.hypot(x - st.pts[n - 2], y - st.pts[n - 1]) < 1.5) return;
+  st.pts.push(x, y); drawing.el.setAttribute("d", smoothPath(st.pts));
+});
+const endDraw = () => {
+  if (!drawing) return; const d = drawing; drawing = null; if (d.erase) return;
+  if (d.st.t === "arrow" && Math.hypot(d.st.pts[2] - d.st.pts[0], d.st.pts[3] - d.st.pts[1]) < 6) return refreshDesign(false);
+  inkChange(() => state.design.ink[d.v].push(d.st)); refreshDesign(false);
+};
+document.addEventListener("pointerup", endDraw);
+document.addEventListener("pointercancel", endDraw);
+
+/* Design sheet: one image with both views, the spec and the price — for WhatsApp or print. */
+function designSheetSVG(d) {
+  const p = designPrice(d.cfg), c = DATA.customers.find((x) => x.id === d.customer), m = blouseMeasure(d.customer);
+  const nest = (v, x) => blouseSVG(d.cfg, v, d.ink[v], { measure: true, bust: m?.values.Bust }).replace("<svg ", `<svg x="${x}" y="96" width="400" height="330" `);
+  const T = (x, y, s, size = 13, weight = 400, fill = "#1b1b1b", anchor = "start") => `<text x="${x}" y="${y}" font-family="Arial, sans-serif" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">${esc(s)}</text>`;
+  const spec = [["Front neck", `${FRONT_NECKS[d.cfg.front][0]} · ${d.cfg.fdepth}"`], ["Back neck", `${BACK_NECKS[d.cfg.back][0]} · ${d.cfg.bdepth}"`], ["Sleeves", SLEEVES[d.cfg.sleeve][0]], ["Cut", CUTS[d.cfg.cut]], ["Length", `${d.cfg.length}"`], ["Fabric", `${PATTERNS[d.cfg.pattern]} print`], ["Work", TRIMS[d.cfg.trim]], ["Opening", CLOSURES[d.cfg.closure]], ["Lining / padding", `${d.cfg.lining ? "Yes" : "No"} / ${d.cfg.padding ? "Yes" : "No"}`]];
+  const H = 640;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 ${H}" width="1100" height="${H}"><rect width="1100" height="${H}" fill="#ffffff"/>
+    <rect x="0" y="0" width="1100" height="70" fill="#153c29"/>${T(32, 44, DATA.shop.name, 24, 700, "#ffffff")}${T(1068, 30, "BLOUSE DESIGN", 12, 700, "#e2b870", "end")}${T(1068, 52, fmtDate(Date.now(), { day: "numeric", month: "long", year: "numeric" }), 13, 400, "#ffffff", "end")}
+    ${T(32, 98, d.name || "Untitled design", 18, 700)}${T(1068, 98, c ? `${c.name} · ${c.phone}` : "Customer not chosen", 14, 400, "#555", "end")}
+    ${nest("front", 20)}${nest("back", 420)}
+    <rect x="836" y="116" width="244" height="${H - 140}" rx="14" fill="#f3f5f0"/>
+    ${spec.map(([k, v], i) => T(852, 144 + i * 34, k.toUpperCase(), 10, 700, "#7a807c") + T(852, 160 + i * 34, v, 14, 700)).join("")}
+    ${T(852, 144 + spec.length * 34 + 6, "ESTIMATE", 10, 700, "#7a807c")}${T(852, 172 + spec.length * 34, inr.format(p.total), 26, 700, "#153c29")}${T(852, 192 + spec.length * 34, `Ready in ${p.days}–${p.days + 2} days`, 12, 400, "#555")}
+    ${m ? T(32, 462, "MEASUREMENTS (INCHES)", 10, 700, "#7a807c") + Object.entries(m.values).map(([k, v], i) => T(32 + (i % 5) * 160, 484 + Math.floor(i / 5) * 22, `${k}: ${v}"`, 13)).join("") : ""}
+    ${d.notes ? T(32, 548, "NOTES", 10, 700, "#7a807c") + T(32, 568, d.notes.slice(0, 110), 14) : ""}
+    ${T(32, H - 20, `${DATA.shop.address} · ${DATA.shop.phone}`, 11, 400, "#888")}${T(808, H - 20, "Made with AuraPOS", 11, 700, "#888", "end")}</svg>`;
+}
+function sheetBlob(d) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => { const cv = document.createElement("canvas"); cv.width = 2200; cv.height = 1280; const ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, 2200, 1280); cv.toBlob((b) => (b ? resolve(b) : reject(new Error("export failed"))), "image/png"); };
+    img.onerror = () => reject(new Error("render failed"));
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(designSheetSVG(d));
+  });
+}
+const sheetName = (d) => `${(d.name || "blouse-design").replace(/[^\w-]+/g, "-").toLowerCase()}.png`;
+function openSheet() {
+  const d = state.design, c = DATA.customers.find((x) => x.id === d.customer), p = designPrice(d.cfg);
+  const msg = `Hello${c ? " " + c.name.split(" ")[0] : ""}! Here is your blouse design from ${DATA.shop.name}: ${designSummary(d.cfg)}. Estimate ${inr.format(p.total)}, ready in ${p.days}–${p.days + 2} days.`;
+  openModal("Design sheet", `<div class="sheet-wrap">${designSheetSVG(d).replace("<svg ", '<svg style="width:100%;height:auto;display:block" ')}</div>
+    <div class="row" style="margin-top:14px"><button class="btn btn-primary" data-act="dshare">${ic("wa")} Share image</button><button class="btn btn-outline" data-act="ddownload">Download PNG</button>${c ? `<a class="btn btn-ghost" target="_blank" rel="noopener" href="${waLink(msg)}">Send summary on WhatsApp</a>` : ""}<button class="btn btn-ghost" data-act="dprint">${ic("print")} Print</button></div>
+    <p class="xs muted" style="margin-top:8px">On a phone, “Share image” opens WhatsApp, Instagram or email with the picture attached.</p>`, null, true);
+}
+function downloadBlob(blob, name) { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); }
+function saveDesign(quiet) {
+  const d = state.design;
+  if (!d.name.trim()) d.name = `${FRONT_NECKS[d.cfg.front][0]} blouse${d.customer ? " · " + custName(d.customer).split(" ")[0] : ""}`;
+  const rec = { id: d.id || "d" + Date.now(), name: d.name.trim(), customer: d.customer, notes: d.notes, at: Date.now(), cfg: { ...d.cfg }, ink: JSON.parse(inkSnap()), job: DATA.designs.find((x) => x.id === d.id)?.job };
+  const i = DATA.designs.findIndex((x) => x.id === rec.id); if (i >= 0) DATA.designs[i] = rec; else DATA.designs.push(rec);
+  d.id = rec.id; if (!quiet) { render(); toast(`“${rec.name}” saved${d.customer ? ` to ${custName(d.customer)}'s profile` : ""}`); }
+  return rec;
+}
+const loadDesign = (x) => { state.design = { id: x.id, name: x.name, customer: x.customer, notes: x.notes || "", cfg: { ...DESIGN_DEFAULT, ...x.cfg }, ink: JSON.parse(JSON.stringify(x.ink)) }; state.ds.undo = []; state.ds.redo = []; };
+function designInput(k, el) {
+  const d = state.design;
+  if (k === "name") return (d.name = el.value);
+  if (k === "notes") return (d.notes = el.value);
+  if (k === "text") return (state.ds.text = el.value);
+  if (k === "customer") {
+    d.customer = el.value; const m = blouseMeasure(d.customer);
+    if (m) { if (m.values["Blouse length"]) d.cfg.length = m.values["Blouse length"]; if (m.values["Front neck depth"]) d.cfg.fdepth = m.values["Front neck depth"]; if (m.values["Back neck depth"]) d.cfg.bdepth = m.values["Back neck depth"]; toast(`Using ${custName(d.customer)}'s saved measurements`); }
+    return render();
+  }
+  if (["fdepth", "bdepth", "length"].includes(k)) { d.cfg[k] = +el.value; $("#dsv-" + k).textContent = el.value + '"'; return refreshDesign(false); }
+  d.cfg[k] = el.value; refreshDesign(false);
+}
+Object.assign(A, {
+  dset: (dd) => { state.design.cfg[dd.k] = dd.v; const def = { front: FRONT_NECKS, back: BACK_NECKS }[dd.k]; if (def) state.design.cfg[dd.k === "front" ? "fdepth" : "bdepth"] = def[dd.v][2]; refreshDesign(); },
+  dtoggle: (dd) => { state.design.cfg[dd.k] = !state.design.cfg[dd.k]; refreshDesign(); },
+  dlook: (dd) => { Object.assign(state.design.cfg, DESIGN_LOOKS[dd.v]); if (!state.design.name) state.design.name = dd.v; refreshDesign(); const n = $("#ds-name"); if (n && !n.value) n.value = dd.v; toast(`${dd.v} applied — change anything you like`); },
+  dview: (dd) => { state.ds.view = dd.v; render(); },
+  dmeasure: () => { state.ds.measure = !state.ds.measure; render(); },
+  dtool: (dd) => { state.ds.tool = dd.v; render(); },
+  dcolor: (dd) => { state.ds.color = dd.v; if (state.ds.tool === "hand" || state.ds.tool === "eraser") state.ds.tool = "pen"; render(); },
+  dsize: (dd) => { state.ds.size = +dd.v; refreshDesign(false); },
+  dundo: () => { const s = state.ds.undo.pop(); if (!s) return; state.ds.redo.push(inkSnap()); state.design.ink = JSON.parse(s); refreshDesign(false); },
+  dredo: () => { const s = state.ds.redo.pop(); if (!s) return; state.ds.undo.push(inkSnap()); state.design.ink = JSON.parse(s); refreshDesign(false); },
+  dclear: () => { inkChange(() => (state.design.ink = { front: [], back: [] })); refreshDesign(false); toast("Drawing cleared · Undo brings it back"); },
+  dnew: () => { state.design = newDesign(state.design.customer); state.ds.undo = []; state.ds.redo = []; render(); toast("New design started"); },
+  dsave: () => saveDesign(),
+  dopen: (dd) => { loadDesign(DATA.designs.find((x) => x.id === dd.id)); closeModal(); if (state.route !== "design") go("design"); else { render(); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+  ddel: (dd) => { const i = DATA.designs.findIndex((x) => x.id === dd.id); const [x] = DATA.designs.splice(i, 1); if (state.design.id === x.id) state.design.id = null; render(); toast(`“${x.name}” deleted`); },
+  dpresent: () => { document.body.classList.toggle("present"); render(); window.scrollTo({ top: 0 }); },
+  dsheet: openSheet,
+  ddownload: () => sheetBlob(state.design).then((b) => { downloadBlob(b, sheetName(state.design)); toast("Design image downloaded"); }).catch(() => toast("Could not create the image on this browser")),
+  dshare: () => sheetBlob(state.design).then(async (b) => {
+    const file = new File([b], sheetName(state.design), { type: "image/png" });
+    if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: state.design.name || "Blouse design", text: `Blouse design from ${DATA.shop.name}` }); } catch (e) { /* share sheet closed */ } }
+    else { downloadBlob(b, file.name); toast("Image downloaded — attach it in WhatsApp"); }
+  }).catch(() => toast("Could not create the image on this browser")),
+  dprint: () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the design sheet"); w.document.write(`<!doctype html><title>${esc(state.design.name || "Blouse design")}</title><style>@page{size:landscape;margin:10mm}body{margin:0}svg{width:100%;height:auto}</style>${designSheetSVG(state.design)}<script>onload=()=>print()<\/script>`); w.document.close(); },
+  djob: () => {
+    const d = state.design;
+    if (!d.customer) { toast("Choose the customer first"); $("#ds-cust")?.focus(); return; }
+    const rec = saveDesign(true), p = designPrice(d.cfg), v = svc("Blouse Stitching");
+    const n = DATA.orders.filter((o) => o.kind === "JOB").length + 1, ci = DATA.customers.findIndex((c) => c.id === d.customer);
+    const m = blouseMeasure(d.customer) || { label: "Blouse", date: Date.now(), values: { Bust: 34, Waist: 30, Shoulder: 14, "Front neck depth": d.cfg.fdepth, "Back neck depth": d.cfg.bdepth, "Blouse length": d.cfg.length } };
+    const o = ord("JOB", n, ci, "Measured", p.days + 1, [{ vid: v.id, name: "Blouse Stitching", qty: 1, price: p.total, note: rec.name }], 0, { id: "o" + Date.now(), measurement: m, design: designSummary(d.cfg), designId: rec.id });
+    o.estimate = p.total; o.events = [{ at: Date.now(), text: `Created from design “${rec.name}” by ${me().name}` }];
+    DATA.orders.push(o); rec.job = o.no; notify("job", `${o.no} assigned to Lakshmi Devi`, `${rec.name} · ${custName(d.customer)}`, "orders");
+    state.orderKind = "JOB"; go("orders"); openOrder(o.id); toast(`${o.no} created · design attached for the tailor`);
+  },
+});
+
 document.addEventListener("click", (e) => {
   const nav = e.target.closest("[data-route]");
   if (nav) { e.preventDefault(); return go(nav.dataset.route); }
@@ -1796,6 +2391,7 @@ document.addEventListener("click", (e) => {
 $("#scrim").addEventListener("click", closeMenu);
 document.addEventListener("input", (e) => {
   const k = e.target.dataset.input; if (!k) return;
+  if (k.startsWith("ds-")) return designInput(k.slice(3), e.target);
   if (k === "role") { state.role = e.target.value; state.cart.orderId = null; render(); return toast(`Viewing as ${e.target.options[e.target.selectedIndex].text} — menu and permissions change`); }
   if (k === "store") { state.store = DATA.stores[e.target.selectedIndex]; render(); return toast(`Switched to ${state.store}`); }
   if (k === "footer") { state.template.footer = e.target.value; $("#tpl-preview").innerHTML = receiptHTML(DATA.bills[DATA.bills.length - 1]); return; }
