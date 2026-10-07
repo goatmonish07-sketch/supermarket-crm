@@ -2310,6 +2310,15 @@ function openSheet() {
     <div class="row" style="margin-top:14px"><button class="btn btn-primary" data-act="dshare">${ic("wa")} Share image</button><button class="btn btn-outline" data-act="ddownload">Download PNG</button>${c ? `<a class="btn btn-ghost" target="_blank" rel="noopener" href="${waLink(msg)}">Send summary on WhatsApp</a>` : ""}<button class="btn btn-ghost" data-act="dprint">${ic("print")} Print</button></div>
     <p class="xs muted" style="margin-top:8px">On a phone, “Share image” opens WhatsApp, Instagram or email with the picture attached.</p>`, null, true);
 }
+/* Inside the Claude viewer a file goes through its save prompt; on any normal website it is a plain download. */
+async function saveFile(blob, name) {
+  const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); return "saved"; }
+    catch (e) { if (e?.code === "declined") return "declined"; if (e?.code === "rate_limited") { toast("A save prompt is already open"); return "busy"; } }
+  }
+  downloadBlob(blob, name); return "saved";
+}
 function downloadBlob(blob, name) { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); }
 function saveDesign(quiet) {
   const d = state.design;
@@ -2351,11 +2360,14 @@ Object.assign(A, {
   ddel: (dd) => { const i = DATA.designs.findIndex((x) => x.id === dd.id); const [x] = DATA.designs.splice(i, 1); if (state.design.id === x.id) state.design.id = null; render(); toast(`“${x.name}” deleted`); },
   dpresent: () => { document.body.classList.toggle("present"); render(); window.scrollTo({ top: 0 }); },
   dsheet: openSheet,
-  ddownload: () => sheetBlob(state.design).then((b) => { downloadBlob(b, sheetName(state.design)); toast("Design image downloaded"); }).catch(() => toast("Could not create the image on this browser")),
+  ddownload: () => sheetBlob(state.design).then(async (b) => { if ((await saveFile(b, sheetName(state.design))) === "saved") toast("Design image saved"); }).catch(() => toast("Could not create the image on this browser")),
   dshare: () => sheetBlob(state.design).then(async (b) => {
     const file = new File([b], sheetName(state.design), { type: "image/png" });
-    if (navigator.canShare?.({ files: [file] })) { try { await navigator.share({ files: [file], title: state.design.name || "Blouse design", text: `Blouse design from ${DATA.shop.name}` }); } catch (e) { /* share sheet closed */ } }
-    else { downloadBlob(b, file.name); toast("Image downloaded — attach it in WhatsApp"); }
+    if (navigator.canShare?.({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: state.design.name || "Blouse design", text: `Blouse design from ${DATA.shop.name}` }); return; }
+      catch (e) { if (e?.name === "AbortError") return; /* sharing blocked here: save the image instead */ }
+    }
+    if ((await saveFile(b, file.name)) === "saved") toast("Image saved — attach it in WhatsApp");
   }).catch(() => toast("Could not create the image on this browser")),
   dprint: () => { const w = window.open("", "_blank"); if (!w) return toast("Allow pop-ups to print the design sheet"); w.document.write(`<!doctype html><title>${esc(state.design.name || "Blouse design")}</title><style>@page{size:landscape;margin:10mm}body{margin:0}svg{width:100%;height:auto}</style>${designSheetSVG(state.design)}<script>onload=()=>print()<\/script>`); w.document.close(); },
   djob: () => {
